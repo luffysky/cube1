@@ -463,7 +463,7 @@ function updateUI(){
   $('holdBtn').setAttribute('aria-label',`暫存交換，${player.held?`目前存放 ${player.held} 方塊`:'目前空位'}。${holdStatus}。按鍵 ${keyLabels('hold')}。每顆固定後才會解鎖。`);
   $('holdBtn').title=`${keyLabels('hold')} · ${holdStatus} · 每顆落子只能交換一次`;
   $('holdEmpty').hidden=!!player.held;
-  document.querySelectorAll('.touch-controls [data-action]').forEach(button=>{button.disabled=phase!=='running'||(button.dataset.action==='hold'&&!player.canHold);});
+  document.querySelectorAll('.touch-controls [data-action], #touchHoldBtn').forEach(button=>{button.disabled=phase!=='running'||(button.dataset.action==='hold'&&!player.canHold);});
   $('touchHoldState').textContent=phase==='running'&&!player.canHold?'待落子':'交換';
   $('cpuSent').textContent=cpuSent;$('cpuLines').textContent=cpu.stats.lines;
   $('incomingValue').innerHTML=total+'<small>行</small>';$('incomingFill').style.height=Math.min(100,total/12*100)+'%';$('pressureFill').style.width=Math.min(100,total/12*100)+'%';$('pressureTitle').closest('section').classList.toggle('danger',total>0);
@@ -501,7 +501,7 @@ function updateSettings(){
   document.querySelector('.controls-footer>div').innerHTML=`<kbd>${keyName(k.left)}</kbd><kbd>${keyName(k.right)}</kbd><span>移動</span><kbd>${keyName(k.soft)}</kbd><span>軟降</span><kbd>${keyName(k.ccw)}</kbd><kbd>${cw}</kbd><span>旋轉</span><kbd>${keyName(k.hard)}</kbd><span>立即固定</span><kbd>${hold}</kbd><span>暫存交換</span><kbd>${keyName(k.pause)}</kbd><span>暫停</span>`;
   $('holdKey').textContent=hold.replaceAll('SHIFT','⇧');
   $('playerCanvas').setAttribute('aria-label',`你的方塊棋盤。${keyName(k.left)}與${keyName(k.right)}移動，${keyName(k.soft)}軟降，${keyName(k.ccw)}逆時針，${cw}順時針，${keyName(k.hard)}硬降並立即固定，${hold}暫存交換，${keyName(k.pause)}暫停。`);
-  document.querySelectorAll('.touch-controls [data-action]').forEach(button=>{const action=button.dataset.action,detail=action==='hard'?'，立即固定方塊':action==='soft'?'，落地後仍可旋轉':action==='hold'?'，每顆落子只能一次':'';button.setAttribute('aria-label',`${ACTION_LABELS[action]}${detail}。鍵盤 ${keyLabels(action)}。`);button.title=`${ACTION_LABELS[action]} · ${keyLabels(action)}`;});
+  document.querySelectorAll('.touch-controls [data-action], #touchHoldBtn').forEach(button=>{const action=button.dataset.action,detail=action==='hard'?'，立即固定方塊':action==='soft'?'，落地後仍可旋轉':action==='hold'?'，每顆落子只能一次':'';button.setAttribute('aria-label',`${ACTION_LABELS[action]}${detail}。鍵盤 ${keyLabels(action)}。`);button.title=`${ACTION_LABELS[action]} · ${keyLabels(action)}`;});
   MODES.drill.rule=`① ${cw} 順時針旋轉<br>② ${keyName(k.hard)} 硬降，完成雙消`;
   if(mode==='drill')$('modeRule').innerHTML=MODES.drill.rule;
   $('helpDropText').textContent=`${keyName(k.soft)} 會加快下落，接地後還有短暫時間可以旋轉。${keyName(k.hard)} 直接落到底並固定；要轉進洞，先旋轉，再硬降。`;
@@ -632,10 +632,14 @@ function fitBoard(){
   const maxWidth=wrap.clientWidth-n(css.paddingLeft)-n(css.paddingRight)-railWidths-2*n(css.columnGap);
   const boxHeight=selector=>{const element=arena.querySelector(selector);if(!element||element.hidden||getComputedStyle(element).display==='none')return 0;const style=getComputedStyle(element);return element.getBoundingClientRect().height+n(style.marginTop)+n(style.marginBottom);};
   const narrow=matchMedia('(max-width:760px)').matches;
+  const touch=narrow||matchMedia('(any-pointer:coarse)').matches;
   const top=wrap.getBoundingClientRect().top+window.scrollY+n(css.paddingTop);
-  const below=boxHeight('.arena-metrics')+boxHeight('.arena-caption')+boxHeight('.touch-controls')+boxHeight('.hold-guide')+14;
-  const viewport=window.innerHeight-top-below;
-  const minimum=holdGuide?240:narrow?300:400;
+  const below=boxHeight('.arena-metrics')+boxHeight('.arena-caption')+boxHeight('.touch-controls')+boxHeight('.hold-guide')+n(getComputedStyle(arena).paddingBottom)+14;
+  // Browser chrome can resize the visible area without changing the layout viewport.
+  // Keep the complete touch deck in view; do not reserve a 400px board on short tablets.
+  const visibleHeight=window.visualViewport?.scale===1?window.visualViewport.height:window.innerHeight;
+  const viewport=visibleHeight-top-below;
+  const minimum=touch?(holdGuide?180:200):holdGuide?240:400;
   const full=Math.min(900,Math.max(minimum,viewport),Math.max(180,maxWidth*2));
   const height=Math.floor(full*(settings.boardSize==='standard'?.82:1));
   const value=height+'px';
@@ -643,6 +647,7 @@ function fitBoard(){
   draw();
 }
 window.addEventListener('resize',()=>{responsiveControls();scheduleBoardFit();});
+window.visualViewport?.addEventListener('resize',scheduleBoardFit);
 if(globalThis.ResizeObserver){const observer=new ResizeObserver(scheduleBoardFit);observer.observe(document.querySelector('.arena-card'));observer.observe(document.querySelector('.topbar'));}
 
 

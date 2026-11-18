@@ -58,7 +58,7 @@
       <div class="playfield-wrap">
         <div class="piece-rail hold-rail"><button id="holdBtn" class="hold-button" data-action="hold" aria-label="暫存交換，目前空位，開局後可用" aria-describedby="holdState" disabled><span class="rail-label">HOLD</span><span class="hold-preview"><canvas id="holdCanvas" width="100" height="80" aria-hidden="true"></canvas><span id="holdEmpty" class="hold-empty">空位</span></span><strong>暫存交換</strong><kbd id="holdKey">C / ⇧</kbd></button><div class="rail-detail hold-state" id="holdState" role="status" aria-live="polite">開局後可用</div><div class="side-metric"><span>COMBO</span><strong id="comboValue">—</strong></div><div class="side-metric b2b"><span>B2B</span><strong id="b2bValue">—</strong></div><div class="incoming-vertical" aria-hidden="true"><div id="incomingFill"></div></div></div>
         <div class="board-shell" id="boardShell"><canvas id="playerCanvas" width="300" height="600" tabindex="0" aria-label="你的方塊棋盤。方向鍵移動，Z逆時針，X或上鍵順時針，空白鍵硬降，C暫存。"></canvas><div id="clearFlash" class="clear-flash" aria-hidden="true"></div><div class="move-callout" id="moveCallout" role="status" aria-live="polite"></div><div class="board-overlay" id="overlay"><div class="overlay-mark" aria-hidden="true">↻</div><p class="eyebrow" id="overlayKicker">FIND YOUR FLOW</p><h2 id="overlayTitle">久違了，<br>你的下一手。</h2><p id="overlayText">旋轉、消行、反擊。<br>這次，先讓手指說話。</p><button id="startBtn" class="primary-button">開始對戰 <span>↗</span></button><button id="secondaryBtn" class="overlay-secondary" hidden>同局重來</button><span class="overlay-hint" id="overlayHint">本機 CPU 陪練 · 120 秒一局</span></div></div>
-        <div class="piece-rail next-rail"><div class="rail-label">NEXT</div><canvas id="nextCanvas" width="100" height="360" aria-label="接下來五顆方塊"></canvas><div class="rail-detail">7-BAG</div></div>
+        <div class="piece-rail next-rail"><div class="rail-label">NEXT</div><canvas id="nextCanvas" width="100" height="360" aria-label="接下來五顆方塊"></canvas><div class="rail-detail">7-BAG</div><button type="button" id="touchHoldBtn" class="touch-hold" data-action="hold" aria-label="暫存交換" disabled><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 10h22m-6-6 6 6-6 6M27 22H5m6-6-6 6 6 6"/></svg><span id="touchHoldState">交換</span></button></div>
       </div>
       <div class="arena-metrics"><div><span data-i18n="score.title">得分</span><strong id="scoreValue">0</strong></div><div><span>消行</span><strong id="linesValue">0</strong></div><div><span>淨送出</span><strong id="sentValue">0</strong></div><div><span>塊 / 秒</span><strong id="ppsValue">0.00</strong></div><div><span>T-SPIN</span><strong id="spinsValue">0</strong></div></div>
       <div class="arena-caption"><span class="caption-dot"></span><span id="arenaCaption">軟降到底還能轉。硬降會立即固定。</span></div>
@@ -68,7 +68,20 @@
 
 
   </div>
-  <section class="touch-controls" aria-label="雙手觸控操作"><div class="touch-move"><span class="thumb-label">左手 · 移動</span><button data-action="left" aria-label="向左"><span>←</span><small>向左</small></button><button data-action="soft" aria-label="軟降，落地後仍可旋轉"><span>↓</span><small>軟降</small></button><button data-action="right" aria-label="向右"><span>→</span><small>向右</small></button></div><div class="touch-rotate"><span class="thumb-label">右手 · 旋轉 / 交換</span><button data-action="ccw" aria-label="逆時針旋轉"><span>↶</span><small>逆轉</small></button><button data-action="cw" aria-label="順時針旋轉"><span>↷</span><small>順轉</small></button><button id="touchHoldBtn" class="touch-hold" data-action="hold" aria-label="暫存交換"><span>⇄</span><small id="touchHoldState">交換</small></button></div><div class="touch-finish"><span>擺好、轉好，再按這裡 <b aria-hidden="true">→</b></span><button class="touch-drop" data-action="hard" aria-label="硬降，立即固定方塊"><strong>硬降</strong><small>立即固定</small></button></div></section>
+  <section class="touch-controls" aria-label="雙手觸控操作">
+    <div class="touch-move"><span class="thumb-label">移動</span>
+      <button type="button" data-action="left" aria-label="向左"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m20 6-10 10 10 10"/></svg><small>向左</small></button>
+      <button type="button" data-action="right" aria-label="向右"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m12 6 10 10-10 10"/></svg><small>向右</small></button>
+    </div>
+    <div class="touch-rotate"><span class="thumb-label">旋轉</span>
+      <button type="button" data-action="ccw" aria-label="逆時針旋轉"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 5v8h8M8 13a10 10 0 1 1-1 11"/></svg><small>逆轉</small></button>
+      <button type="button" data-action="cw" aria-label="順時針旋轉"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M24 5v8h-8m8 0a10 10 0 1 0 1 11"/></svg><small>順轉</small></button>
+    </div>
+    <div class="touch-finish">
+      <button type="button" class="touch-soft" data-action="soft" aria-label="軟降，落地後仍可旋轉"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m6 10 10 10 10-10"/></svg><span class="touch-key-copy"><strong>軟降</strong></span></button>
+      <button type="button" class="touch-drop" data-action="hard" aria-label="硬降，立即固定方塊"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m6 7 10 10L26 7M6 25h20"/></svg><span class="touch-key-copy"><strong>硬降</strong><small>立即固定</small></span></button>
+    </div>
+  </section>
   <section class="keyboard-guide" aria-label="鍵盤雙手配置"><div class="keyboard-guide-heading"><strong>雙手分工，少一點誤按。</strong><button id="keySettingsBtn"><span id="keyPresetLabel">經典方向鍵</span> · 更換鍵位 ↗</button></div><div id="keyboardHands" class="keyboard-hands"></div><p id="keyboardAliases">捷徑：↑ 順轉 · Shift 暫存交換 · P 暫停</p></section>
   <footer class="controls-footer"><div><kbd>←</kbd><kbd>→</kbd><span>移動</span><kbd>↓</kbd><span>軟降</span><kbd>Z</kbd><kbd>X / ↑</kbd><span>旋轉</span><kbd>SPACE</kbd><span>硬降</span><kbd>C</kbd><span>暫存</span><kbd>P</kbd><span>暫停</span></div><button id="retryBtn">↶ <span>重新開始</span></button><button id="undoBtn" disabled>撤銷上一手 <kbd>U</kbd></button></footer>
   <div class="bottom-note"><span>SPINREALM · 旋界 / 暫定名稱</span><span>以手感為起點，讓反擊更有意思。</span></div>

@@ -9,7 +9,7 @@ html[data-background="ocean"] body::before{background:radial-gradient(ellipse at
 html[data-custom-background="true"] body::before{background-image:linear-gradient(color-mix(in srgb,var(--bg) 82%,transparent),color-mix(in srgb,var(--bg) 82%,transparent)),var(--custom-background-image);background-size:cover;background-position:center;}
 html[data-theme] :is(.arena-card,.opponent-card,.pressure-card,.handling-card,.mission-card,.party-panel,.keyboard-guide,.hold-guide,.modal,.info-dialog,.member-dialog,.srg-panel,.platform-card){background:var(--panel);border-color:var(--line);color:var(--text);}
 html[data-theme] :is(.topbar,.arena-header,.arena-metrics,.arena-caption,.mode-tabs,.opponent-rail>.left-rail,.keyboard-finish,.keyboard-preset-section,.audio-credit,.cpu-party-status){border-color:var(--line);}
-html[data-theme] :is(.mode-tabs,.keyboard-presets button,.presets button,.view-button,.hold-button,.item-button,.touch-controls button,.key-bindings button,select,input[type="text"],input[type="email"],input[type="password"],input[type="search"],.secondary-button,.sidebar-toggle,.blueprint-button,.pause-button){background:var(--panel-alt);border-color:var(--line);color:var(--text);}
+html[data-theme] :is(.mode-tabs,.keyboard-presets button,.presets button,.view-button,.hold-button,.item-button,.touch-controls button,.touch-hold,.key-bindings button,select,input[type="text"],input[type="email"],input[type="password"],input[type="search"],.secondary-button,.sidebar-toggle,.blueprint-button,.pause-button){background:var(--panel-alt);border-color:var(--line);color:var(--text);}
 html[data-theme] :is(.mode-tab.active,.view-button[aria-pressed="true"],.keyboard-presets button.selected,.presets button.selected){background:color-mix(in srgb,var(--lime) 13%,var(--panel));border-color:var(--lime);color:var(--lime);}
 html[data-theme] :is(.primary-button,.hold-guide-steps>span.current){background:var(--lime);border-color:var(--lime);color:var(--on-accent);}
 html[data-theme] :is(.primary-button span,.primary-button small){color:var(--on-accent);}
@@ -75,11 +75,11 @@ html:is([data-theme="snow"],[data-theme="sakura"]) .pressure-card.danger{border-
 html:is([data-theme="snow"],[data-theme="sakura"]) .pressure-card.danger .pressure-number{color:var(--red);}
 html:is([data-theme="snow"],[data-theme="sakura"]) :is(
   .hold-button:hover:not(:disabled),.hold-button.pressed,
-  .touch-controls button:active,.touch-controls button.pressed,
+  .touch-controls button:active,.touch-controls button.pressed,.touch-hold.pressed,
   .item-button:hover:not(:disabled)
 ){background:color-mix(in srgb,var(--lime) 12%,var(--panel));border-color:var(--lime);color:var(--text);}
 html:is([data-theme="snow"],[data-theme="sakura"]) :is(
-  .hold-button:disabled,.touch-controls button:disabled,.item-button:disabled
+  .hold-button:disabled,.touch-controls button:disabled,.touch-hold:disabled,.item-button:disabled
 ){background:var(--panel-alt);border-color:var(--line);border-style:dashed;opacity:1;}
 html:is([data-theme="snow"],[data-theme="sakura"]) .hold-button:disabled :is(.rail-label,.hold-empty,strong){color:var(--muted);}
 html:is([data-theme="snow"],[data-theme="sakura"]) .hold-button.cooldown+.hold-state{color:var(--muted);}
@@ -91,3 +91,12 @@ html[lang="ja"] :is(.mode-tab,.hold-button>strong){letter-spacing:0;}
 html[lang="ko"] :is(.modal p,.mode-info p,.item-notice){word-break:keep-all;overflow-wrap:anywhere;}
 @media(max-width:760px){html[lang="en"] .mode-tab{font-size:9px;padding-inline:2px;white-space:normal;min-height:34px;line-height:1.3;}html[lang="en"] .mode-tab .tab-symbol{display:none;}html[lang="en"] .hold-button>strong{font-size:8px;}html[lang="en"] .item-button strong{font-size:8px;}html[lang="en"] .item-button small{font-size:7px;}html[lang="ja"] .mode-tab{font-size:9px;}}
 @media(prefers-reduced-motion:reduce){html[data-theme] *,html[data-theme] *::before,html[data-theme] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+
+/* Keep the immediate-lock action distinct in every theme. */
+@media (any-pointer: coarse), (max-width: 760px) {
+  html[data-theme] .touch-controls .touch-drop { background: var(--lime); border-color: var(--lime); color: var(--on-accent); }
+  html[data-theme] .touch-controls .touch-drop .touch-key-copy { color: var(--on-accent); }
+  html[data-theme] .touch-controls .touch-drop:is(:active, .pressed):not(:disabled) { background: color-mix(in srgb, var(--lime) 85%, var(--panel)); color: var(--on-accent); }
+  html[data-theme] .touch-controls .touch-drop:disabled { background: var(--panel-alt); border-color: var(--line); color: var(--muted); }
+  html[data-theme] .touch-controls .touch-drop:disabled .touch-key-copy { color: var(--muted); }
+}
