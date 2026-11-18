@@ -1,0 +1,42 @@
+name: Restore CC0 SPINREALM background music
+on:
+  push:
+    paths:
+      - '.github/workflows/restore-music-loop.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  restore-music:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Fetch CC0 author archive and encode replacement MP3
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --connect-timeout 20 \
+            'https://opengameart.org/sites/default/files/exploration_theme.zip' -o /tmp/exploration_theme.zip
+          unzip -t /tmp/exploration_theme.zip
+          mkdir -p /tmp/spinrealm-audio
+          unzip -oq /tmp/exploration_theme.zip -d /tmp/spinrealm-audio
+          SOURCE="$(find /tmp/spinrealm-audio -type f \( -iname '*.wav' -o -iname '*.flac' -o -iname '*.ogg' \) | sort | head -n1)"
+          test -n "$SOURCE"
+          ffmpeg -hide_banner -loglevel error -nostdin -y -i "$SOURCE" -vn \
+            -codec:a libmp3lame -b:a 128k -ar 44100 \
+            dist/games/spinrealm/audio/music-loop.mp3
+          test -s dist/games/spinrealm/audio/music-loop.mp3
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 dist/games/spinrealm/audio/music-loop.mp3
+          git hash-object dist/games/spinrealm/audio/music-loop.mp3
+      - name: Commit audio to main and remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dist/games/spinrealm/audio/music-loop.mp3
+          git rm .github/workflows/restore-music-loop.yml
+          git commit -m 'audio: restore CC0 exploration theme for SPINREALM'
+          git push origin HEAD:main
