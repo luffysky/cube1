@@ -1,4 +1,4 @@
-name: GitHub Pages
+name: Web tests (Vercel-ready)
 
 on:
   push:
@@ -11,62 +11,23 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: false
+  group: web-checks-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  verify-web:
+    name: Test and verify web build
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: read
     steps:
       - name: Check out source
-        uses: actions/checkout@v7.0.1
-      - name: Set up Node.js
-        uses: actions/setup-node@v7.1.0
+        uses: actions/checkout@v4
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
         with:
           node-version: '24'
-          package-manager-cache: false
-      - name: Test game and offline rules
+      - name: Test gameplay and offline rules
         run: npm test
-      - name: Test Pages transformations
+      - name: Validate static build transformer
         run: node scripts/build-github-pages.mjs --self-test
-      # One-time repository setup: Settings > Pages > Source > GitHub Actions.
-      # enablement:true needs a separate elevated token; this workflow uses none.
-      - name: Read Pages configuration
-        if: github.event_name != 'pull_request'
-        id: pages
-        uses: actions/configure-pages@v6.0.0
-      - name: Build and validate public paths
-        env:
-          PAGES_CONFIGURED: ${{ github.event_name != 'pull_request' }}
-          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          PAGES_REPOSITORY_NAME: ${{ github.event.repository.name }}
-        run: |
-          if [ "$PAGES_CONFIGURED" = 'true' ]; then
-            node scripts/build-github-pages.mjs --base="${PAGES_BASE_PATH}/"
-          else
-            node scripts/build-github-pages.mjs --base="/${PAGES_REPOSITORY_NAME}/"
-          fi
-      - name: Upload static website
-        uses: actions/upload-pages-artifact@v5.0.0
-        with:
-          path: release-web/
-          include-hidden-files: true
-
-  deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5.0.1
+      - name: Verify web output without deploying to GitHub Pages
+        run: node scripts/build-github-pages.mjs --base=/
