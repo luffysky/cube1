@@ -1,0 +1,75 @@
+SPINREALM AUDIO — SOURCES AND LICENSE NOTICES
+Verified: 2026-11-18 UTC
+
+All 11 runtime audio files are derived from assets published under CC0 1.0.
+License reference: https://creativecommons.org/publicdomain/zero/1.0/
+Commercial use and modification are allowed by the cited CC0 dedication and source notices.
+Author credit is retained voluntarily. No author endorsement is implied.
+Source and output SHA-256 hashes, original filenames and modifications are in credits.json.
+
+1. Exploration Theme — Cleyton Kauffman
+Work: https://opengameart.org/content/exploration-theme
+Author: https://soundcloud.com/cleytonkauffman
+Original archive: https://opengameart.org/sites/default/files/exploration_theme.zip
+Used: Exploration Theme/Exploration Theme.wav -> music-loop.mp3
+Changes: Full 134.4-second composition retained; linear gain +5.08 dB from measured -25.08 LUFS toward -20 LUFS; encoded as 128 kbit/s MP3, 44.1 kHz stereo. No remix or melody replacement.
+
+Verbatim bundled readme.txt:
+----------------------------------------
+Hi, :)
+
+Feel free to use and share this asset as you like. Credit is appreciated but not required
+
+E-mail: cleytonkauffman@gmail.com
+
+========[Soundcloud
+
+https://soundcloud.com/cleytonkauffman
+
+========[Instagram
+
+https://www.instagram.com/cleytonkauffman/
+
+========[Copyright/Attribution Notice (OPTIONAL)
+
+Music by Cleyton Kauffman - https://soundcloud.com/cleytonkauffman
+
+========[License
+
+Creative Commons Zero (CC0)
+
+
+Thank you for your support!
+----------------------------------------
+
+2. Interface Sounds (1.0) — Kenney
+Work: https://kenney.nl/assets/interface-sounds
+Used: ten short cues listed by event and original filename in credits.json.
+Changes: Selected cues downmixed to mono, standardized to 44.1 kHz signed 16-bit WAV, high-pass 70 Hz and low-pass 6500 Hz, short edge fades/padding, peak normalized to approximately -9 dBFS. Each exact filter is recorded in credits.json.
+
+Verbatim bundled License.txt:
+----------------------------------------
+	
+
+	Interface Sounds (1.0)
+
+	Created/distributed by Kenney (www.kenney.nl)
+	Creation date: 11-02-2020
+
+			------------------------------
+
+	License: (Creative Commons Zero, CC0)
+	http://creativecommons.org/publicdomain/zero/1.0/
+
+	This content is free to use in personal, educational and commercial projects.
+
+	Support us by crediting Kenney or www.kenney.nl (this is not mandatory)
+
+			------------------------------
+
+	Donate:   http://support.kenney.nl
+	Patreon:  http://patreon.com/kenney/
+
+	Follow on Twitter for updates:
+	http://twitter.com/KenneyNL
+----------------------------------------

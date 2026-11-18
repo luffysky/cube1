@@ -1,0 +1,116 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { Store } from '../../server/api/store.mjs';
+import { Ranked } from '../../server/api/ranked.mjs';
+import { createApp } from '../../server/api/app.mjs';
+import { testPool } from './pglite-helper.mjs';
+
+test('real SQL transactions preserve balances, receipts, friend authorization and rank settlement', async t => {
+  const pool = await testPool(); t.after(() => pool.end());
+  let now = Date.now(); const store = new Store(pool, { clock: () => now }); const ranked = new Ranked(store);
+  for (const user of ['alice', 'bob', 'eve', 'spender']) await store.ensureUser(user);
+  await t.test('readiness uses actual database and reveals only a cached boolean', async () => {
+    const actualDatabase = (await pool.query('SELECT current_database() AS name')).rows[0].name;
+    assert.equal(await store.readiness(actualDatabase), true);
+    assert.equal(await store.readiness('wrong_database'), false);
+    const app = createApp({ store, authenticate: async () => null, expectedDatabase: actualDatabase });
+    const response = await app.fetch(new Request('https://api.example/health/ready'));
+    assert.equal(response.status, 200); assert.deepEqual(await response.json(), { ready: true });
+    const wrong = createApp({ store, authenticate: async () => null, expectedDatabase: 'wrong_database' });
+    const failure = await wrong.fetch(new Request('https://api.example/health/ready'));
+    assert.equal(failure.status, 503); assert.deepEqual(await failure.json(), { ready: false });
+  });
+  await t.test('initial grant, idempotent concurrent purchase and daily claim', async () => {
+    await store.ensureUser('alice');
+    assert.equal((await store.profile('alice')).wallet.balance, 250);
+    const receipts = await Promise.all([store.purchase('alice', 'purchase-test-1', { itemId: 'shield', quantity: 2 }), store.purchase('alice', 'purchase-test-1', { itemId: 'shield', quantity: 2 })]);
+    assert.deepEqual(receipts[0], receipts[1]);
+    assert.equal((await store.profile('alice')).wallet.balance, 210);
+    assert.deepEqual((await store.profile('alice')).inventory, [{ itemId: 'shield', quantity: 2 }]);
+    await assert.rejects(store.purchase('alice', 'purchase-test-1', { itemId: 'shield', quantity: 3 }), error => error.code === 'idempotency_conflict');
+    const claims = await Promise.all([store.daily('alice', 'daily-test-1'), store.daily('alice', 'daily-test-2')]);
+    assert.equal(claims.reduce((sum, claim) => sum + claim.granted, 0), 50);
+    assert.equal((await store.profile('alice')).wallet.balance, 260);
+    const history = await store.walletHistory('alice');
+    assert.equal(history.entries.filter(entry => entry.reason === 'initial_grant').length, 1);
+    assert.equal(history.entries.filter(entry => entry.reason === 'shop_purchase').length, 1);
+  });
+  await t.test('racing spending cannot overdraw or grant unpaid items', async () => {
+    const results = await Promise.allSettled([store.purchase('spender', 'overspend-1', { itemId: 'shield', quantity: 10 }), store.purchase('spender', 'overspend-2', { itemId: 'shield', quantity: 10 })]);
+    assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
+    assert.equal(results.filter(result => result.status === 'rejected')[0].reason.code, 'insufficient_coins');
+    const profile = await store.profile('spender');
+    assert.equal(profile.wallet.balance, 50);
+    assert.deepEqual(profile.inventory, [{ itemId: 'shield', quantity: 10 }]);
+    await assert.rejects(store.purchase('spender', 'forged-price', { itemId: 'shield', price: -999 }), error => error.code === 'invalid_payload');
+  });
+  await t.test('friend requests, recipient-only acceptance, blocking and private lookup', async () => {
+    const bob = await store.profile('bob');
+    const invitation = await store.requestFriend('alice', { friendCode: bob.profile.friendCode });
+    await assert.rejects(store.friendAction('alice', invitation.requestId, 'accept'), error => error.code === 'friend_action_not_allowed');
+    await assert.rejects(store.friendAction('eve', invitation.requestId, 'accept'), error => error.code === 'friend_request_not_found');
+    await store.friendAction('bob', invitation.requestId, 'accept');
+    assert.equal((await store.friends('alice')).friends.length, 1);
+    await store.block('bob', { userId: 'alice' });
+    assert.equal((await store.friends('alice')).friends.length, 0);
+    await assert.rejects(store.findFriend('alice', bob.profile.friendCode), error => error.code === 'friend_not_found');
+    await store.block('bob', { userId: 'alice' }, true);
+  });
+  await t.test('concurrent queue joins create one real match and no double seat', async () => {
+    const result = await Promise.all([ranked.queue('alice', 'POST'), ranked.queue('bob', 'POST'), ranked.queue('alice', 'POST')]);
+    const matched = result.filter(row => row.status === 'matched');
+    assert.equal(matched.length, 2);
+    assert.equal(matched[0].matchId, matched[1].matchId);
+    const seats = await pool.query('SELECT * FROM sr_ranked_seats');
+    assert.equal(seats.rowCount, 2);
+    const matchId = matched[0].matchId;
+    await assert.rejects(ranked.match('eve', matchId), error => error.code === 'match_not_found');
+    await assert.rejects(store.useItem('alice', 'rank-use-item', { itemId: 'shield', mode: 'party' }), error => error.code === 'items_not_allowed');
+    await assert.rejects(ranked.match('alice', matchId, { inputs: [{ seq: 1, action: 'hard' }] }), error => error.code === 'countdown_active');
+    now += 3100;
+    await ranked.match('alice', matchId, { inputs: [{ seq: 1, action: 'hard' }] });
+    now += 100;
+    const state = await ranked.match('bob', matchId);
+    assert.equal(state.games.alice.stats.pieces, 1);
+    const ended = await ranked.match('alice', matchId, { forfeit: true });
+    assert.equal(ended.result.winnerId, 'bob');
+    assert.equal(ended.settlement.alice.coins, 0);
+    assert.equal(ended.settlement.alice.ratingAfter, 984);
+    await ranked.match('alice', matchId, { forfeit: true });
+    await ranked.match('bob', matchId);
+    assert.equal((await store.profile('alice')).rank.games, 1);
+    assert.equal((await pool.query('SELECT * FROM sr_rank_settlements WHERE match_id=$1', [matchId])).rowCount, 2);
+    assert.equal((await pool.query('SELECT * FROM sr_ranked_seats')).rowCount, 0);
+  });
+  await t.test('server-owned fixture reward is paid once and duplicate result submissions cannot mint', async () => {
+    await ranked.queue('alice', 'POST'); const { matchId } = await ranked.queue('bob', 'POST');
+    const row = (await pool.query('SELECT * FROM sr_ranked_matches WHERE id=$1', [matchId])).rows[0];
+    // Trusted test fixture, written directly by the server. This shape is never accepted by an HTTP route.
+    row.snapshot.games.alice.stats.pieces = 5; row.snapshot.games.bob.stats.pieces = 5;
+    now += 35000;
+    await pool.query('UPDATE sr_ranked_matches SET snapshot=$2,heartbeat_one=$3,heartbeat_two=$3 WHERE id=$1', [matchId, row.snapshot, new Date(now)]);
+    const before = (await store.profile('alice')).wallet.balance;
+    const ended = await ranked.match('bob', matchId, { forfeit: true });
+    assert.equal(ended.settlement.alice.coins, 30);
+    assert.equal(ended.settlement.bob.coins, 10);
+    await Promise.all([ranked.match('alice', matchId), ranked.match('bob', matchId, { forfeit: true })]);
+    assert.equal((await store.profile('alice')).wallet.balance, before + 30);
+    assert.equal((await pool.query("SELECT * FROM sr_wallet_ledger WHERE user_id='alice' AND reason='ranked_reward'")).rowCount, 1);
+    const history = await store.matchHistory('alice');
+    assert.equal(history.matches.length, 2);
+    assert.ok(history.matches.some(entry => entry.id === matchId && entry.opponent.nickname.startsWith('Player ') && entry.coins === 30));
+    assert.deepEqual(await store.matchHistory('eve'), { matches: [] });
+  });
+  await t.test('HTTP uses authenticated identity, rejects fake endpoints and keeps private responses', async () => {
+    const app = createApp({ store, authenticate: async request => request.headers.get('authorization') === 'Bearer alice' ? 'alice' : null, allowedOrigins: ['https://game.example'], logger: { error() {} } });
+    const call = (path, body, extra = {}) => app.fetch(new Request(`https://api.example${path}`, { method: body ? 'POST' : 'GET', headers: { authorization: 'Bearer alice', origin: 'https://game.example', 'content-type': 'application/json', ...extra }, ...(body ? { body: JSON.stringify(body) } : {}) }));
+    const response = await call('/v1/profile');
+    assert.equal(response.status, 200); assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.equal((await response.json()).profile.id, 'alice');
+    assert.equal((await call('/v1/profile', null, { authorization: '' })).status, 401);
+    assert.equal((await call('/v1/profile', null, { origin: 'https://attacker.example' })).status, 403);
+    assert.equal((await call('/v1/matches/local/complete', { score: 999999, coins: 999999 })).status, 404);
+    assert.equal((await call('/v1/billing/checkout', {})).status, 503);
+    assert.equal((await call('/v1/shop/purchase', { itemId: 'shield' })).status, 400);
+  });
+});

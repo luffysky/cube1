@@ -1,0 +1,21 @@
+{
+  "name": "snowrealm-games-cube1",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs tests/spinrealm/*.test.mjs",
+    "test:api": "npm --prefix server/api test",
+    "test:desktop": "npm --prefix desktop test",
+    "build:pages": "node scripts/build-github-pages.mjs",
+    "build:api": "npm --prefix server/api run build",
+    "build:desktop": "npm --prefix desktop run build:dir",
+    "build:auth": "esbuild tools/auth-entry.mjs --bundle --format=esm --platform=browser --minify --outfile=dist/games/spinrealm/vendor/neon-auth.mjs"
+  },
+  "dependencies": {
+    "@neon/auth": "0.8.2"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

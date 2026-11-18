@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1015">
+  <meta name="description" content="SnowRealmGames 雪域遊戲：在瀏覽器開啟旋界 SPINREALM，探索開發中的 52 HUNT 與 NEXT FLOOR 下一層。">
+  <meta property="og:title" content="SnowRealmGames｜下一個世界，一鍵開局。">
+  <meta property="og:description" content="從指尖的反擊，到未知的下一層。獨立網頁遊戲，從這裡出發。">
+  <meta property="og:url" content="https://snowrealm-games-luffysky.luffysky00.chatgpt.site/">
+  <title>SnowRealmGames｜下一個世界，一鍵開局。</title>
+  <link rel="icon" href="/assets/realm-mark.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/games/spinrealm/member.css">
+  <link rel="stylesheet" href="/games/spinrealm/appearance.css">
+</head>
+<body data-srg-page="platform">
+<a class="skip-link" href="#games">跳到遊戲館</a>
+<header class="site-header">
+  <a class="brand" href="/" aria-label="SnowRealmGames 首頁"><img src="/assets/realm-mark.svg" width="34" height="34" alt=""><span>SNOWREALM<small>GAMES / 雪域遊戲</small></span></a>
+  <nav class="main-nav" aria-label="主要導覽"><a class="active" href="#games">遊戲館</a><a href="#journal">開發日誌</a><a href="#about">關於雪域</a></nav>
+  <div class="nav-actions"><button class="saved-button" id="showFavorites" aria-label="查看我的收藏"><span aria-hidden="true">☆</span><span class="saved-label">我的收藏</span><b id="favoriteCount">0</b></button><button class="install-button" id="installApp" hidden>加入主畫面 <span aria-hidden="true">↗</span></button></div>
+</header>
+<main>
+  <section class="hero container" aria-labelledby="heroTitle">
+    <div class="hero-copy"><p class="eyebrow"><span class="status-dot"></span> INDEPENDENT WORLDS. OPEN TO PLAY.</p><h1 id="heroTitle">下一個世界，<br><span>一鍵開局。</span></h1><p class="hero-description">從指尖的反擊，到未知的下一層。<br>我們把想玩的世界，做進你的瀏覽器。</p><div class="hero-actions"><a class="button primary" href="/games/spinrealm/" data-play="spinrealm">玩旋界 <span aria-hidden="true">↗</span></a><a class="button secondary" href="#games">探索遊戲館 <span aria-hidden="true">↓</span></a></div><div class="hero-meta"><span><i aria-hidden="true">◈</i> 開啟網頁就能玩</span><span><i aria-hidden="true">⌘</i> 鍵盤與觸控</span><span><i aria-hidden="true">✧</i> 持續進化的世界</span></div></div>
+    <a class="hero-feature" href="/games/spinrealm/" data-play="spinrealm" aria-label="開始遊玩旋界 SPINREALM"><div class="feature-topline"><span><i class="status-dot"></i> NOW PLAYING</span><span>01 / SPINREALM</span></div><img class="hero-art" src="/assets/spinrealm-cover.svg" width="900" height="660" alt="霓光方塊棋盤，一顆 T 型方塊準備旋入空隙，旁邊保留著暫存方塊。"><div class="hero-feature-bottom"><div><span class="small-label">FEATURED REALM</span><h2>旋界<span translate="no">SPINREALM</span></h2></div><span class="circle-arrow" aria-hidden="true">↗</span></div><span class="feature-caption">轉進去。把壓力送回去。</span></a>
+  </section>
+  <div class="realm-strip"><div class="container"><span>THREE WORLDS. ONE REALM.</span><p>三個世界，從同一扇門出發。</p><span class="strip-right">WEB FIRST <i>✳</i> PLAY ANYWHERE</span></div></div>
+
+  <section class="games-section container" id="games" aria-labelledby="gamesTitle">
+    <div class="section-heading"><div><p class="eyebrow">THE COLLECTION / 遊戲館</p><h2 id="gamesTitle">選一個世界<span>。</span></h2></div><p>現在就玩旋界。<br>另外兩個世界，正在成形。</p></div>
+    <div class="catalog-toolbar"><div class="filter-tabs" role="group" aria-label="篩選遊戲"><button data-filter="all" aria-pressed="true">全部 <span>03</span></button><button data-filter="playable" aria-pressed="false">現在可玩 <span>01</span></button><button data-filter="development" aria-pressed="false">開發中 <span>02</span></button><button data-filter="favorites" aria-pressed="false">已收藏 <span id="filterFavoriteCount">00</span></button></div><label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="gameSearch" type="search" placeholder="尋找你的下一個世界" aria-label="搜尋遊戲" autocomplete="off"></label></div>
+    <div class="game-grid" id="gameGrid">
+      <article class="game-card spin-card" data-game="spinrealm" data-status="playable" data-search="旋界 spinrealm 俄羅斯方塊 tetris battle 益智 對戰 cpu">
+        <div class="card-art"><a href="/games/spinrealm/" data-play="spinrealm" aria-label="遊玩旋界"><img src="/assets/spinrealm-cover.svg" width="900" height="660" alt="旋界的青綠色方塊對戰棋盤" loading="lazy"></a><span class="game-status available"><i class="status-dot"></i> 可試玩</span><button class="favorite-toggle" data-favorite="spinrealm" aria-label="收藏旋界" aria-pressed="false">☆</button></div>
+        <div class="card-content"><p class="card-category">01 / COMPETITIVE PUZZLE</p><h3><a href="/games/spinrealm/" data-play="spinrealm">旋界 <span translate="no">SPINREALM</span></a></h3><p class="card-description">這顆先留著，下一轉再反擊。<br>在熟悉的方塊之間，找回跟手的節奏。</p><div class="card-tags"><span>CPU 對戰</span><span>道具派對</span><span>T-Spin</span></div><a class="card-link playable-link" href="/games/spinrealm/" data-play="spinrealm">立即遊玩 <span aria-hidden="true">↗</span></a></div>
+      </article>
+      <article class="game-card hunt-card" data-game="52hunt" data-status="development" data-search="52 hunt 52hunt 撲克牌 追獵 鬼 人類 非對稱 生存">
+        <div class="card-art"><a href="/games/52hunt/" aria-label="了解52 HUNT"><img src="/assets/hunt-cover.svg" width="900" height="660" alt="暗紅舞台上的撲克牌，黑桃 A 與神祕 Joker 身分" loading="lazy"></a><span class="game-status developing">開發規劃中</span><button class="favorite-toggle" data-favorite="52hunt" aria-label="收藏52 HUNT" aria-pressed="false">☆</button></div>
+        <div class="card-content"><p class="card-category">02 / ASYMMETRIC HUNT</p><h3><a href="/games/52hunt/">52 HUNT <span>命運追獵</span></a></h3><p class="card-description">52 張牌，決定你是誰。<br>身份揭曉後，誰還值得相信？</p><div class="card-tags"><span>52 人概念</span><span>身分博弈</span><span>多人追獵</span></div><a class="card-link" href="/games/52hunt/">探索遊戲概念 <span aria-hidden="true">↗</span></a></div>
+      </article>
+      <article class="game-card floor-card" data-game="next-floor" data-status="development" data-search="next floor 下一層 電梯 世界 探索 合作 冒險">
+        <div class="card-art"><a href="/games/next-floor/" aria-label="了解 NEXT FLOOR 下一層"><img src="/assets/floor-cover.svg" width="900" height="660" alt="開啟的電梯門外，是漂浮在藍色天空中的新世界" loading="lazy"></a><span class="game-status developing">開發規劃中</span><button class="favorite-toggle" data-favorite="next-floor" aria-label="收藏 NEXT FLOOR 下一層" aria-pressed="false">☆</button></div>
+        <div class="card-content"><p class="card-category">03 / WORLDS TO EXPLORE</p><h3><a href="/games/next-floor/">NEXT FLOOR <span>下一層</span></a></h3><p class="card-description">叮。這次，門外會是什麼？<br>一座電梯，通往未曾想過的世界。</p><div class="card-tags"><span>世界探索</span><span>電梯 Hub</span><span>選擇與連動</span></div><a class="card-link" href="/games/next-floor/">探索遊戲概念 <span aria-hidden="true">↗</span></a></div>
+      </article>
+    </div>
+    <div class="empty-state" id="emptyState" hidden><span aria-hidden="true">◇</span><h3 id="emptyTitle">這裡還沒有遊戲。</h3><p id="emptyText">試試別的關鍵字，或回到全部遊戲。</p><button class="button secondary" id="clearFilters">看全部遊戲 ↗</button></div>
+    <div class="catalog-foot"><span id="resultCount" role="status" aria-live="polite">3 個世界 · 1 個可試玩</span><span>收藏只記在這台裝置，隨時都能改。</span></div>
+  </section>
+
+  <section class="continue-section container" id="continueSection" hidden aria-labelledby="continueTitle"><div><p class="eyebrow">WELCOME BACK</p><h2 id="continueTitle">再轉一局？</h2><p>你的操作設定，留在這個瀏覽器。</p></div><a class="button primary" href="/games/spinrealm/" data-play="spinrealm">回到旋界 <span>↗</span></a></section>
+
+  <section class="journal-section container" id="journal" aria-labelledby="journalTitle"><div class="journal-intro"><p class="eyebrow">DEVELOPER'S LOG / 開發日誌</p><h2 id="journalTitle">慢慢做，<br>認真玩。</h2><p>每次更新，都讓下一局更值得期待。</p><span class="journal-build">BUILD 0.4 / 2026.11</span></div><div class="journal-list"><article><span class="log-marker current"></span><div class="log-top"><span>已加入試玩</span><time datetime="2026-11-18">2026.11.18</time></div><h3>你的帳號，你的風格，你的排位。</h3><p>新增 SnowRealm 會員、金幣帳本、外觀商城、好友與真人排位測試。六種主題、五種方塊樣式，繁體、簡體、英、日、韓五種語言，讓每一局更像你的世界。</p><a href="/games/spinrealm/" data-play="spinrealm">試玩新版旋界 <span>↗</span></a></article><article><span class="log-marker"></span><div class="log-top"><span>本次更新</span><time datetime="2026-11-18">2026.11.18</time></div><h3>一個入口，放得下更多世界。</h3><p>SnowRealmGames 遊戲館登場。瀏覽遊戲、留下收藏，也能在支援的瀏覽器加入主畫面。</p><a href="#games">看看遊戲館 <span>↑</span></a></article><article class="next-log"><span class="log-marker"></span><div class="log-top"><span>下一站 / 規劃中</span><span>尚未開放</span></div><h3>把「再一局」傳給朋友。</h3><p>真人隨機排位已進入連線測試；朋友房、多人混戰與組隊將在確認對局品質後擴展。CPU 模式仍可離線練習。</p></article></div></section>
+
+  <section class="about-section" id="about" aria-labelledby="aboutTitle"><div class="container"><div class="about-heading"><img src="/assets/realm-mark.svg" width="52" height="52" alt=""><p class="eyebrow">THE SNOWREALM WAY</p><h2 id="aboutTitle">遊戲可以小，<br>想像不能。</h2><p>SnowRealmGames 是一座持續長大的獨立遊戲基地。<br>把喜歡的手感，和還沒見過的世界，一個個做出來。</p></div><div class="principles"><article><span>01</span><h3>瀏覽器，就是入口。</h3><p>以網頁遊戲為主。電腦與行動裝置逐步調校；PWA 提供更方便的回訪方式。</p></article><article><span>02</span><h3>勝負，交給你的操作。</h3><p>未來外觀與支持方案不改變競技能力。必要操作、暫存交換與公平規則維持一致。</p></article><article><span>03</span><h3>先做值得再玩的遊戲。</h3><p>每個世界都從可驗證的小版本開始。新模式跟著實際試玩進步，不用承諾填滿遊戲館。</p></article></div></div></section>
+</main>
+<footer class="site-footer container"><a class="brand footer-brand" href="/"><img src="/assets/realm-mark.svg" width="29" height="29" alt=""><span>SNOWREALM<small>GAMES / 雪域遊戲</small></span></a><p>© 2026 SnowRealmGames<br><span id="offlineState" role="status">離線資源尚未就緒</span></p><div><button data-open="privacyDialog">使用與資料說明</button><a href="/studio/">開發工作台 <span>↗</span></a><a href="#top" id="backTop">回到頂端 ↑</a></div></footer>
+<dialog id="privacyDialog" class="info-dialog"><button class="dialog-close" data-close="privacyDialog" aria-label="關閉使用說明">×</button><p class="eyebrow">YOUR BROWSER, YOUR SETTINGS</p><h2>目前版本的資料說明</h2><p>遊戲收藏、最近玩過、旋界鍵位與手感設定儲存在這個瀏覽器。清除網站資料或更換裝置後，不會自動同步。</p><p>會員採用 Neon 託管登入。暱稱、好友、金幣帳本、購買記錄、排位與外觀設定存放在伺服器；密碼由登入服務管理。自訂圖片目前只保存在這台裝置，不會公開給其他玩家。正式收款尚未啟用。</p><p>PWA 會在成功載入必要資源後保存離線版本。真人排位、登入與商城需保持連線；離線練習分數不會兌換成伺服器金幣。</p><button class="button secondary" id="clearLocalData">清除此裝置的平台收藏與最近紀錄</button><p class="fine-print">此按鈕不會刪除旋界的鍵位設定或清除瀏覽器快取。</p></dialog>
+<div class="update-banner" id="updateBanner" hidden><div><strong>下一個版本已準備好。</strong><span>結束這一局，再更新也可以。</span></div><button id="applyUpdate">更新版本 ↻</button><button id="dismissUpdate" aria-label="稍後再更新">×</button></div>
+<div class="toast" id="siteToast" role="status" aria-live="polite"></div>
+<script type="module" src="/app.mjs"></script>
+<script type="module" src="/member-platform.mjs"></script>
+<script type="module" src="/pwa.mjs"></script>
+</body>
+</html>

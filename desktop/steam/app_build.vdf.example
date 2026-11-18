@@ -1,0 +1,11 @@
+"AppBuild"
+{
+  "AppID" "YOUR_APP_ID"
+  "Desc" "spinrealm-review-candidate"
+  "ContentRoot" "../content/spinrealm"
+  "BuildOutput" "../output"
+  "Depots"
+  {
+    "YOUR_WINDOWS_DEPOT_ID" "depot_windows.vdf"
+  }
+}
