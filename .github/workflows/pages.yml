@@ -29,5 +29,7 @@ jobs:
         run: npm test
       - name: Validate static build transformer
         run: node scripts/build-github-pages.mjs --self-test
+      - name: Ensure required offline music asset exists
+        run: test -s dist/games/spinrealm/audio/music-loop.mp3
       - name: Verify web output without deploying to GitHub Pages
         run: node scripts/build-github-pages.mjs --base=/
