@@ -1,0 +1,13 @@
+node_modules/
+**/node_modules/
+**/build/
+**/release/
+release-web/
+.release-web-*/
+*.zip
+*.log
+.env
+.env.*
+!.env.example
+*.local
+__pycache__/

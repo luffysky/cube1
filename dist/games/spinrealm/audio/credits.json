@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "project": "SPINREALM / 旋界",
+  "verifiedDateUtc": "2026-11-18",
+  "selection": "One calm synth/piano loop and ten short action cues; no original Tetris theme used.",
+  "licenseSummary": "All included audio assets were published under CC0-1.0. Credit is optional under the source notices; author credit is retained voluntarily. No claim of author endorsement.",
+  "sources": [
+    {
+      "id": "cleyton-exploration-theme",
+      "title": "Exploration Theme",
+      "author": "Cleyton Kauffman",
+      "pageUrl": "https://opengameart.org/content/exploration-theme",
+      "downloadUrl": "https://opengameart.org/sites/default/files/exploration_theme.zip",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "The author page declares CC0; bundled Exploration Theme/readme.txt states Creative Commons Zero (CC0), with optional credit.",
+      "archiveFile": "exploration_theme.zip",
+      "archiveSha256": "81601fb33319491973803edeebb5ab5d2d05d943c0accb48ea79e84a9680fa43",
+      "bundledLicensePath": "Exploration Theme/readme.txt",
+      "bundledLicenseSha256": "5516a1d57b79938480b6fdd021504c1cfe8b3be05938e210b844fef6f7a5d129",
+      "credit": "Music by Cleyton Kauffman — https://soundcloud.com/cleytonkauffman"
+    },
+    {
+      "id": "kenney-interface-sounds",
+      "title": "Interface Sounds (1.0)",
+      "author": "Kenney",
+      "pageUrl": "https://kenney.nl/assets/interface-sounds",
+      "downloadMethod": "Official page download-link endpoint followed to its publisher-issued signed ZIP URL. The temporary URL is intentionally not published.",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "licenseEvidence": "Publisher page declares Creative Commons CC0; archive License.txt explicitly permits personal, educational and commercial projects.",
+      "archiveFile": "kenney-interface-sounds.zip",
+      "archiveSha256": "f2193d072726d6758a5f7871b2dcc54dcce0d5c35c6f0a62f92549b327c81232",
+      "bundledLicensePath": "License.txt",
+      "bundledLicenseSha256": "f7966c773bbed0eca6a9c75081c44a178b38eae112724dbb5fdfbd4192d118a9",
+      "credit": "Interface Sounds by Kenney — https://kenney.nl"
+    }
+  ],
+  "assets": [
+    {
+      "file": "clear.wav",
+      "event": "clear",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/confirmation_001.ogg",
+      "sourceSha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+      "sha256": "b44e1c2033f59b6719af10ccf29d8a3f5b3757350073b8f8ab549c1397f9ad14",
+      "bytes": 26314,
+      "durationSeconds": 0.297846,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/confirmation_001.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.292841:d=0.005",
+        "linearGain": 0.354906,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "drop.wav",
+      "event": "drop",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/drop_003.ogg",
+      "sourceSha256": "43d086d50f90493a98cd2e09aa6dbf150d164f1578e1ec768d21cb185571ad87",
+      "sha256": "2d58e27daa84d0b4d854160728b0263a5982e345422105a4391d25a004c6a2e3",
+      "bytes": 17348,
+      "durationSeconds": 0.19619,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/drop_003.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.194088:d=0.005",
+        "linearGain": 0.33579151,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "hold.wav",
+      "event": "hold",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/switch_003.ogg",
+      "sourceSha256": "ca12dd32103f401481d5aff56d5e9831174e99bb577139c09b07d046eb8b837e",
+      "sha256": "e4de12ae3cd7a16770a08b128b1e95a92a122ee1df888f1500988896097a11a5",
+      "bytes": 44850,
+      "durationSeconds": 0.508005,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/switch_003.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.503000:d=0.005",
+        "linearGain": 0.52935977,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "incoming.wav",
+      "event": "incoming",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/question_001.ogg",
+      "sourceSha256": "abb8f9e4eb2071491b0b15f84ee302386b1847609310c1b000ae174639a6cc5a",
+      "sha256": "53a9d2078bbd43f21440a88f54213d766a2270059054d7e6a1f822a206f649c0",
+      "bytes": 44028,
+      "durationSeconds": 0.498685,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/question_001.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.493680:d=0.005",
+        "linearGain": 0.39351193,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "item.wav",
+      "event": "item",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/maximize_004.ogg",
+      "sourceSha256": "59c7a24b204be24d2a44a86d1e4d18c2cf51fa0446967a14b2590e8fb3afaf34",
+      "sha256": "62164a0c7c0d2c8e2c33d862a29c7414d5ec51f1c95625aa9fbae9b45e2d2e5d",
+      "bytes": 37614,
+      "durationSeconds": 0.425964,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/maximize_004.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.420959:d=0.005",
+        "linearGain": 0.61613806,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "move.wav",
+      "event": "move",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/tick_001.ogg",
+      "sourceSha256": "9d057b918024c787bbe6c00beed13a7ef72a3fa0c259add3cef36582792f4230",
+      "sha256": "807ee771a89f3dc5db70086d63ca703f13d841120447f274c3f06a5455c1a324",
+      "bytes": 4718,
+      "durationSeconds": 0.052993,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/tick_001.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.026220:d=0.005",
+        "linearGain": 0.65930826,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "music-loop.mp3",
+      "event": "music",
+      "sourceId": "cleyton-exploration-theme",
+      "sourceFile": "Exploration Theme/Exploration Theme.wav",
+      "sourceSha256": "f88993692b978d9bf3d376b1ae45111c1d5f0ea27b4e550e987f580e1384a150",
+      "sha256": "1008eca144c36d0abe012ce2af950cad404264be405c3bc625214debc0061c02",
+      "bytes": 2151400,
+      "durationSeconds": 134.426122,
+      "codec": "mp3",
+      "sampleRateHz": 44100,
+      "channels": 2,
+      "license": "CC0-1.0",
+      "modifications": {
+        "gainDb": 5.08,
+        "sourceIntegratedLufs": -25.08,
+        "targetIntegratedLufs": -20,
+        "outputFormat": "MP3, 128 kbit/s, 44.1 kHz stereo",
+        "fullTrackRetained": true
+      }
+    },
+    {
+      "file": "over.wav",
+      "event": "over",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/error_005.ogg",
+      "sourceSha256": "3f75b11df5b06d68d2c25fbf0e9c9d9e7dd9250562a4007ee34856b8a309a2ae",
+      "sha256": "027487cc5fcfbc75a1fa5056a04f87748e8c510031be467acba27d3adc55d111",
+      "bytes": 44598,
+      "durationSeconds": 0.505147,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/error_005.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.503045:d=0.005",
+        "linearGain": 0.52704924,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "rotate.wav",
+      "event": "rotate",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/click_002.ogg",
+      "sourceSha256": "adcd1f4adc35f1b41bc1b5bbefeff7aa44f2f3f0d96d3199b544140c7c1e761c",
+      "sha256": "b5c2b4bd6103d2e0e6b49b8ab48d1a81ca85a7426e701f8305b7b67ee49d56a3",
+      "bytes": 1774,
+      "durationSeconds": 0.019615,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/click_002.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.013023:d=0.005",
+        "linearGain": 0.40782681,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "spin.wav",
+      "event": "spin",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/confirmation_004.ogg",
+      "sourceSha256": "568967a3d9f8a8f6af54ea01729c4882284308f2a27d78c07ffd7ee0d6951661",
+      "sha256": "82b5f6a266510a657e23b6d3836fa30190c0dcabe88d663b29ffadd7b3b7a28d",
+      "bytes": 44004,
+      "durationSeconds": 0.498413,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/confirmation_004.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.493408:d=0.005",
+        "linearGain": 0.39436595,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    },
+    {
+      "file": "win.wav",
+      "event": "win",
+      "sourceId": "kenney-interface-sounds",
+      "sourceFile": "Audio/confirmation_002.ogg",
+      "sourceSha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c",
+      "sha256": "743b735ca72603809f9274b44ee3309ac3df99c22b9c49ed8cedcdf88cda5375",
+      "bytes": 48290,
+      "durationSeconds": 0.547007,
+      "codec": "pcm_s16le",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "license": "CC0-1.0",
+      "modifications": {
+        "sourceFile": "Audio/confirmation_002.ogg",
+        "filter": "highpass=f=70,lowpass=f=6500,apad=pad_dur=0.008,afade=t=in:st=0:d=0.001,afade=t=out:st=0.542002:d=0.005",
+        "linearGain": 0.38469219,
+        "peakTargetDbfs": -9,
+        "outputFormat": "PCM signed 16-bit WAV; 44.1 kHz mono"
+      }
+    }
+  ],
+  "audioBytes": 2464938,
+  "runtimeNotes": [
+    "Unlock only in a real user gesture.",
+    "Browser and device listening verification remains necessary; HTMLAudio loop timing is not claimed to be sample-accurate on every device.",
+    "No payment, external audio URL, or third-party runtime audio library is used."
+  ]
+}

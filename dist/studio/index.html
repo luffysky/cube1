@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1015">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="SnowRealmGames 內部商業假設工作台。比較支持者、外觀與廣告的收入假設，明確保留未知成本；尚未收款。">
+  <title>SnowRealmGames｜內部假設試算 · 尚未收款</title>
+  <link rel="icon" href="/assets/realm-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="./studio.css">
+</head>
+<body class="studio-page">
+<a class="skip-link" href="#calculator">跳到假設試算</a>
+<header class="site-header">
+  <a class="brand" href="/" aria-label="SnowRealmGames 首頁"><img src="/assets/realm-mark.svg" width="34" height="34" alt=""><span>SNOWREALM<small>GAMES / 雪域遊戲</small></span></a>
+  <nav class="main-nav" aria-label="工作台導覽"><a href="/">遊戲館</a><a class="active" href="#calculator">假設試算</a><a href="#game-models">遊戲模式</a><a href="#gates">階段驗收</a></nav>
+  <a class="studio-return" href="/">返回入口 <span aria-hidden="true">↗</span></a>
+</header>
+<main class="container studio-main">
+  <section class="studio-hero" aria-labelledby="studioTitle">
+    <div><p class="eyebrow">STUDIO / BUSINESS WORKBENCH</p><h1 id="studioTitle">把收入假設，<br><span>算清楚。</span></h1><p class="studio-intro">免費核心、明碼外觀、可選支持者。<br>先看數字從哪裡來，再決定下一步怎麼做。</p></div>
+    <aside class="studio-status"><span class="internal-badge">內部假設試算／尚未收款</span><p>這裡是規劃工具，不是商店。價格、人數、比例與廣告單價都可調整；目前沒有金流或廣告收入串接。</p><div class="studio-meta"><span>NT$ / 每月</span><span>MODEL 01 · 2026.11</span></div></aside>
+  </section>
+
+  <p class="studio-intro">v0.4 商業方案已更新：SnowRealm Plus、自訂背景、金幣外觀與派對道具。此頁保留舊版網頁情境試算；Steam 不使用廣告模式。<a href="https://github.com/luffysky/cube1/blob/main/docs/BUSINESS_MODEL_zh-CN.md" target="_blank" rel="noopener noreferrer">閱讀新版規劃（簡體） ↗</a></p>
+  <section id="calculator" class="calculator-section" aria-labelledby="calculatorTitle">
+    <div class="studio-section-heading"><div><p class="eyebrow">01 / TEST THE ASSUMPTIONS</p><h2 id="calculatorTitle">同一套模型，三種起點。</h2></div><p>未知費用留白。<br>只有確認是零，才填 0。</p></div>
+    <div class="scenario-toolbar"><div class="scenario-buttons" role="group" aria-label="選擇假設情境"><button type="button" data-scenario="small_hypothetical" aria-pressed="true"><span>01</span>小規模<small>1,000 MAU</small></button><button type="button" data-scenario="medium_hypothetical" aria-pressed="false"><span>02</span>中規模<small>10,000 MAU</small></button><button type="button" data-scenario="larger_hypothetical" aria-pressed="false"><span>03</span>較大規模<small>50,000 MAU</small></button></div><p id="scenarioState">小規模情境 · 全部數字皆為假設</p></div>
+    <div class="calculator-grid">
+      <form class="model-form" data-business-studio novalidate aria-label="每月收入假設">
+        <fieldset><legend><span>A</span>支持者收入</legend><p class="fieldset-note">MAU 以平台去重；同一人玩兩款，仍算一人。</p><div class="field-grid three-fields">
+          <div class="model-field"><label for="mau">月活躍人數 <span>MAU</span></label><div class="input-wrap"><input id="mau" name="mau" type="number" min="0" step="1" value="1000" inputmode="numeric" required aria-describedby="mauError"><span>人</span></div><p class="field-error" id="mauError"></p></div>
+          <div class="model-field"><label for="supporterRate">支持者比例</label><div class="input-wrap"><input id="supporterRate" name="supporterRate" type="number" min="0" max="100" step="0.1" value="1" inputmode="decimal" required aria-describedby="supporterRateError"><span>%</span></div><p class="field-error" id="supporterRateError"></p></div>
+          <div class="model-field"><label for="supporterPrice">支持者月單價</label><div class="input-wrap"><span>NT$</span><input id="supporterPrice" name="supporterPrice" type="number" min="0" step="1" value="100" inputmode="decimal" required aria-describedby="supporterPriceError"></div><p class="field-error" id="supporterPriceError"></p></div>
+        </div><div class="supporter-count"><span>假設付費支持者</span><strong><output id="paidSupportersValue">10</output><small>人</small></strong><span>人數向下取整</span></div></fieldset>
+        <fieldset><legend><span>B</span>外觀商品收入</legend><p class="fieldset-note">訂單不是去重人數；支持者也可能購買外觀。</p><div class="field-grid">
+          <div class="model-field"><label for="cosmeticOrders">外觀付費訂單</label><div class="input-wrap"><input id="cosmeticOrders" name="cosmeticOrders" type="number" min="0" step="1" value="10" inputmode="numeric" required aria-describedby="cosmeticOrdersError"><span>筆 / 月</span></div><p class="field-error" id="cosmeticOrdersError"></p></div>
+          <div class="model-field"><label for="cosmeticPrice">平均每筆實收</label><div class="input-wrap"><span>NT$</span><input id="cosmeticPrice" name="cosmeticPrice" type="number" min="0" step="1" value="150" inputmode="decimal" required aria-describedby="cosmeticPriceError"></div><p class="field-error" id="cosmeticPriceError"></p></div>
+        </div></fieldset>
+        <fieldset><legend><span>C</span>可選廣告收入</legend><p class="fieldset-note">以廣告方認列的付費曝光計算；淨 eCPM 已扣其分成，請勿重複扣費。</p><div class="field-grid">
+          <div class="model-field"><label for="adImpressions">有效付費曝光</label><div class="input-wrap"><input id="adImpressions" name="adImpressions" type="number" min="0" step="1" value="1000" inputmode="numeric" required aria-describedby="adImpressionsError"><span>次 / 月</span></div><p class="field-error" id="adImpressionsError"></p></div>
+          <div class="model-field"><label for="netEcpm">發行者淨 eCPM</label><div class="input-wrap"><span>NT$</span><input id="netEcpm" name="netEcpm" type="number" min="0" step="1" value="60" inputmode="decimal" required aria-describedby="netEcpmError"></div><p class="field-error" id="netEcpmError"></p></div>
+        </div><p class="assumption-note">此處是未來情境。目前未接廣告，實際廣告收入為 0。</p></fieldset>
+        <fieldset class="cost-fieldset"><legend><span>D</span>不能省略的扣款與成本</legend><p class="fieldset-note">預設空白代表未知；填 0 代表你明確假設本月沒有此項支出。</p><div class="field-grid">
+          <div class="model-field"><label for="deductions">商品交易扣款 <span>D</span></label><div class="input-wrap"><span>NT$</span><input id="deductions" name="deductions" type="number" min="0" step="1" inputmode="decimal" placeholder="未知，先留白" aria-describedby="deductionsHint deductionsError"></div><p class="field-help" id="deductionsHint">退款、金流費、通路分潤等，避免重複計算。</p><p class="field-error" id="deductionsError"></p></div>
+          <div class="model-field"><label for="costs">營運成本 <span>C</span></label><div class="input-wrap"><span>NT$</span><input id="costs" name="costs" type="number" min="0" step="1" inputmode="decimal" placeholder="未知，先留白" aria-describedby="costsHint costsError"></div><p class="field-help" id="costsHint">伺服器、內容、人力、客服與推廣。</p><p class="field-error" id="costsError"></p></div>
+        </div></fieldset>
+        <p class="model-errors" id="modelErrors" role="alert" hidden></p>
+        <p class="session-note">不儲存輸入、不送出資料；重新開啟頁面會回到預設情境。</p>
+      </form>
+
+      <aside class="results-panel" aria-labelledby="resultsTitle"><div class="results-top"><div><p class="eyebrow">MONTHLY MODEL</p><h3 id="resultsTitle">這組假設算出什麼？</h3></div><span id="resultState">仍有未知項目</span></div><div class="result-line"><div class="result-label"><span>商品銷售 gross</span><small>會員 + 外觀 · 退款前</small></div><output id="productGrossValue">NT$2,500</output><div class="result-breakdown"><p><span>支持者</span><b id="supporterBreakdown">10 人 × NT$100 = NT$1,000</b></p><p><span>外觀</span><b id="cosmeticBreakdown">10 筆 × NT$150 = NT$1,500</b></p></div></div><div class="result-line"><div class="result-label"><span>廣告淨收入</span><small>假設的發行者收入</small></div><output id="adRevenueValue">NT$60</output><p class="result-formula" id="adBreakdown">1,000 次 ÷ 1,000 × NT$60</p></div><div class="result-line result-subtotal"><div class="result-label"><span>扣交易費前合計</span><small>商品 gross + 廣告淨收入</small></div><output id="beforeDeductionsValue">NT$2,560</output></div><div class="result-line net-result"><div class="result-label"><span>淨營收</span><small>再扣商品交易扣款 D</small></div><output class="is-unknown" id="netRevenueValue">待確認</output><p class="result-formula" id="netRevenueHint">交易扣款 D 未填，淨營收保持未知。</p></div><div class="result-line final-result" aria-live="polite" aria-atomic="true"><div class="result-label"><span>營運結果</span><small>淨營收 − 營運成本 C</small></div><output class="is-unknown" id="operatingResultValue">待確認</output><p class="result-formula" id="operatingResultHint">尚缺交易扣款 D、營運成本 C；空白不當作 0。</p></div><p class="result-disclaimer">這不是實際收入報表。所有情境均非成長預測、非市場標準，也不是已決定的上市價格。</p></aside>
+    </div>
+    <noscript><div class="model-errors">請啟用 JavaScript 進行互動試算。上方顯示固定的小規模假設；D 與 C 未知，因此沒有淨結果。</div></noscript>
+  </section>
+
+  <section id="game-models" class="studio-content-section" aria-labelledby="modelsTitle"><div class="studio-section-heading"><div><p class="eyebrow">02 / VALUE WITHOUT ADVANTAGE</p><h2 id="modelsTitle">三款遊戲，三種支持方式。</h2></div><p>勝負與必要操作維持公平。<br>商品要先能交付，才開始販售。</p></div><div class="studio-table-wrap"><table class="studio-table"><caption>各遊戲候選商業模式，尚未販售</caption><thead><tr><th scope="col">遊戲 / 狀態</th><th scope="col">可以考慮的價值</th><th scope="col">不出售的能力</th></tr></thead><tbody><tr><th scope="row"><span class="game-name">旋界 <small>SPINREALM</small></span><span class="table-status ready">已有可玩原型</span></th><td>棋盤風格、消行音色、結算與個人展示。</td><td>操作速度、鎖定優勢、攻擊強度、額外預覽與 Hold。</td></tr><tr><th scope="row"><span class="game-name">52 HUNT</span><span class="table-status">規劃中</span></th><td>不改變輪廓與辨識難度的服裝、名牌、賽後動畫。</td><td>身分重抽、額外情報、延長 60 秒保護或 Joker 任務捷徑。</td></tr><tr><th scope="row"><span class="game-name">NEXT FLOOR <small>下一層</small></span><span class="table-status">規劃中</span></th><td>永久電梯 Hub 裝潢、收集冊與探索回憶展示。</td><td>必要線索、基本探索能力與合作參與資格。</td></tr></tbody></table></div><div class="principle-cards"><article><span>PLATFORM</span><h3>一個支持者身分。</h3><p>共同徽章與個人頁，單款外觀各有明確適用範圍。不承諾尚未完成的未來內容。</p></article><article><span>PLAYER CHOICE</span><h3>廣告由玩家選。</h3><p>單人模式才評估自願獎勵；多人對局不中插，也不讓同房玩家等一人看廣告。</p></article><article><span>WEB FIRST</span><h3>入口留在瀏覽器。</h3><p>全遊戲採 Web，最多 PWA。手機 3D、背景恢復與離線範圍逐項實機驗收。</p></article></div></section>
+
+  <section id="gates" class="studio-content-section" aria-labelledby="gatesTitle"><div class="studio-section-heading"><div><p class="eyebrow">03 / EVIDENCE BEFORE EXPANSION</p><h2 id="gatesTitle">每一步，都有過關條件。</h2></div></div><div class="gate-list"><article><span>01</span><div><h3>先證明有人想再玩。</h3><p>入口如實標記狀態，驗證旋界手感與朋友再戰；記錄離開原因，不用流量代替留存。</p></div><b>玩法與體驗</b></article><article><span>02</span><div><h3>把商品做完。</h3><p>至少一組可預覽、可使用、沒有競技優勢的外觀；價格與權益內容確認後才準備販售。</p></div><b>可交付內容</b></article><article><span>03</span><div><h3>付款和權益對得上。</h3><p>先在測試環境驗證成功、失敗、重複回呼、恢復與到期。現在尚未串接金流。</p></div><b>交易與恢復</b></article><article><span>04</span><div><h3>依真實數據擴張。</h3><p>對照實收、退款、伺服器與內容成本；再評估廣告、下一個世界及更大規模的 52 人測試。</p></div><b>實際成本與證據</b></article></div></section>
+
+  <section class="studio-sources" aria-labelledby="sourcesTitle"><div><p class="eyebrow">SOURCE NOTES / 2026.11.18</p><h2 id="sourcesTitle">參考模式，不照抄數字。</h2><p>官方資料支持玩法與平台限制；本頁的假設售價、比例及 eCPM 並非引用市場數據。CrazyGames SDK 的一般自有網域環境不會自動提供廣告收益。</p></div><div class="source-links"><a href="https://tetr.io/about/" target="_blank" rel="noopener noreferrer">TETR.IO · 免費競技定位 <span>↗</span></a><a href="https://docs.crazygames.com/requirements/ads/" target="_blank" rel="noopener noreferrer">CrazyGames · 獎勵廣告規範 <span>↗</span></a><a href="https://docs.crazygames.com/sdk/intro/" target="_blank" rel="noopener noreferrer">CrazyGames · SDK 環境限制 <span>↗</span></a><a href="https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/" target="_blank" rel="noopener noreferrer">WebKit · 主畫面 Web App <span>↗</span></a><a href="https://developer.chrome.com/blog/devtools-grounded-real-world" target="_blank" rel="noopener noreferrer">Chrome · 手機實機效能測試 <span>↗</span></a></div></section>
+</main>
+<footer class="site-footer container"><a class="brand footer-brand" href="/"><img src="/assets/realm-mark.svg" width="29" height="29" alt=""><span>SNOWREALM<small>GAMES / 雪域遊戲</small></span></a><p>© 2026 SnowRealmGames<br><span>內部規劃工具 · 尚未收款</span></p><div><a href="/">回到遊戲館 ↗</a><a href="#calculator">回到試算 ↑</a></div></footer>
+<script type="module" src="./model.mjs"></script>
+</body>
+</html>

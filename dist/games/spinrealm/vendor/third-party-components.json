@@ -1,0 +1,208 @@
+{
+  "bundle": "neon-auth.mjs",
+  "bundleSha256": "cabd30427124b8fcfb71950336d9316ad8b0d0057474beae6ba16959a5e7e341",
+  "build": {
+    "entry": "tools/auth-entry.mjs",
+    "bundler": "esbuild",
+    "version": "0.28.2",
+    "format": "esm",
+    "platform": "browser",
+    "minified": true,
+    "byteIdenticalAudit": true
+  },
+  "scope": "Packages with non-zero bytes in the emitted browser bundle, determined from the esbuild metafile; excludes build-only and tree-shaken dependencies.",
+  "components": [
+    {
+      "name": "@better-auth/core",
+      "version": "1.7.25",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/better-auth/better-auth.git",
+        "directory": "packages/core"
+      },
+      "sourceArchive": "https://registry.npmjs.org/@better-auth/core/-/core-1.7.25.tgz",
+      "sourceIntegrity": "sha512-L20SJSCpgKQIiZHZZBP28gvvqwkQ+IJxFwtNEeC4PSWBG1/yu5VckGGAoiieUBOcR/OZNHXW+lPFWcgQHK4ZYQ==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE.md",
+          "sha256": "7a07f7d9085cb3157e4377d944988c9712933141b0f7201955ceccfac92abde4"
+        }
+      ]
+    },
+    {
+      "name": "@better-auth/oauth-provider",
+      "version": "1.7.25",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/better-auth/better-auth.git",
+        "directory": "packages/oauth-provider"
+      },
+      "sourceArchive": "https://registry.npmjs.org/@better-auth/oauth-provider/-/oauth-provider-1.7.25.tgz",
+      "sourceIntegrity": "sha512-P0KkIkcXBcoMYZTJzKdzmOo2c+AN1ZjIA5C0x/F5E8TBQR4q5STMlfvp1YwfYx8R8e6H9ve7CCOjYwoJX0urVQ==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE.md",
+          "sha256": "7a07f7d9085cb3157e4377d944988c9712933141b0f7201955ceccfac92abde4"
+        }
+      ]
+    },
+    {
+      "name": "@better-fetch/fetch",
+      "version": "1.3.3",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/better-auth/better-fetch.git",
+        "directory": "packages/better-fetch"
+      },
+      "sourceArchive": "https://registry.npmjs.org/@better-fetch/fetch/-/fetch-1.3.3.tgz",
+      "sourceIntegrity": "sha512-U6SlDt/GUWtK2JAxS/NhdoYTEim+EL1G5byz2TUj83KjLZBUpYzb5SmX0aXaCnbGkAjFKnV/o/0+cyXMbEcqqg==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE",
+          "sha256": "54d710e643b5fd218f0c29cddea92432b2c730dddd594c7047c97993dd9f9a59"
+        }
+      ]
+    },
+    {
+      "name": "@neon/auth",
+      "version": "0.8.2",
+      "license": "Apache-2.0",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/neondatabase/neon-pkgs.git",
+        "directory": "packages/auth"
+      },
+      "sourceArchive": "https://registry.npmjs.org/@neon/auth/-/auth-0.8.2.tgz",
+      "sourceIntegrity": "sha512-k9Asov5TQMoyu6N3IkAO4wTCf2jRfFU86N9coee7XbkCmMmFu7KtkxrolUe8Ywsx+JUgEow8PTerbI5Z0tntRQ==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        }
+      ]
+    },
+    {
+      "name": "@supabase/auth-js",
+      "version": "2.79.0",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/supabase/supabase-js.git",
+        "directory": "packages/core/auth-js"
+      },
+      "sourceArchive": "https://registry.npmjs.org/@supabase/auth-js/-/auth-js-2.79.0.tgz",
+      "sourceIntegrity": "sha512-p2GKvdbF9d/6C+dtS6iNcSicPr6eUfkvovD60HWlWsD+oOjC483DzFWrzGjNpBwnswhfMRP8Qn3rYA0VWaOfjw==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE",
+          "sha256": "334dd6820e2eaeab2064e7c59001b810566728a28a41a7c1dbf69bbee17d0936"
+        }
+      ]
+    },
+    {
+      "name": "better-auth",
+      "version": "1.7.25",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/better-auth/better-auth.git",
+        "directory": "packages/better-auth"
+      },
+      "sourceArchive": "https://registry.npmjs.org/better-auth/-/better-auth-1.7.25.tgz",
+      "sourceIntegrity": "sha512-OglRnzasyXpZHMceZBW76tQRbS6lSJhqkxm0l/7db1qJ415ecD1YkKHgOUCvmPbVDLJiB4/fumD2vw2hf+1VCQ==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE.md",
+          "sha256": "7a07f7d9085cb3157e4377d944988c9712933141b0f7201955ceccfac92abde4"
+        }
+      ]
+    },
+    {
+      "name": "better-call",
+      "version": "1.4.6",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/better-auth/better-call.git",
+        "directory": "packages/better-call"
+      },
+      "sourceArchive": "https://registry.npmjs.org/better-call/-/better-call-1.4.6.tgz",
+      "sourceIntegrity": "sha512-tJ3lkMFeQProwiuZiQApwgVmYmBfXM4sAP7HxMsnAFtl4NWZhamG+RGoMNgHwGYkmcB+3eWyo3vgt4sWUUSdQA==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE",
+          "sha256": "ad800a5024c64adeb3eafa2b2b01893027a68631ff367a993020d1ec36e11266"
+        }
+      ]
+    },
+    {
+      "name": "defu",
+      "version": "6.1.7",
+      "license": "MIT",
+      "repository": "unjs/defu",
+      "sourceArchive": "https://registry.npmjs.org/defu/-/defu-6.1.7.tgz",
+      "sourceIntegrity": "sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE",
+          "sha256": "46231df5a7733c3f52f11b71f3df61813007745b62b09031acfb45fb42d75082"
+        }
+      ]
+    },
+    {
+      "name": "nanostores",
+      "version": "1.5.5",
+      "license": "MIT",
+      "repository": "nanostores/nanostores",
+      "sourceArchive": "https://registry.npmjs.org/nanostores/-/nanostores-1.5.5.tgz",
+      "sourceIntegrity": "sha512-FixtE239Gl6Gz0ZGCK0WzvNwObNCIwVT+L7zQcf1QgcA6AzBxblzqe9OT88qiucNkhsjSOqiogSaF5jVbJiqSA==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE",
+          "sha256": "181bc2685f0cea9d1beb28352420e3a7fb382b38895d2b430ed1b3bc39572af6"
+        }
+      ]
+    },
+    {
+      "name": "tslib",
+      "version": "2.8.1",
+      "license": "0BSD",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/Microsoft/tslib.git"
+      },
+      "sourceArchive": "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz",
+      "sourceIntegrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==",
+      "licenseFiles": [
+        {
+          "path": "CopyrightNotice.txt",
+          "sha256": "da16ddb65f8ca390998fb99223d0112498b56b45784d00afd77ff8ce1ac4de8b"
+        },
+        {
+          "path": "LICENSE.txt",
+          "sha256": "210b19e543130388c68654b7497e967119ce17145f66ab7d85688fbd70f08751"
+        }
+      ]
+    },
+    {
+      "name": "zod",
+      "version": "4.6.7",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/colinhacks/zod.git"
+      },
+      "sourceArchive": "https://registry.npmjs.org/zod/-/zod-4.6.7.tgz",
+      "sourceIntegrity": "sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==",
+      "licenseFiles": [
+        {
+          "path": "LICENSE",
+          "sha256": "3f1189b28e3866e0d979968d466b78f813f76827cfdca1fbb124cc0a5c8841f8"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+name: Desktop release candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['desktop/**', 'dist/**', '.github/workflows/desktop-build.yml']
+  pull_request:
+    paths: ['desktop/**', 'dist/**', '.github/workflows/desktop-build.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows x64 preview
+    runs-on: windows-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: desktop
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7, verified 2026-11-18
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Test asset-server security boundaries
+        run: npm test
+      - name: Build Windows zip and NSIS
+        run: npm run build:win
+      - name: Verify bundled public game resources
+        shell: pwsh
+        run: |
+          $entry = 'release/win-unpacked/resources/web/games/spinrealm/index.html'
+          if (-not (Test-Path $entry)) { throw 'Bundled practice entry is missing' }
+          $files = Get-ChildItem release -File | Where-Object { $_.Extension -in '.zip', '.exe' }
+          if ($files.Count -lt 2) { throw 'Expected both the zip and NSIS artifacts' }
+          $files | ForEach-Object { Get-FileHash $_.FullName -Algorithm SHA256 } | Format-Table -AutoSize | Out-String | Set-Content release/SHA256SUMS.txt
+      - name: Upload installable preview and build manifest
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: spinrealm-windows-x64-${{ github.sha }}
+          path: |
+            desktop/release/*.zip
+            desktop/release/*.exe
+            desktop/release/SHA256SUMS.txt
+            desktop/build-info.json
+            desktop/README.zh-CN.md
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  linux:
+    name: Linux x64 AppImage preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: desktop
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: npm run build:linux
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: spinrealm-linux-x64-${{ github.sha }}
+          path: |
+            desktop/release/*.AppImage
+            desktop/build-info.json
+            desktop/README.zh-CN.md
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

@@ -1,0 +1,71 @@
+{
+  "name": "snowrealm-spinrealm-desktop",
+  "version": "0.4.0-preview.1",
+  "private": true,
+  "description": "SnowRealm Games Spinrealm desktop release candidate shell",
+  "author": "SnowRealm Games",
+  "license": "UNLICENSED",
+  "main": "main.cjs",
+  "desktopName": "games.snowrealm.spinrealm.desktop",
+  "engines": { "node": ">=24.0.0 <25" },
+  "scripts": {
+    "start": "npm run verify:assets && electron .",
+    "test": "node --test test/server.test.cjs test/policy.test.cjs",
+    "verify:assets": "node scripts/verify-assets.cjs",
+    "build:dir": "npm run verify:assets && electron-builder --dir --publish never",
+    "build:win": "npm run verify:assets && electron-builder --win zip nsis --x64 --publish never",
+    "build:linux": "npm run verify:assets && electron-builder --linux AppImage --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.3.4",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "games.snowrealm.spinrealm",
+    "productName": "Spinrealm",
+    "executableName": "spinrealm",
+    "artifactName": "Spinrealm-${version}-${os}-${arch}.${ext}",
+    "asar": true,
+    "npmRebuild": false,
+    "allowMissingDependencies": false,
+    "directories": { "output": "release" },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "lib/**/*",
+      "renderer/**/*",
+      "desktop.config.json",
+      "build-info.json",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist",
+        "to": "web",
+        "filter": ["**/*", "!**/.*", "!**/*.map"]
+      }
+    ],
+    "win": {
+      "icon": "../dist/assets/icon-512.png",
+      "target": [{ "target": "zip", "arch": ["x64"] }, { "target": "nsis", "arch": ["x64"] }],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": false,
+      "shortcutName": "Spinrealm"
+    },
+    "linux": {
+      "icon": "../dist/assets/icon-512.png",
+      "syncDesktopName": true,
+      "target": [{ "target": "AppImage", "arch": ["x64"] }],
+      "category": "Game",
+      "synopsis": "Spinrealm falling-block practice by SnowRealm Games"
+    },
+    "publish": null
+  }
+}

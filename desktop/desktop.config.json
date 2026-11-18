@@ -1,0 +1,13 @@
+{
+  "authOrigin": "https://ep-crimson-truth-b3j5tyvk.neonauth.c-4.ap-southeast-1.aws.neon.tech",
+  "apiBaseUrl": "https://br-winter-thunder-b3ozovl2-cube1api.compute.c-4.ap-southeast-1.aws.neon.tech",
+  "steamAppId": null,
+  "features": {
+    "onlineApi": true,
+    "steamSdk": false,
+    "steamCloud": false,
+    "steamAchievements": false,
+    "steamFriends": false,
+    "steamWallet": false
+  }
+}
