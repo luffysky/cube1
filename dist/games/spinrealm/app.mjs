@@ -17,9 +17,12 @@ const $ = id => document.getElementById(id);
 const DEFAULT_KEYS = {left:'ArrowLeft',right:'ArrowRight',soft:'ArrowDown',hard:'Space',cw:'KeyX',ccw:'KeyZ',hold:'KeyC',pause:'KeyP'};
 const KEY_LAYOUTS = {classic:{...DEFAULT_KEYS},wasd:{left:'KeyA',right:'KeyD',soft:'KeyS',hard:'Space',cw:'KeyW',ccw:'KeyQ',hold:'KeyE',pause:'KeyP'}};
 const ACTION_LABELS = {left:'向左',right:'向右',soft:'軟降',hard:'硬降',cw:'順時針',ccw:'逆時針',hold:'暫存交換',pause:'暫停'};
-const DEFAULTS = {das:130,arr:25,soft:25,lock:500,sound:false,musicVolume:28,sfxVolume:60,boardSize:'large',reduce:false,keys:{...DEFAULT_KEYS}};
+const DEFAULTS = {das:210,arr:35,soft:25,lock:500,sound:false,musicVolume:28,sfxVolume:60,boardSize:'large',reduce:false,keys:{...DEFAULT_KEYS}};
 const PRESETS = {steady:{das:150,arr:35,soft:35,lock:550},crisp:{das:110,arr:16,soft:20,lock:450},fast:{das:80,arr:0,soft:0,lock:350}};
 const SIDEBAR_STORAGE_KEY = 'spinrealm.ui.sidebar.v1';
+const OPPONENT_VIEW_KEY = 'spinrealm.ui.opponentView.v1';
+let opponentView = 'board';
+try { opponentView = localStorage.getItem(OPPONENT_VIEW_KEY) === 'stats' ? 'stats' : 'board'; } catch {}
 let sidebarExpanded = false;
 try { sidebarExpanded = localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'expanded'; } catch {}
 let settings = structuredClone(DEFAULTS);
@@ -73,6 +76,15 @@ function keyLabels(action){
 function keyboardLayout(){return Object.keys(KEY_LAYOUTS).find(name=>Object.entries(KEY_LAYOUTS[name]).every(([action,code])=>settings.keys[action]===code))||'custom';}
 function inform(message){$('globalToast').textContent=translate(message);$('globalToast').classList.add('show');toastUntil=performance.now()+2600;}
 function clearInputs(){repeater.clear();heldCodes.clear();document.querySelectorAll('[data-action].pressed').forEach(b=>b.classList.remove('pressed'));}
+function setOpponentView(view){
+  if(!['board','stats'].includes(view))return;
+  opponentView=view;
+  try{localStorage.setItem(OPPONENT_VIEW_KEY,view);}catch{}
+  $('opponentBoardPanel').hidden=view!=='board';
+  $('opponentStatsPanel').hidden=view!=='stats';
+  document.querySelectorAll('[data-opponent-view]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.opponentView===view)));
+  draw();
+}
 
 function syncAudio(){
   const next=document.hidden?'paused':audioPreview?'playing':performance.now()<audioSfxPreviewUntil?'ended':phase==='running'?'playing':phase==='paused'?'paused':'ended';
@@ -309,7 +321,7 @@ async function useTicket(id){
 document.querySelectorAll('[data-ticket]').forEach(button=>button.addEventListener('click',()=>void useTicket(button.dataset.ticket)));
 const gamepad=createGamepadController({
   enabled:()=>!document.querySelector('dialog[open]')&&['running','paused'].includes(phase),
-  press:action=>repeater.press(action),
+  press:action=>repeater.press(action,{minDas:220}),
   release:action=>{if(![...heldCodes.values()].includes(action))repeater.release(action);},
   pause:togglePause,onConnect:()=>inform(t('controller.connected'))
 });
@@ -401,7 +413,6 @@ function undo(){
 
 function step(dt){
   if(phase!=='running')return;
-  repeater.step(dt);
   if(phase!=='running')return;
   if(mode!=='drill'&&!holdGuide)player.step(dt);
   if(mode==='ranked'){player.drainEvents();return;}
@@ -442,7 +453,7 @@ function drawPieces(canvas,types,dim=false){
   const ctx=ctxFor(canvas),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);const slot=types.length>1?h/5:h;
   types.forEach((type,i)=>{if(!type)return;const shape=SHAPES[type][0],size=Math.min(w/4.8,slot/3.1),minX=Math.min(...shape.map(c=>c[0])),maxX=Math.max(...shape.map(c=>c[0])),minY=Math.min(...shape.map(c=>c[1])),maxY=Math.max(...shape.map(c=>c[1]));const ox=(w-(maxX-minX+1)*size)/2,oy=i*slot+(slot-(maxY-minY+1)*size)/2;ctx.globalAlpha=dim?.35:1;for(const[x,y]of shape)block(ctx,ox+(x-minX)*size,oy+(y-minY)*size,size,COLORS[type]);ctx.globalAlpha=1;});
 }
-function draw(){if(!player)return;drawBoard($('playerCanvas'),player,true);drawPieces($('holdCanvas'),[player.held],!player.canHold);drawPieces($('nextCanvas'),player.queue.slice(0,5));}
+function draw(){if(!player)return;drawBoard($('playerCanvas'),player,true);if(isVersus()&&cpu&&opponentView==='board')drawBoard($('cpuCanvas'),cpu,false);drawPieces($('holdCanvas'),[player.held],!player.canHold);drawPieces($('nextCanvas'),player.queue.slice(0,5));}
 
 function updateUI(){
   if(!player)return;
@@ -550,6 +561,7 @@ $('testSfx').addEventListener('click',async()=>{
   }
 });
 document.querySelectorAll('[data-item]').forEach(button=>button.addEventListener('click',event=>{usePlayerItem(button.dataset.item);if(event.detail>0&&phase==='running')$('playerCanvas').focus({preventScroll:true});}));
+document.querySelectorAll('[data-opponent-view]').forEach(button=>button.addEventListener('click',()=>setOpponentView(button.dataset.opponentView)));
 $('boardSizeBtn').addEventListener('click',event=>{settings.boardSize=settings.boardSize==='large'?'standard':'large';updateViewControls();storeSettings();scheduleBoardFit();if(event.detail>0&&phase==='running')$('playerCanvas').focus({preventScroll:true});});
 $('fullscreenBtn').addEventListener('click',async()=>{
   clearInputs();
@@ -587,7 +599,7 @@ document.addEventListener('keydown',e=>{
   if(action==='pause'){e.preventDefault();if(!e.repeat)togglePause();return;}
   if(e.code==='Escape'){if(phase==='running'){e.preventDefault();pause();}return;}
   if(!action||phase!=='running')return;
-  e.preventDefault();if(e.repeat||heldCodes.has(e.code))return;heldCodes.set(e.code,action);repeater.press(action);
+  e.preventDefault();if(e.repeat||heldCodes.has(e.code))return;heldCodes.set(e.code,action);repeater.press(action,{minDas:190});
 });
 document.addEventListener('keyup',e=>{const action=heldCodes.get(e.code);if(action){heldCodes.delete(e.code);if(![...heldCodes.values()].includes(action))repeater.release(action);}});
 window.addEventListener('blur',()=>{clearInputs();if(phase==='running')pause();if(audioPreview)resetAudioPreview();});
@@ -595,7 +607,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){clearInput
 document.querySelectorAll('[data-action]').forEach(button=>{
   const action=button.dataset.action;
   const repeating=['left','right','soft'].includes(action);
-  button.addEventListener('pointerdown',e=>{if(button.disabled||phase!=='running')return;e.preventDefault();initAudio();button.setPointerCapture(e.pointerId);button.classList.add('pressed');if(repeating)repeater.press(action);else perform(action);});
+  button.addEventListener('pointerdown',e=>{if(button.disabled||phase!=='running')return;e.preventDefault();initAudio();button.setPointerCapture(e.pointerId);button.classList.add('pressed');if(repeating)repeater.press(action,{minDas:260});else perform(action);});
   const up=()=>{button.classList.remove('pressed');if(repeating)repeater.release(action);};
   button.addEventListener('pointerup',up);button.addEventListener('pointercancel',up);button.addEventListener('lostpointercapture',up);
   button.addEventListener('click',e=>{if(e.detail===0&&!button.disabled&&phase==='running'){initAudio();perform(action);updateUI();draw();}});
@@ -655,6 +667,8 @@ function frame(now){
   gamepad.poll();
   const rawDelta=lastFrame?Math.max(0,now-lastFrame):0;lastFrame=now;
   if(phase==='running'){
+    // Input repeats once per visible frame; do not replay a burst of held moves after a lag spike.
+    repeater.step(Math.min(rawDelta,32),{maxHorizontalRepeats:1});
     elapsed+=rawDelta;
     if(mode!=='ranked'&&isVersus()&&elapsed>=120000)end(sent===cpuSent?'tie':sent>cpuSent?'win':'loss');
     else{accumulator+=Math.min(100,rawDelta);while(accumulator>=FIXED_DT){step(FIXED_DT);accumulator-=FIXED_DT;if(phase!=='running'){accumulator=0;break;}}}
@@ -666,4 +680,4 @@ document.querySelector('.arena-card').append(document.querySelector('.touch-cont
 initLocalization();applyAppearance();
 memberUI=initMemberUI({beforeOpen:()=>{if(phase==='running')pause();clearInputs();},afterClose:()=>{clearInputs();scheduleBoardFit();},onRanked:()=>selectMode('ranked')});
 subscribeLocale(()=>{updateSettings();scheduleBoardFit();});
-responsiveControls();applyMode(new URLSearchParams(location.search).get('mode')==='ranked'?'ranked':'duel');updateSettings();requestAnimationFrame(frame);
+responsiveControls();applyMode(new URLSearchParams(location.search).get('mode')==='ranked'?'ranked':'duel');setOpponentView(opponentView);updateSettings();requestAnimationFrame(frame);
