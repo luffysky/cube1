@@ -57,7 +57,57 @@
 
   <section class="continue-section container" id="continueSection" hidden aria-labelledby="continueTitle"><div><p class="eyebrow">WELCOME BACK</p><h2 id="continueTitle">再轉一局？</h2><p>你的操作設定，留在這個瀏覽器。</p></div><a class="button primary" href="/games/spinrealm/" data-play="spinrealm">回到旋界 <span>↗</span></a></section>
 
-  <section class="journal-section container" id="journal" aria-labelledby="journalTitle"><div class="journal-intro"><p class="eyebrow">DEVELOPER'S LOG / 開發日誌</p><h2 id="journalTitle">慢慢做，<br>認真玩。</h2><p>每次更新，都讓下一局更值得期待。</p><span class="journal-build">BUILD 0.4 / 2026.11</span></div><div class="journal-list"><article><span class="log-marker current"></span><div class="log-top"><span>已加入試玩</span><time datetime="2026-11-18">2026.11.18</time></div><h3>你的帳號，你的風格，你的排位。</h3><p>新增 SnowRealm 會員、金幣帳本、外觀商城、好友與真人排位測試。六種主題、五種方塊樣式，繁體、簡體、英、日、韓五種語言，讓每一局更像你的世界。</p><a href="/games/spinrealm/" data-play="spinrealm">試玩新版旋界 <span>↗</span></a></article><article><span class="log-marker"></span><div class="log-top"><span>本次更新</span><time datetime="2026-11-18">2026.11.18</time></div><h3>一個入口，放得下更多世界。</h3><p>SnowRealmGames 遊戲館登場。瀏覽遊戲、留下收藏，也能在支援的瀏覽器加入主畫面。</p><a href="#games">看看遊戲館 <span>↑</span></a></article><article class="next-log"><span class="log-marker"></span><div class="log-top"><span>下一站 / 規劃中</span><span>尚未開放</span></div><h3>把「再一局」傳給朋友。</h3><p>真人隨機排位已進入連線測試；朋友房、多人混戰與組隊將在確認對局品質後擴展。CPU 模式仍可離線練習。</p></article></div></section>
+  <section class="journal-section container" id="journal" aria-labelledby="journalTitle">
+    <div class="journal-intro">
+      <p class="eyebrow">DEVELOPER'S LOG / 開發日誌</p>
+      <h2 id="journalTitle">每一局的進步，<br>都有跡可循。</h2>
+      <p>這裡不只記錄新增了什麼，也記錄我們正在修正什麼。好玩的遊戲，值得把進度說清楚。</p>
+      <span class="journal-build">SPINREALM v0.4 · PLAYTEST / 2026.11</span>
+    </div>
+    <div class="journal-list">
+      <article>
+        <span class="log-marker current"></span>
+        <div class="log-top"><span>2026.11.19 · 已更新 / 操作與資訊</span><time datetime="2026-11-19">11.19</time></div>
+        <h3>只看自己的棋盤，把注意力留給下一手。</h3>
+        <p>《旋界》對戰介面移除對手的即時小棋盤，改用對手狀態、送出攻擊、已抵消行數與來襲壓力呈現戰況。你不用邊下方塊邊盯著另一座棋盤，也能感受到每一次反擊。平板與觸控按鈕同步調整，讓移動、旋轉、軟降與硬降更容易按到。</p>
+        <p>這是現行遊戲畫面的調整；更完整的霓光競技場視覺、直式與橫式版面仍在設計與實作規劃中。</p>
+        <a href="/games/spinrealm/" data-play="spinrealm">進入旋界試玩 <span>↗</span></a>
+      </article>
+      <article>
+        <span class="log-marker"></span>
+        <div class="log-top"><span>2026.11.19 · 修復中 / 會員系統</span><time datetime="2026-11-19">11.19</time></div>
+        <h3>登入成功，不代表旅程就能順利開始。</h3>
+        <p>我們收到新會員註冊後無法載入遊戲資料的回報。已補上正式網站的登入可信來源、改善錯誤提示，並調整 Neon Auth Session 與遊戲 API 之間的 JWT 取得流程。登入服務已能回傳會員身分，但首次遊戲資料建立、好友代碼與金幣仍待實際驗收。</p>
+        <p>在驗收完成前，會員與真人排位都視為測試功能；遇到問題不必重複註冊，我們會持續追查。</p>
+      </article>
+      <article>
+        <span class="log-marker"></span>
+        <div class="log-top"><span>2026.11.19 · 測試建置 / 電腦版</span><time datetime="2026-11-19">11.19</time></div>
+        <h3>從瀏覽器走向桌面，還差一段真正的實測。</h3>
+        <p>《旋界》已建立 Windows 與 Linux 的桌面候選版打包流程，保留離線練習、視窗與全螢幕操作。這還不是 Steam 正式版本：安裝、操作手感、連線穩定性，以及 Steam 平台整合都需要繼續驗證。我們會先把遊戲做好，再談正式發售。</p>
+      </article>
+      <article>
+        <span class="log-marker"></span>
+        <div class="log-top"><span>2026.11.18 · 開發里程碑</span><time datetime="2026-11-18">11.18</time></div>
+        <h3>從一場練習，長成一座競技場。</h3>
+        <p>《旋界》v0.4 加入會員、金幣帳本、好友、外觀收藏與真人排位 Beta 的基礎；操作支援 SRS 旋轉、T-Spin、Hold、手把及自訂鍵位，介面提供繁體中文、簡體中文、英文、日文與韓文。真人排位已具備配對與伺服器判定架構，但仍需兩位玩家跨網路完整對局與斷線測試。</p>
+        <a href="/games/spinrealm/" data-play="spinrealm">了解旋界目前版本 <span>↗</span></a>
+      </article>
+      <article>
+        <span class="log-marker"></span>
+        <div class="log-top"><span>2026.11.18 · 遊戲館上線</span><time datetime="2026-11-18">11.18</time></div>
+        <h3>一個入口，慢慢打開更多世界。</h3>
+        <p>SnowRealm Games 遊戲館登場，收錄《旋界》與《轉磚對戰》的試玩入口，以及《52 HUNT》《NEXT FLOOR 下一層》的開發概念。遊戲館提供收藏、最近遊玩與支援裝置的 PWA 安裝功能；不同遊戲目前仍各自維護資料與進度。</p>
+        <a href="#games">探索遊戲館 <span>↑</span></a>
+      </article>
+      <article class="next-log">
+        <span class="log-marker"></span>
+        <div class="log-top"><span>下一站 / 規劃中</span><span>尚未開放</span></div>
+        <h3>讓對戰更專注，也讓精彩能被看見。</h3>
+        <p>接下來將評估觀戰與賽後回放：對戰中的玩家只看自己的棋盤，觀眾與回放則可在適當權限下觀看雙方戰局。朋友房、跨遊戲 SnowRealm 統一登入，以及歷史回放儲存，也將分階段設計。這些不是目前已上線的功能。</p>
+      </article>
+    </div>
+  </section>
 
   <section class="about-section" id="about" aria-labelledby="aboutTitle"><div class="container"><div class="about-heading"><img src="/assets/realm-mark.svg" width="52" height="52" alt=""><p class="eyebrow">THE SNOWREALM WAY</p><h2 id="aboutTitle">遊戲可以小，<br>想像不能。</h2><p>SnowRealmGames 是一座持續長大的獨立遊戲基地。<br>把喜歡的手感，和還沒見過的世界，一個個做出來。</p></div><div class="principles"><article><span>01</span><h3>瀏覽器，就是入口。</h3><p>以網頁遊戲為主。電腦與行動裝置逐步調校；PWA 提供更方便的回訪方式。</p></article><article><span>02</span><h3>勝負，交給你的操作。</h3><p>未來外觀與支持方案不改變競技能力。必要操作、暫存交換與公平規則維持一致。</p></article><article><span>03</span><h3>先做值得再玩的遊戲。</h3><p>每個世界都從可驗證的小版本開始。新模式跟著實際試玩進步，不用承諾填滿遊戲館。</p></article></div></div></section>
 </main>
