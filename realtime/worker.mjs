@@ -93,7 +93,7 @@ export class SpinrealmRoom {
       this.players.set(p.id,p);if(!this.host)this.host=p.id;
     }
     p.ws=ws;this.clients.set(ws,p.id);
-    send(ws,{type:'welcome',you:p.id,reconnect:p.key,host:p.id===this.host});
+    send(ws,{type:'welcome',you:p.id,reconnect:p.key,host:p.id===this.host,lastSeq:p.seq});
     this.lobby();
     if(this.phase==='playing'||this.phase==='ended')this.snapshot();
   }
