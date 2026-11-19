@@ -1,0 +1,339 @@
+/* SPINREALM ARENA V2
+ * Design reference: SnowRealm competitive neon blue/violet/gold concept.
+ * Preserve user-owned appearance themes, visual contrast, and gameplay dimensions.
+ * The in-match hierarchy is always: own board -> controls -> rival -> auxiliary info.
+ */
+:root{
+  --srg-night:#070d23;--srg-panel:#0d1933;--srg-panel-high:#122143;
+  --srg-line:#244b81;--srg-electric:#00d9ff;--srg-royal:#8f4bff;
+  --srg-gold:#ffcc68;--srg-ink:#eaf8ff;--srg-subtle:#a5c1df;
+}
+body[data-srg-page="spinrealm"]{
+  background:radial-gradient(ellipse at 50% -14%,#49218772,transparent 48%),
+    radial-gradient(ellipse at 0% 36%,#014c8d4a,transparent 43%),
+    linear-gradient(160deg,#080d22,#070b1d 65%,#090d20);
+  color:var(--text);
+}
+body[data-srg-page="spinrealm"] .ambient{
+  z-index:-1;
+  background:linear-gradient(130deg,transparent 0 48%,#1474af0e 49% 50%,transparent 51% 100%),
+    repeating-linear-gradient(90deg,transparent 0 80px,#589de108 81px 82px),
+    radial-gradient(ellipse at 50% 15%,#57239c32,transparent 62%);
+}
+body[data-srg-page="spinrealm"] .topbar{
+  max-width:1500px;min-height:72px;height:auto;
+  border-bottom:1px solid #3294de55;
+  background:linear-gradient(180deg,#0c1732ed,#0a1228b0);
+  box-shadow:0 10px 35px #060b226c;padding-block:10px;
+}
+body[data-srg-page="spinrealm"] .brand{font-style:italic;letter-spacing:.7px;text-shadow:0 0 20px #31baf94b}
+body[data-srg-page="spinrealm"] .brand-light{color:var(--srg-electric);font-weight:700}
+body[data-srg-page="spinrealm"] .brand-icon i{background:linear-gradient(135deg,var(--srg-electric),var(--srg-royal));box-shadow:0 0 9px #39dfff88}
+body[data-srg-page="spinrealm"] .mode-tabs{
+  gap:4px;background:#050e24b8;border:1px solid #20578a77;
+  border-radius:12px;padding:5px;box-shadow:inset 0 0 14px #4d32ba18;
+}
+body[data-srg-page="spinrealm"] .mode-tab{
+  font-size:11px;font-weight:700;color:#b8cbed;border-radius:8px;letter-spacing:.1px;
+}
+body[data-srg-page="spinrealm"] .mode-tab:hover{color:#fff;background:#1b3f75a8}
+body[data-srg-page="spinrealm"] .mode-tab.active{
+  background:linear-gradient(135deg,#194b89,#352070);
+  border:1px solid #55c8fe77;color:#ebfaff;
+  box-shadow:0 0 15px #24b3ff35,inset 0 0 14px #4d9df429;
+}
+body[data-srg-page="spinrealm"] .mode-tabs .room-link{color:#e4c6ff}
+body[data-srg-page="spinrealm"] .header-actions .icon-button{
+  border-color:#38628d;color:#def7ff;background:#111d3b;
+  box-shadow:inset 0 0 12px #148fe514;
+}
+body[data-srg-page="spinrealm"] main{max-width:1400px;padding-top:18px}
+body[data-srg-page="spinrealm"] .page-heading{margin:0 0 13px}
+body[data-srg-page="spinrealm"] .page-heading h1{font-size:clamp(16px,2vw,24px);letter-spacing:1px;font-weight:800}
+body[data-srg-page="spinrealm"] .page-heading h1>span{color:var(--srg-gold)}
+body[data-srg-page="spinrealm"] .page-heading .eyebrow{color:#91ccef}
+body[data-srg-page="spinrealm"] .build-tag span{color:var(--srg-gold)}
+body[data-srg-page="spinrealm"] .build-tag small{color:var(--srg-subtle)}
+body[data-srg-page="spinrealm"] .workspace,
+body[data-srg-page="spinrealm"] .workspace.left-collapsed{
+  grid-template-columns:minmax(190px,255px) minmax(0,1fr);
+  gap:16px;align-items:start;
+}
+body[data-srg-page="spinrealm"] .opponent-rail{gap:12px}
+body[data-srg-page="spinrealm"] .opponent-card,
+body[data-srg-page="spinrealm"] .pressure-card,
+body[data-srg-page="spinrealm"] .arena-card,
+body[data-srg-page="spinrealm"] .party-panel{
+  border:1px solid #2d5d99;
+  border-radius:13px;
+  background:linear-gradient(155deg,#122244ed,#0b1530f5);
+  box-shadow:0 0 0 1px #172c52,0 16px 32px #05091a80,inset 0 1px 0 #8ed6ff1c;
+}
+body[data-srg-page="spinrealm"] .opponent-card{padding:14px;gap:11px}
+body[data-srg-page="spinrealm"] .opponent-card .mini-label{color:#8dc9ee}
+body[data-srg-page="spinrealm"] .opponent-header h3{color:#f5f9ff}
+body[data-srg-page="spinrealm"] .opponent-view-toggle button{
+  border-color:#37558e;color:#adc5ed;background:#101b38;font-weight:650;
+}
+body[data-srg-page="spinrealm"] .opponent-view-toggle button[aria-pressed="true"]{
+  color:#fff;border-color:#40ceff;
+  background:linear-gradient(120deg,#095e8d,#3c2d84);
+  box-shadow:0 0 14px #18baff34;
+}
+body[data-srg-page="spinrealm"] .opponent-board-panel canvas{
+  width:min(100%,158px);max-height:316px;border:1px solid #50d5fb;
+  box-shadow:0 0 14px #10b9ec5b,inset 0 0 14px #123e87;
+}
+body[data-srg-page="spinrealm"] .opponent-signal{
+  background:#0e2040;border:1px solid #246790;
+}
+body[data-srg-page="spinrealm"] .opponent-stats>span,
+body[data-srg-page="spinrealm"] .battle-summary>div{
+  background:#0c1c3a;border-color:#315b8b;
+}
+body[data-srg-page="spinrealm"] .opponent-stats b,
+body[data-srg-page="spinrealm"] .battle-summary strong{color:var(--srg-electric)}
+body[data-srg-page="spinrealm"] .pressure-card{padding:13px}
+body[data-srg-page="spinrealm"] .pressure-number{color:var(--srg-gold)}
+body[data-srg-page="spinrealm"] .pressure-track{background:#071024;border:1px solid #234f7f}
+body[data-srg-page="spinrealm"] .pressure-track #pressureFill{
+  background:linear-gradient(90deg,#24d6ff,#8b4aff,#f876b5);
+  box-shadow:0 0 12px #4ecbff8c;
+}
+body[data-srg-page="spinrealm"] .arena-card{min-width:0;overflow:hidden}
+body[data-srg-page="spinrealm"] .arena-header{
+  background:linear-gradient(90deg,#0e2147,#1b1d53 65%,#0e2147);
+  border-bottom:1px solid #3976b6;padding-block:10px;
+}
+body[data-srg-page="spinrealm"] .player-id,
+body[data-srg-page="spinrealm"] .arena-header strong{color:#eaf8ff}
+body[data-srg-page="spinrealm"] .match-clock strong{
+  font-weight:900;color:#fff;text-shadow:0 0 12px #61c4ff8a;letter-spacing:1px;
+}
+body[data-srg-page="spinrealm"] .view-button,
+body[data-srg-page="spinrealm"] .sidebar-toggle,
+body[data-srg-page="spinrealm"] .pause-button{
+  border:1px solid #3c6594;background:#142342;color:#c4e7ff;border-radius:7px;
+}
+body[data-srg-page="spinrealm"] .playfield-wrap{
+  background:radial-gradient(ellipse at 50% 35%,#2d2b8640,transparent 65%),
+    linear-gradient(180deg,#0c1733,#0b122b);
+}
+body[data-srg-page="spinrealm"] #boardShell{
+  border-color:#4bc6ff;
+  box-shadow:0 0 5px #49c9ff,0 0 28px #2a90f86b,inset 0 0 20px #229afa24;
+}
+body[data-srg-page="spinrealm"] .rail-label{color:#c1e4ff}
+body[data-srg-page="spinrealm"] .hold-button{
+  border-color:#3d80bc;background:linear-gradient(145deg,#12345b,#151c48);
+  box-shadow:inset 0 0 12px #168ff52a;
+}
+body[data-srg-page="spinrealm"] .next-rail{color:#cdeeff}
+body[data-srg-page="spinrealm"] .arena-metrics{
+  background:#0a1833;border-top:1px solid #2d5c98;border-bottom:1px solid #1f447b;
+}
+body[data-srg-page="spinrealm"] .arena-metrics strong{color:var(--srg-electric)}
+body[data-srg-page="spinrealm"] .arena-caption{color:#b8cdea}
+body[data-srg-page="spinrealm"] #overlay{
+  background:linear-gradient(155deg,#060d25ee,#09142cee);
+  backdrop-filter:blur(3px);
+}
+body[data-srg-page="spinrealm"] #overlay h2{color:#fff;text-shadow:0 0 16px #6b8dfb52}
+body[data-srg-page="spinrealm"] #overlay .primary-button{
+  background:linear-gradient(125deg,#fff1a5,#f3b54c 48%,#d88e36);
+  color:#24170b;border-color:#ffe8a0;font-weight:900;
+  box-shadow:0 0 26px #ffd16d80,0 5px 0 #9b5b25;
+}
+body[data-srg-page="spinrealm"] #overlay .primary-button:hover{filter:brightness(1.08)}
+body[data-srg-page="spinrealm"] .touch-controls button{
+  border-color:#3189ce;background:linear-gradient(150deg,#083a67,#0d2d58);
+  color:#e6f9ff;box-shadow:inset 0 0 13px #0d97ed52,0 4px 0 #071a3e;
+}
+body[data-srg-page="spinrealm"] .touch-rotate button{
+  border-color:#834dff;background:linear-gradient(150deg,#3b237e,#26185c);
+  box-shadow:inset 0 0 16px #8752ff55,0 4px 0 #140a3d;
+}
+body[data-srg-page="spinrealm"] .touch-finish .touch-drop{
+  background:linear-gradient(125deg,#6031c6,#8b4fff);border-color:#ae92ff;color:#fff;
+}
+body[data-srg-page="spinrealm"] .touch-controls button:active:not(:disabled),
+body[data-srg-page="spinrealm"] .touch-controls button.pressed{box-shadow:inset 0 0 15px #4dd9ff44;transform:translateY(2px)}
+body[data-srg-page="spinrealm"] .keyboard-guide,
+body[data-srg-page="spinrealm"] .controls-footer{
+  border-color:#31547c;color:#a6c3df;
+}
+/* Pre-match lobby: a real navigation surface, not fake season/account records. */
+.srg-lobby{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,250px);
+  gap:14px;margin:4px 0 16px;padding:18px 20px;
+  border:1px solid #2b609f;border-radius:15px;
+  background:radial-gradient(ellipse at 65% 0%,#5934a64d,transparent 60%),
+    linear-gradient(125deg,#102550,#0b1937 72%);
+  box-shadow:0 0 0 1px #172c56,0 14px 30px #060b20b8;
+}
+.srg-lobby .eyebrow{color:#91c8ff}
+.srg-lobby h2{font-size:clamp(19px,2.4vw,29px);letter-spacing:.5px;margin:6px 0 7px;color:#f4f7ff}
+.srg-lobby p{font-size:11px;color:#bdd5ef;line-height:1.7;margin:0 0 12px}
+.srg-lobby-actions{display:flex;flex-wrap:wrap;gap:8px}
+.srg-lobby-actions button,.srg-lobby-actions a{
+  display:inline-flex;align-items:center;justify-content:center;min-height:39px;
+  border-radius:9px;padding:9px 16px;font-size:12px;font-weight:750;
+  background:linear-gradient(125deg,#1b3f78,#34235f);border:1px solid #4776aa;color:#edf7ff;
+}
+.srg-lobby-actions .srg-featured{
+  color:#291800;background:linear-gradient(125deg,#ffe7a2,#ffc35b);
+  border-color:#fff0b9;box-shadow:0 0 16px #ffc86e42;
+}
+.srg-lobby-meta{display:grid;gap:8px;align-content:center}
+.srg-lobby-meta>div{
+  padding:10px 12px;border:1px solid #33547e;background:#0a1936b8;border-radius:9px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.srg-lobby-meta span{font-size:10px;color:#a7c9eb}
+.srg-lobby-meta strong{font-size:11px;color:#ffe19c;text-align:right}
+body.in-session .srg-lobby{display:none}
+body[data-srg-page="spinrealm"] .srg-toolbar{
+  padding-bottom:10px;gap:7px;
+}
+body[data-srg-page="spinrealm"] .srg-toolbar button,
+body[data-srg-page="spinrealm"] .srg-toolbar select{
+  border-color:#315887;background:#101f40;color:#dbeaff;
+}
+@media (max-width:900px){
+  body[data-srg-page="spinrealm"] .srg-lobby{grid-template-columns:1fr;gap:12px}
+  body[data-srg-page="spinrealm"] .srg-lobby-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-srg-page="spinrealm"] .workspace,
+  body[data-srg-page="spinrealm"] .workspace.left-collapsed{display:flex;flex-direction:column;gap:10px}
+  body[data-srg-page="spinrealm"] .opponent-rail{order:0;width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px}
+  body[data-srg-page="spinrealm"] .arena-card{order:1;width:100%}
+}
+/* Portrait focus: the opponent is a *strip*, not a second giant arena. */
+@media(max-width:760px){
+  body[data-srg-page="spinrealm"] .topbar,
+  body[data-srg-page="spinrealm"].in-session .topbar{
+    min-height:0;display:grid;grid-template-columns:1fr auto;gap:7px;padding:9px 11px;
+  }
+  body[data-srg-page="spinrealm"] .brand{font-size:15px}
+  body[data-srg-page="spinrealm"] .header-actions .icon-button{width:32px;height:32px}
+  body[data-srg-page="spinrealm"] .mode-tabs,
+  body[data-srg-page="spinrealm"].in-session .mode-tabs{
+    display:grid;grid-column:1/-1;grid-row:2;
+    grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
+    padding:3px;background:#091431;
+  }
+  body[data-srg-page="spinrealm"] .mode-tab{
+    min-height:34px;white-space:nowrap;padding:7px 3px;font-size:10px;
+  }
+  body[data-srg-page="spinrealm"] main,
+  body[data-srg-page="spinrealm"].in-session main{padding:9px 9px 0}
+  body[data-srg-page="spinrealm"] .page-heading{display:none}
+  .srg-lobby{padding:12px;margin-bottom:10px;border-radius:12px}
+  .srg-lobby h2{font-size:21px}
+  .srg-lobby p{font-size:11px;margin-bottom:10px}
+  .srg-lobby-actions button,.srg-lobby-actions a{flex:1 1 auto;padding:8px 10px}
+  .srg-lobby-meta>div{padding:7px 9px}
+  body[data-srg-page="spinrealm"] .opponent-rail{
+    order:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:7px;
+  }
+  body[data-srg-page="spinrealm"] .opponent-card,
+  body[data-srg-page="spinrealm"] .pressure-card{
+    padding:9px;min-height:0;align-content:start;gap:5px;
+  }
+  body[data-srg-page="spinrealm"] .opponent-header h3{font-size:12px;margin:2px 0 0}
+  body[data-srg-page="spinrealm"] .opponent-card .mini-label{font-size:8px}
+  body[data-srg-page="spinrealm"] .opponent-header .cpu-indicator{display:none}
+  body[data-srg-page="spinrealm"] .opponent-view-toggle{gap:4px}
+  body[data-srg-page="spinrealm"] .opponent-view-toggle button{font-size:9px;min-height:31px;padding:5px 2px}
+  body[data-srg-page="spinrealm"] .opponent-signal{
+    font-size:8px;padding:3px 7px;order:4;margin:1px 0 0;
+  }
+  body[data-srg-page="spinrealm"] .opponent-board-panel{
+    display:flex;min-height:0;justify-content:center;
+  }
+  body[data-srg-page="spinrealm"] .opponent-board-panel canvas{
+    width:58px !important;max-width:58px !important;height:116px !important;
+    max-height:116px !important;aspect-ratio:1/2;flex:none;
+  }
+  body[data-srg-page="spinrealm"] .opponent-card .cpu-note{display:none}
+  body[data-srg-page="spinrealm"] .pressure-heading{margin:0;gap:5px}
+  body[data-srg-page="spinrealm"] .pressure-number{font-size:21px}
+  body[data-srg-page="spinrealm"] .pressure-track{height:5px;margin:3px 0}
+  body[data-srg-page="spinrealm"] .pressure-card #pressureText{font-size:9px;line-height:1.5;margin:0}
+  body[data-srg-page="spinrealm"] .battle-summary{margin-top:3px;gap:4px}
+  body[data-srg-page="spinrealm"] .battle-summary>div{padding:5px}
+  body[data-srg-page="spinrealm"] .battle-summary strong{font-size:16px}
+  body[data-srg-page="spinrealm"] #exchangeText{display:none}
+  body[data-srg-page="spinrealm"] .arena-header{
+    gap:6px;padding:7px 8px;min-height:48px;
+  }
+  body[data-srg-page="spinrealm"] .arena-header .match-clock strong{font-size:19px}
+  body[data-srg-page="spinrealm"] .player-id{font-size:10px}
+  body[data-srg-page="spinrealm"] .playfield-wrap{gap:6px;padding:8px 5px}
+  body[data-srg-page="spinrealm"] .hold-rail,
+  body[data-srg-page="spinrealm"] .next-rail{width:clamp(43px,12vw,63px)}
+  body[data-srg-page="spinrealm"] .arena-metrics{padding:8px 5px}
+  body[data-srg-page="spinrealm"] .arena-metrics strong{font-size:13px}
+  body[data-srg-page="spinrealm"] .arena-caption{display:none}
+  body[data-srg-page="spinrealm"] .arena-card>.touch-controls{
+    gap:9px 9px;margin:9px 9px 11px;
+  }
+  body[data-srg-page="spinrealm"] .touch-controls .thumb-label{
+    padding:0 3px;color:#a0d5fa;font-size:10px;
+  }
+  body[data-srg-page="spinrealm"] .touch-controls button{
+    height:clamp(53px,7.5dvh,76px);border-radius:12px;
+    padding:5px 3px;gap:3px;
+  }
+  body[data-srg-page="spinrealm"] .touch-controls svg{width:27px;height:27px}
+  body[data-srg-page="spinrealm"] .touch-controls button>small{font-size:11px}
+  body[data-srg-page="spinrealm"] .touch-finish button{height:clamp(53px,7dvh,70px)}
+  body[data-srg-page="spinrealm"] .touch-controls .touch-key-copy strong{font-size:14px}
+  body[data-srg-page="spinrealm"] .next-rail>.touch-hold{height:50px;font-size:11px}
+  body[data-srg-page="spinrealm"] .srg-toolbar{
+    justify-content:space-between;padding:6px 9px 9px;
+  }
+  body[data-srg-page="spinrealm"] .srg-toolbar button,
+  body[data-srg-page="spinrealm"] .srg-toolbar select{
+    min-height:30px;padding:5px 6px;font-size:10px;
+  }
+}
+@media(max-width:430px){
+  body[data-srg-page="spinrealm"] .mode-tab{font-size:9px}
+  body[data-srg-page="spinrealm"] .opponent-board-panel canvas{
+    width:46px !important;max-width:46px !important;height:92px !important;max-height:92px !important;
+  }
+  body[data-srg-page="spinrealm"] .opponent-card,
+  body[data-srg-page="spinrealm"] .pressure-card{padding:7px}
+  body[data-srg-page="spinrealm"] .arena-header .match-clock strong{font-size:17px}
+  body[data-srg-page="spinrealm"] .view-button{padding-inline:4px;font-size:9px}
+  body[data-srg-page="spinrealm"] .touch-controls button{height:60px}
+}
+@media(orientation:landscape) and (max-height:550px) and (max-width:1100px){
+  body[data-srg-page="spinrealm"] .page-heading,.srg-lobby{display:none}
+  body[data-srg-page="spinrealm"] .topbar{padding:4px 9px}
+  body[data-srg-page="spinrealm"] .mode-tabs{grid-template-columns:repeat(6,minmax(0,1fr));}
+  body[data-srg-page="spinrealm"] .workspace,
+  body[data-srg-page="spinrealm"] .workspace.left-collapsed{
+    display:grid;grid-template-columns:minmax(120px,22%) minmax(0,1fr);gap:8px;align-items:start;
+  }
+  body[data-srg-page="spinrealm"] .opponent-rail{
+    display:flex;flex-direction:column;order:0;max-height:calc(100dvh - 105px);
+    overflow:auto;
+  }
+  body[data-srg-page="spinrealm"] .arena-card{order:1}
+  body[data-srg-page="spinrealm"] .opponent-board-panel canvas{max-height:96px !important;width:48px !important;height:96px !important}
+  body[data-srg-page="spinrealm"] .playfield-wrap{padding-block:5px}
+  body[data-srg-page="spinrealm"] .arena-card>.touch-controls{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin:4px;
+  }
+  body[data-srg-page="spinrealm"] .touch-move,
+  body[data-srg-page="spinrealm"] .touch-rotate{gap:4px}
+  body[data-srg-page="spinrealm"] .touch-controls button{height:39px;padding:2px}
+  body[data-srg-page="spinrealm"] .touch-controls svg{width:20px;height:20px}
+  body[data-srg-page="spinrealm"] .touch-finish{grid-column:auto;gap:3px}
+  body[data-srg-page="spinrealm"] .touch-controls button>small{display:none}
+}
+/* Respect the reduced-motion preference and user's toggled reduced mode. */
+@media(prefers-reduced-motion:reduce){
+  body[data-srg-page="spinrealm"] *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
