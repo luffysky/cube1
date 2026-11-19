@@ -526,6 +526,14 @@ function openDialog(id){if(phase==='running')pause();clearInputs();$(id).showMod
 function closeDialog(id){$(id).close();pendingBinding=null;updateSettings();}
 
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>selectMode(b.dataset.mode)));
+document.querySelectorAll('[data-lobby-mode]').forEach(button=>button.addEventListener('click',()=>{
+  const next=button.dataset.lobbyMode;
+  if(selectMode(next))start();
+}));
+$('lobbyRoomLink').addEventListener('click',event=>{
+  if(ranked.matchId||ranked.queued){event.preventDefault();inform('請先完成或退出目前排位，再進入多人好友房。');}
+});
+
 $('roomModeLink').addEventListener('click',event=>{
   if(ranked.matchId||ranked.queued){event.preventDefault();inform('請先完成或退出目前排位，再進入多人好友房。');return;}
   if(phase==='running'&&!confirm('離開目前這一局，前往多人好友房？'))event.preventDefault();
