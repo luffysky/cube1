@@ -75,9 +75,9 @@ function showStep(n){step=n;el('srgLanguageStage').hidden=n!==1;el('srgRegionSta
 function open(force=false){
  if(!force&&state)return;
  language=state?.language||deviceLanguage();choice.value=language;
- region.value=state?.region||'';age.value=state?.age||'';
  el('srgAnalytics').checked=state?.optionalAnalytics||false;el('srgAcceptTerms').checked=Boolean(state);
- el('srgConsentMessage').textContent='';root.hidden=false;update();showStep(1);
+ el('srgConsentMessage').textContent='';root.hidden=false;update();
+ region.value=state?.region||'';age.value=state?.age||'';updateRegion();showStep(1);
 }
 function finish(optionalAnalytics){
  if(!REGIONS.includes(region.value)||!AGE_GROUPS.includes(age.value)||!el('srgAcceptTerms').checked){
