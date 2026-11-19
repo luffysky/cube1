@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { CATALOG, CATALOG_BY_ID, CATALOG_VERSION, DEFAULT_APPEARANCE, ECONOMY, FREE_COSMETICS, MEMBERSHIP } from '../../dist/platform/catalog.mjs';
 import { appearancePatch, entitlement, exactKeys, fail, friendCode, hash, nickname, rank, validateUuid } from './domain.mjs';
+import { AD_REWARD } from './rewarded-ads.mjs';
 
 export async function transaction(pool, callback) {
   const client = await pool.connect();
@@ -111,6 +112,52 @@ export class Store {
         const result = await ledger(client, userId, ECONOMY.dailyCoins, 'daily_grant', `daily:${day}`);
         return { wallet: { balance: result.balance }, granted: result.applied ? ECONOMY.dailyCoins : 0, alreadyClaimed: !result.applied, day };
       });
+    });
+  }
+  async rewardedAdStatus(userId,{enabled=false}={}){
+    if(!enabled)return {enabled:false,coins:AD_REWARD.coins,limit:AD_REWARD.limitPerUTCDate,claimedToday:0,remaining:0};
+    const today=new Date(this.clock()).toISOString().slice(0,10);
+    const result=await this.pool.query(`SELECT count(*)::integer AS claimed FROM sr_reward_ad_attempts
+      WHERE user_id=$1 AND status='granted' AND granted_at >= $2::date AND granted_at < ($2::date + interval '1 day')`,[userId,today]);
+    const claimedToday=result.rows[0]?.claimed||0;
+    return {enabled:true,coins:AD_REWARD.coins,limit:AD_REWARD.limitPerUTCDate,claimedToday,remaining:Math.max(0,AD_REWARD.limitPerUTCDate-claimedToday)};
+  }
+  async startRewardedAd(userId,adUnit){
+    return this.tx(async client=>{
+      await lockUser(client,userId);
+      const now=new Date(this.clock()),today=now.toISOString().slice(0,10);
+      const todayCount=(await client.query(`SELECT count(*)::integer AS claimed FROM sr_reward_ad_attempts WHERE user_id=$1
+        AND status='granted' AND granted_at >= $2::date AND granted_at < ($2::date + interval '1 day')`,[userId,today])).rows[0].claimed;
+      if(todayCount>=AD_REWARD.limitPerUTCDate)fail('ad_daily_limit',429);
+      const existing=(await client.query(`SELECT id FROM sr_reward_ad_attempts WHERE user_id=$1 AND status='pending'
+        AND expires_at>$2 ORDER BY issued_at DESC LIMIT 1`,[userId,now])).rows[0];
+      if(existing)fail('ad_attempt_in_progress',409);
+      const id=randomUUID(),expires=new Date(now.getTime()+AD_REWARD.ttlMs);
+      await client.query(`INSERT INTO sr_reward_ad_attempts(id,user_id,provider,ad_unit,reward_coins,expires_at,issued_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7)`,[id,userId,AD_REWARD.provider,adUnit,AD_REWARD.coins,expires,now]);
+      return {attemptId:id,expiresAt:expires.toISOString(),provider:AD_REWARD.provider,coins:AD_REWARD.coins};
+    });
+  }
+  async acceptRewardedAdEvent(event){
+    // The HTTP handler MUST check adapter signature BEFORE this method.
+    // Provider callbacks are untrusted until validated upstream.
+    const ref=(await this.pool.query('SELECT user_id FROM sr_reward_ad_attempts WHERE id=$1',[event.attemptId])).rows[0];
+    if(!ref)fail('ad_attempt_not_found',404);
+    return this.tx(async client=>{
+      await lockUser(client,ref.user_id);
+      const row=(await client.query('SELECT * FROM sr_reward_ad_attempts WHERE id=$1 FOR UPDATE',[event.attemptId])).rows[0];
+      if(!row)fail('ad_attempt_not_found',404);
+      if(row.status==='granted')return {accepted:true,applied:false};
+      if(row.status!=='pending'||new Date(row.expires_at).getTime()<this.clock())fail('ad_attempt_expired',409);
+      if(row.ad_unit!==event.adUnit||row.provider!==event.provider)fail('invalid_ad_event',403);
+      const today=new Date(this.clock()).toISOString().slice(0,10);
+      const claimed=(await client.query(`SELECT count(*)::integer AS n FROM sr_reward_ad_attempts
+        WHERE user_id=$1 AND status='granted' AND granted_at >= $2::date AND granted_at < ($2::date + interval '1 day')`,[ref.user_id,today])).rows[0].n;
+      if(claimed>=AD_REWARD.limitPerUTCDate)fail('ad_daily_limit',429);
+      const credit=await ledger(client,ref.user_id,row.reward_coins,'rewarded_ad','rewarded_ad:'+event.attemptId,{provider:event.provider});
+      await client.query(`UPDATE sr_reward_ad_attempts SET status='granted',granted_at=$2,provider_event_id=$3
+        WHERE id=$1`,[event.attemptId,new Date(this.clock()),event.eventId]);
+      return {accepted:true,applied:credit.applied};
     });
   }
   async purchase(userId, key, body) {
