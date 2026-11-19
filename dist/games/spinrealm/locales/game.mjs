@@ -5,6 +5,17 @@ ads.rewardButton|觀看廣告，領取 15 金幣|观看广告，领取 15 金币
 ads.rewardLimit|每日最多 30 次，必須由伺服器驗證。|每天最多 30 次，必须经过服务器验证。|Up to 30 per day; server verification required.|1日3回まで。サーバー認証が必要です。|하루 최대 3회, 서버 검증 필수
 ads.rewardWait|廣告服務暫未開放，請稍後再試。|广告服务暂未开放，请稍后重试。|Rewarded ads are not yet enabled.|リワード広告はまだ利用できません。|보상형 광고가 아직 활성화되지 않았습니다.
 ledger.rewarded_ad|廣告獎勵|广告奖励|Rewarded ad|広告報酬|광고 보상
+quests.title|每日挑戰任務|每日挑战任务|Daily challenges|デイリーチャレンジ|일일 도전 과제
+quests.desc|由伺服器驗證的真人排位任務，與廣告獎勵分開計算，每日 UTC 重置。|由服务器验证的真人排位任务，与广告奖励分开计算，每日 UTC 重置。|Server-verified ranked missions, separate from ad rewards. Reset daily at UTC midnight.|サーバー検証済みのランク戦ミッション。広告報酬とは別で毎日UTCで更新。|서버에서 검증한 랭크 미션으로 광고 보상과 별개이며 매일 UTC에 초기화됩니다.
+quests.ranked_play_1|完成 1 場排位|完成 1 场排位|Complete 1 ranked match|ランク戦を1回完了|랭크 대전 1회 완료
+quests.ranked_play_3|完成 3 場排位|完成 3 场排位|Complete 3 ranked matches|ランク戦を3回完了|랭크 대전 3회 완료
+quests.ranked_win_1|贏得 1 場排位|赢得 1 场排位|Win 1 ranked match|ランク戦で1勝|랭크 대전 1승
+quests.claim|領取任務金幣|领取任务金币|Claim reward|報酬を受け取る|보상 받기
+quests.claimed|已領取|已领取|Claimed|受取済み|수령 완료
+quests.incomplete|尚未達成|尚未达成|Not completed|未達成|미완료
+quests.unavailable|任務服務尚未開放，請稍後重試。|任务服务尚未开放，请稍后重试。|Mission service is not available yet.|ミッション機能はまだ利用できません。|미션 기능을 아직 사용할 수 없습니다.
+quests.rewardReceived|任務獎勵已入帳|任务奖励已到账|Mission reward credited|ミッション報酬を付与しました|미션 보상이 지급되었습니다
+ledger.quest_reward|每日任務獎勵|每日任务奖励|Daily quest reward|デイリー報酬|일일 퀘스트 보상
 game.pageTitle|SPINREALM 旋界｜讓每一轉，都算數。|SPINREALM 旋界｜让每一转，都算数。|SPINREALM — Make every rotation count.|SPINREALM｜すべての回転に、意味を。|SPINREALM｜모든 회전에 의미를.
 game.description|旋轉、拆解、反擊。SPINREALM 旋界的對戰方塊手感試玩場。|旋转、拆解、反击。SPINREALM 旋界的对战方块操作试玩场。|Rotate, clear and counter. The SPINREALM competitive block playtest.|回して、消して、反撃。対戦ブロックゲーム SPINREALM のプレイテスト。|회전하고, 지우고, 반격하세요. 블록 대전 게임 SPINREALM 플레이테스트.
 game.homeLabel|SPINREALM 旋界首頁|SPINREALM 旋界首页|SPINREALM home|SPINREALM ホーム|SPINREALM 홈
