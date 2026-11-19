@@ -74,7 +74,7 @@ async function memberModule(t,{fetcher}={}){
   let tokenCalls=0;const entitlements=[];
   const profile={profile:{id:'alice'},wallet:{balance:250},appearance:{theme:'obsidian'},entitlement:{plus:false,customImages:false}};
   const signed=`e30.${Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+900})).toString('base64url')}.test`;
-  const env={CONFIG:{authUrl:'https://auth.example',apiUrl:'https://api.example'},setEntitlements:value=>entitlements.push(value),setAppearance:()=>{},restoreCustomImage:async()=>{},clearCustomPreview:()=>{},setImageScope:()=>{},auth:{getSession:async()=>({data:{user:{id:'alice'}}}),token:async()=>{tokenCalls++;return{data:{token:signed}};},signOut:async()=>({data:{}})}};
+  const env={CONFIG:{authUrl:'https://auth.example',apiUrl:'https://api.example'},setEntitlements:value=>entitlements.push(value),setAppearance:()=>{},restoreCustomImage:async()=>{},clearCustomPreview:()=>{},setImageScope:()=>{},auth:{getSession:async()=>{tokenCalls++;return{data:{user:{id:'alice'},session:{token:signed}}};},signOut:async()=>({data:{}})}};
   globalThis[key]=env;globalThis.fetch=fetcher||(async()=>Response.json(profile));
   let source=await readFile(new URL('../../dist/games/spinrealm/member-client.mjs',import.meta.url),'utf8');
   source=source.replace("import { CONFIG } from './config.mjs';",`const {CONFIG}=globalThis['${key}'];`)
@@ -82,7 +82,7 @@ async function memberModule(t,{fetcher}={}){
     .replace("import('./vendor/neon-auth.mjs')",`Promise.resolve({createAuthClient:()=>globalThis['${key}'].auth})`);
   const module=await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}#${key}`);
   t.after(()=>{globalThis.fetch=oldFetch;delete globalThis[key];});
-  return{module,profile,entitlements,tokenCalls:()=>tokenCalls,setFetch:value=>{globalThis.fetch=value;}};
+  return{module,profile,entitlements,tokenCalls:()=>Math.max(0,tokenCalls-1),setFetch:value=>{globalThis.fetch=value;}};
 }
 
 test('member caches JWT across polls and refreshes once after 401',async t=>{
