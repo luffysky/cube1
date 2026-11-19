@@ -57,4 +57,5 @@ const nav=document.createElement('nav');nav.className='srg-legal-links';nav.setA
 nav.innerHTML='<a href="/privacy.html">隱私政策</a><a href="/cookies.html">Cookie 政策</a><a href="/terms.html">使用條款</a><a href="/minor-protection.html">未成年人保護</a><button type="button" id="srgConsentSettings">Cookie 與同意設定</button>';
 document.body.append(nav);nav.querySelector('button').addEventListener('click',()=>open(true));
 window.addEventListener('storage',e=>{if(e.key===STORAGE){try{const s=JSON.parse(e.newValue);if(s?.version===POLICY)state=s;else{state=null;open();}}catch{state=null;open();}}});
-if(!state)open();
+// Policy pages must remain readable without first accepting anything.
+if(!state && document.body.dataset.srgPage!=='legal')open();
