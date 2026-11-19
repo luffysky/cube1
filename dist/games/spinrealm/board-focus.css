@@ -1,0 +1,178 @@
+/* SPINREALM field-first layout. Geometry from board-fit.mjs: 10 x 20 square cells.
+   This layer intentionally follows arena-v2.css to resolve historical media overrides. */
+body[data-srg-page="spinrealm"] .board-shell{
+  box-sizing:border-box;
+  width:calc(var(--board-h) / 2);
+  height:var(--board-h);
+  max-width:none;
+  min-width:0;
+  flex:0 0 auto;
+  aspect-ratio:1/2;
+}
+body[data-srg-page="spinrealm"] .board-shell>canvas{
+  display:block;width:100%;height:100%;
+  aspect-ratio:1/2;
+}
+body[data-srg-page="spinrealm"] .playfield-wrap{
+  display:flex;
+  justify-content:center;align-items:flex-start;
+  min-width:0;overflow:visible;
+}
+body[data-srg-page="spinrealm"] .arena-card{min-width:0;}
+body[data-srg-page="spinrealm"] .piece-rail{flex:none;min-width:0;}
+body[data-srg-page="spinrealm"] .opponent-board-panel canvas{aspect-ratio:1/2;}
+/* Narrow the desktop opponent column; its board stays proportionally miniature. */
+@media(min-width:901px){
+ body[data-srg-page="spinrealm"] .workspace,
+ body[data-srg-page="spinrealm"] .workspace.left-collapsed{
+   display:grid;grid-template-columns:clamp(160px,15vw,205px) minmax(0,1fr);
+   gap:clamp(10px,1.4vw,20px);
+ }
+ body[data-srg-page="spinrealm"] .opponent-rail{grid-column:1;grid-row:1;}
+ body[data-srg-page="spinrealm"] .arena-card{grid-column:2;grid-row:1;}
+}
+/* Tablet portrait: own field first, opponent after the entire playfield. */
+@media(orientation:portrait) and (max-width:900px){
+ body[data-srg-page="spinrealm"] .workspace,
+ body[data-srg-page="spinrealm"] .workspace.left-collapsed{
+   display:flex;flex-direction:column;gap:10px;
+ }
+ body[data-srg-page="spinrealm"] .arena-card{order:0;width:100%;}
+ body[data-srg-page="spinrealm"] .opponent-rail{
+   order:1;display:grid;width:100%;
+   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+   gap:8px;
+ }
+ body[data-srg-page="spinrealm"] .playfield-wrap{
+   padding:9px 5px 7px;
+   gap:clamp(4px,1.25vw,12px);
+ }
+ body[data-srg-page="spinrealm"] .hold-rail,
+ body[data-srg-page="spinrealm"] .next-rail{
+   flex:0 0 clamp(35px,10vw,69px);
+   width:clamp(35px,10vw,69px);
+ }
+ body[data-srg-page="spinrealm"] .arena-metrics{padding:7px 4px;}
+ body[data-srg-page="spinrealm"] .arena-card>.touch-controls{
+   margin:9px 9px 14px;
+ }
+ body[data-srg-page="spinrealm"] .arena-caption{display:none;}
+ body[data-srg-page="spinrealm"] .opponent-board-panel canvas{
+   width:min(100%,85px)!important;
+   max-height:170px!important;height:auto!important;
+ }
+ body[data-srg-page="spinrealm"] .pressure-card{align-self:stretch;}
+}
+/* Phone portrait: reclaim vertical space from navigation and cosmetic panels. */
+@media(orientation:portrait) and (max-width:600px){
+ body[data-srg-page="spinrealm"].in-session .platform-nav{display:none;}
+ body[data-srg-page="spinrealm"].in-session .topbar{
+   padding:5px 9px;grid-template-columns:1fr auto;gap:4px;
+ }
+ body[data-srg-page="spinrealm"].in-session .brand{font-size:15px;}
+ body[data-srg-page="spinrealm"].in-session .mode-tabs{
+   display:none;
+ }
+ body[data-srg-page="spinrealm"] .arena-header{
+   padding:6px 7px;min-height:43px;
+ }
+ body[data-srg-page="spinrealm"] .arena-header .player-id small,
+ body[data-srg-page="spinrealm"] .arena-header .sidebar-toggle{display:none;}
+ body[data-srg-page="spinrealm"] .arena-header .match-clock{margin-right:5px;}
+ body[data-srg-page="spinrealm"] .playfield-wrap{
+   gap:4px;padding:7px 3px;
+ }
+ body[data-srg-page="spinrealm"] .hold-rail,
+ body[data-srg-page="spinrealm"] .next-rail{
+   flex:0 0 clamp(33px,10vw,48px);
+   width:clamp(33px,10vw,48px);
+ }
+ body[data-srg-page="spinrealm"] .hold-rail .rail-detail,
+ body[data-srg-page="spinrealm"] .next-rail .rail-detail{font-size:8px;}
+ body[data-srg-page="spinrealm"] .arena-card>.touch-controls{
+   margin:7px 6px 11px;gap:8px;
+ }
+ body[data-srg-page="spinrealm"] .touch-move,
+ body[data-srg-page="spinrealm"] .touch-rotate{gap:6px;}
+ body[data-srg-page="spinrealm"] .touch-controls button{
+   min-height:52px;touch-action:none;
+ }
+ body[data-srg-page="spinrealm"] .opponent-rail{
+   grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;
+ }
+ body[data-srg-page="spinrealm"] .opponent-card,
+ body[data-srg-page="spinrealm"] .pressure-card{padding:9px;}
+ body[data-srg-page="spinrealm"] .opponent-board-panel canvas{
+   width:49px!important;max-width:49px!important;height:98px!important;max-height:98px!important;
+ }
+}
+/* Short landscape phones: keep controls beside the board, rather than below it,
+   so height calculations don't sacrifice the player's field. */
+@media(orientation:landscape) and (max-height:600px) and (max-width:1100px){
+ body[data-srg-page="spinrealm"] .page-heading,
+ body[data-srg-page="spinrealm"] .srg-lobby{display:none;}
+ body[data-srg-page="spinrealm"].in-session .platform-nav{display:none;}
+ body[data-srg-page="spinrealm"] .topbar,
+ body[data-srg-page="spinrealm"].in-session .topbar{
+   display:flex;height:auto;min-height:0;flex-wrap:nowrap;gap:6px;
+   padding:3px 9px;
+ }
+ body[data-srg-page="spinrealm"] .mode-tabs,
+ body[data-srg-page="spinrealm"].in-session .mode-tabs{
+   display:none;
+ }
+ body[data-srg-page="spinrealm"] .workspace,
+ body[data-srg-page="spinrealm"] .workspace.left-collapsed{
+   display:grid;grid-template-columns:minmax(110px,19%) minmax(0,1fr);
+   align-items:start;gap:8px;
+ }
+ body[data-srg-page="spinrealm"] .opponent-rail{
+   display:flex;flex-direction:column;gap:5px;grid-column:1;grid-row:1;
+   order:0;width:100%;max-height:calc(100dvh - 45px);overflow:auto;
+ }
+ body[data-srg-page="spinrealm"] .pressure-card{padding:6px;}
+ body[data-srg-page="spinrealm"] .arena-card{
+   display:grid;grid-template-columns:minmax(0,1fr) clamp(100px,18vw,170px);
+   grid-template-rows:auto auto auto;grid-column:2;grid-row:1;
+   order:1;width:100%;overflow:hidden;
+ }
+ body[data-srg-page="spinrealm"] .arena-header{
+   grid-column:1/-1;grid-row:1;padding:4px 7px;min-height:32px;
+ }
+ body[data-srg-page="spinrealm"] .playfield-wrap{
+   grid-column:1;grid-row:2;gap:4px;padding:3px 4px;min-width:0;
+ }
+ body[data-srg-page="spinrealm"] .arena-metrics{
+   grid-column:1;grid-row:3;padding:3px 2px;gap:3px;
+ }
+ body[data-srg-page="spinrealm"] .arena-card>.touch-controls{
+   grid-column:2;grid-row:2/4;
+   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+   align-content:center;gap:4px;margin:4px;
+ }
+ body[data-srg-page="spinrealm"] .touch-move,
+ body[data-srg-page="spinrealm"] .touch-rotate,
+ body[data-srg-page="spinrealm"] .touch-finish{
+   grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+   gap:4px;margin:0;padding:0;
+ }
+ body[data-srg-page="spinrealm"] .touch-controls .thumb-label{display:none;}
+ body[data-srg-page="spinrealm"] .touch-controls button,
+ body[data-srg-page="spinrealm"] .touch-finish button{
+   width:100%;height:clamp(33px,9dvh,49px);min-height:0;
+   border-radius:7px;padding:2px;
+ }
+ body[data-srg-page="spinrealm"] .touch-controls svg{width:19px;height:19px;}
+ body[data-srg-page="spinrealm"] .touch-controls button>small,
+ body[data-srg-page="spinrealm"] .touch-key-copy small{display:none;}
+ body[data-srg-page="spinrealm"] .touch-key-copy strong{font-size:10px;}
+ body[data-srg-page="spinrealm"] .hold-rail,
+ body[data-srg-page="spinrealm"] .next-rail{
+   flex:0 0 clamp(28px,6vw,45px);width:clamp(28px,6vw,45px);
+ }
+ body[data-srg-page="spinrealm"] .hold-rail .rail-detail,
+ body[data-srg-page="spinrealm"] .next-rail .rail-detail{display:none;}
+ body[data-srg-page="spinrealm"] .arena-caption{display:none;}
+ body[data-srg-page="spinrealm"] .opponent-board-panel canvas{width:46px!important;height:92px!important;max-height:92px!important;}
+}
+/* Reduced motion remains governed by the player's appearance preference. */
