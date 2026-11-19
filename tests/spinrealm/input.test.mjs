@@ -52,3 +52,21 @@ test('holding the exchange input across a placement never swaps the next piece a
   assert.equal(game.held,nextPiece);
   assert.equal(game.canHold,false);
 });
+
+
+test('short touch tap moves exactly one cell even when saved DAS is aggressive',()=>{
+  const moves=[];const input=new InputRepeater(()=>({das:60,arr:10,soft:25}),(action)=>moves.push(action));
+  input.press('left',{minDas:260});
+  input.step(180,{maxHorizontalRepeats:1});input.release('left');
+  input.step(1000,{maxHorizontalRepeats:1});
+  assert.deepEqual(moves,['left']);
+});
+
+test('long press still repeats but one painted frame never causes multi-cell catch-up',()=>{
+  const moves=[];const input=new InputRepeater(()=>({das:80,arr:16,soft:25}),(action)=>moves.push(action));
+  input.press('right',{minDas:190});
+  input.step(189,{maxHorizontalRepeats:1});assert.equal(moves.length,1);
+  input.step(150,{maxHorizontalRepeats:1});assert.equal(moves.length,2);
+  input.step(16,{maxHorizontalRepeats:1});assert.equal(moves.length,3);
+  input.release('right');input.step(300,{maxHorizontalRepeats:1});assert.equal(moves.length,3);
+});
