@@ -15,6 +15,8 @@ game.build|v0.3 · 大棋盤 / 道具派對|v0.3 · 大棋盘 / 道具派对|v0.
 game.opponentStatus|對手與戰況|对手与战况|Opponent and match status|対戦相手と戦況|상대 및 경기 상황
 game.opponentBoard|CPU 對手棋盤|CPU 对手棋盘|CPU opponent board|CPU の盤面|CPU 상대 보드
 game.netSent|淨送出|净送出|Net sent|送信ライン|보낸 줄
+game.battleCancelled|已抵消|已抵消|Cancelled|相殺済み|상쇄 완료
+game.battleSent|已送出|已送出|Sent|送信済み|전송 완료
 game.lines|消行|消行|Lines|消去ライン|지운 줄
 game.cpuNote|本機對手 · 同一組方塊序列|本机对手 · 相同方块序列|Local opponent · same piece sequence|ローカル対戦 · 同じブロック順|로컬 상대 · 동일한 블록 순서
 game.incoming|INCOMING / 待抵消|INCOMING / 待抵消|INCOMING / to counter|INCOMING / 相殺待ち|INCOMING / 상쇄 대기
