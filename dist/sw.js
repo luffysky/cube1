@@ -1,6 +1,6 @@
 /* Original SnowRealm Games offline shell. No libraries or runtime cache rules. */
 // Bump VERSION whenever a precached file changes. Install is all-or-nothing.
-const VERSION = '2026-11-19-v20';
+const VERSION = '2026-11-19-v21';
 const CACHE_PREFIX = 'snowrealm-games-shell-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 
@@ -30,6 +30,7 @@ const ASSETS = [
   '/games/spinrealm/icon.svg', '/games/spinrealm/platform-bridge.mjs',
   '/games/spinrealm/appearance.mjs',
   '/games/spinrealm/appearance.css',
+  '/games/spinrealm/arena-v2.css',
   '/games/spinrealm/i18n.mjs',
   '/games/spinrealm/config.mjs',
   '/games/spinrealm/catalog.mjs',
