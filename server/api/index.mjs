@@ -3,6 +3,7 @@ import { attachDatabasePool } from '@neon/functions';
 import { createApp } from './app.mjs';
 import { jwtAuthenticator } from './auth.mjs';
 import { Store } from './store.mjs';
+import { AdminStore } from './admin.mjs';
 
 const connectionString = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
 if (!connectionString) throw new Error('DATABASE_URL is required');
@@ -13,6 +14,8 @@ pool.on('error', error => console.error('snowrealm_pool_error', { code: error.co
 
 export default createApp({
   store: new Store(pool),
+  adminStore: new AdminStore(pool),
+  adminSubjects: process.env.SNOWREALM_ADMIN_SUBJECTS || '',
   authenticate: jwtAuthenticator({ jwksUrl: process.env.NEON_AUTH_JWKS_URL, authBaseUrl: process.env.NEON_AUTH_BASE_URL, audience: process.env.AUTH_AUDIENCE || undefined }),
   allowedOrigins: (process.env.ALLOWED_ORIGINS || '').split(',').map(value => value.trim()).filter(Boolean),
   entitlementWebhookSecret: process.env.ENTITLEMENT_WEBHOOK_SECRET || '',
