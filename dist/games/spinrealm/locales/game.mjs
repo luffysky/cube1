@@ -14,6 +14,10 @@ game.help|操作說明|操作说明|How to play|操作説明|플레이 방법
 game.build|v0.3 · 大棋盤 / 道具派對|v0.3 · 大棋盘 / 道具派对|v0.3 · Large board / item party|v0.3 · 大きな盤面 / アイテム戦|v0.3 · 큰 보드 / 아이템 파티
 game.opponentStatus|對手與戰況|对手与战况|Opponent and match status|対戦相手と戦況|상대 및 경기 상황
 game.opponentBoard|CPU 對手棋盤|CPU 对手棋盘|CPU opponent board|CPU の盤面|CPU 상대 보드
+game.opponentViewSetting|對手顯示方式|对手显示方式|Opponent view|相手の表示モード|상대 화면 방식
+game.opponentBoardOption|對手棋盤|对手棋盘|Opponent board|相手の盤面|상대 보드
+game.opponentStatsOption|戰況數據|战况数据|Match stats|対戦データ|대전 통계
+game.opponentLiveBoard|對手目前棋盤排列|对手当前棋盘排列|Opponent live board|相手の現在の盤面|상대의 현재 보드
 game.netSent|淨送出|净送出|Net sent|送信ライン|보낸 줄
 game.battleCancelled|已抵消|已抵消|Cancelled|相殺済み|상쇄 완료
 game.opponentMatchState|對手對局狀態|对手对局状态|Opponent match status|相手の対局状態|상대 경기 상태
