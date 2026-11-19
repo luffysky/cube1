@@ -80,6 +80,15 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
           exactKeys((await readBody(request)).data,[]);
           return respond(await store.startRewardedAd(userId,rewardedAdUnit));
         }
+        if (path === '/v1/quests/daily' && method === 'GET') {
+          await store.limit(userId,'quest_read',40);
+          return respond(await store.dailyQuests(userId));
+        }
+        if (path === '/v1/quests/daily/claim' && method === 'POST') {
+          await store.limit(userId,'quest_claim',20);
+          const {data}=await readBody(request);exactKeys(data,['questId'],['questId']);
+          return respond(await store.claimDailyQuest(userId,data.questId,requestKey(request)));
+        }
         if (path === '/v1/wallet/history' && method === 'GET') return respond(await store.walletHistory(userId));
         if (path === '/v1/wallet/daily' && method === 'POST') {
           await store.limit(userId, 'wallet_write', 30);
