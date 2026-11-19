@@ -413,7 +413,6 @@ function undo(){
 
 function step(dt){
   if(phase!=='running')return;
-  if(phase!=='running')return;
   if(mode!=='drill'&&!holdGuide)player.step(dt);
   if(mode==='ranked'){player.drainEvents();return;}
   if(isVersus()){cpu.step(dt);bot.update(dt);}
@@ -527,6 +526,10 @@ function openDialog(id){if(phase==='running')pause();clearInputs();$(id).showMod
 function closeDialog(id){$(id).close();pendingBinding=null;updateSettings();}
 
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>selectMode(b.dataset.mode)));
+$('roomModeLink').addEventListener('click',event=>{
+  if(ranked.matchId||ranked.queued){event.preventDefault();inform('請先完成或退出目前排位，再進入多人好友房。');return;}
+  if(phase==='running'&&!confirm('離開目前這一局，前往多人好友房？'))event.preventDefault();
+});
 $('startBtn').addEventListener('click',()=>start(false));$('secondaryBtn').addEventListener('click',()=>{if(mode==='ranked')void leaveRanked();else start(true);});
 $('pauseBtn').addEventListener('click',togglePause);
 $('sidebarToggle').addEventListener('click',event=>{
