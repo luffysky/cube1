@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { CATALOG, CATALOG_BY_ID, CATALOG_VERSION, DEFAULT_APPEARANCE, ECONOMY, FREE_COSMETICS, MEMBERSHIP } from '../../dist/platform/catalog.mjs';
 import { appearancePatch, entitlement, exactKeys, fail, friendCode, hash, nickname, rank, validateUuid } from './domain.mjs';
 import { AD_REWARD } from './rewarded-ads.mjs';
+import { DAILY_QUESTS, getDailyQuest } from './quests.mjs';
 
 export async function transaction(pool, callback) {
   const client = await pool.connect();
@@ -111,6 +112,40 @@ export class Store {
         const day = new Date(this.clock()).toISOString().slice(0, 10);
         const result = await ledger(client, userId, ECONOMY.dailyCoins, 'daily_grant', `daily:${day}`);
         return { wallet: { balance: result.balance }, granted: result.applied ? ECONOMY.dailyCoins : 0, alreadyClaimed: !result.applied, day };
+      });
+    });
+  }
+  async dailyQuests(userId,client=this.pool) {
+    const today=new Date(this.clock()).toISOString().slice(0,10);
+    const [matches,claims]=await Promise.all([
+      client.query(`SELECT count(*)::integer AS completed,
+         count(*) FILTER(WHERE outcome='win')::integer AS wins
+         FROM sr_rank_settlements WHERE user_id=$1 AND created_at >= $2::date
+           AND created_at < ($2::date + interval '1 day')
+           AND outcome IN ('win','draw','loss')`,[userId,today]),
+      client.query(`SELECT event_key FROM sr_wallet_ledger WHERE user_id=$1 AND reason='quest_reward'
+         AND event_key LIKE $2`,[userId,`quest:${today}:%`])
+    ]);
+    const stats=matches.rows[0]||{completed:0,wins:0};
+    const claimed=new Set(claims.rows.map(row=>row.event_key));
+    return {date:today,quests:DAILY_QUESTS.map(q=>{
+      const progress=Math.max(0,Number(stats[q.kind]||0));
+      return {id:q.id,coins:q.coins,target:q.target,progress:Math.min(progress,q.target),
+       completed:progress>=q.target,claimed:claimed.has(`quest:${today}:${q.id}`)};
+    })};
+  }
+  async claimDailyQuest(userId,questId,idempotencyKey){
+    const quest=getDailyQuest(questId);
+    if(!quest)fail('invalid_quest',400);
+    return this.tx(async client=>{
+      await lockUser(client,userId);
+      return idempotent(client,userId,idempotencyKey,'quest_claim',{questId},async()=>{
+        const status=await this.dailyQuests(userId,client);
+        const current=status.quests.find(item=>item.id===questId);
+        if(!current?.completed)fail('quest_not_completed',409);
+        const award=await ledger(client,userId,quest.coins,'quest_reward',`quest:${status.date}:${questId}`,{questId});
+        return {questId,granted:award.applied?quest.coins:0,alreadyClaimed:!award.applied,
+         wallet:{balance:award.balance}};
       });
     });
   }
