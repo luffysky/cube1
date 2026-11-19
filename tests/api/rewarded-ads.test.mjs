@@ -24,6 +24,8 @@ test('only trusted configured provider and exact callback format can credit',()=
  assert.equal(adsEnabled({secret,publisherReady:false}),false);
  assert.equal(adsEnabled({secret:'bad',publisherReady:true}),false);
  assert.equal(rewardedAdsConfig().enabled,false);
+ assert.equal(rewardedAdsConfig().limitPerUTCDate,30);
+ assert.equal(rewardedAdsConfig().coins*rewardedAdsConfig().limitPerUTCDate,450);
 });
 test('unauthorized users cannot claim ad rewards; disabled status shows zero availability',async()=>{
  let credit=0;
