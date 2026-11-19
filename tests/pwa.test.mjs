@@ -9,6 +9,7 @@ const clientSource = await fs.readFile(new URL('../dist/pwa.mjs', import.meta.ur
 const ORIGIN = 'https://games.example.test';
 const markers = new Map([
   ['/index.html', 'platform'], ['/games/spinrealm/index.html', 'spinrealm'],
+  ['/games/spinrealm/room.html', 'room'],
   ['/games/52hunt/index.html', '52hunt'], ['/games/next-floor/index.html', 'next-floor'],
 ]);
 const waveFixture = new Uint8Array(46);
