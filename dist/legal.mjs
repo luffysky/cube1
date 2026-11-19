@@ -98,5 +98,6 @@ root.querySelectorAll('[data-consent-action]').forEach(button=>button.addEventLi
 }));
 nav.querySelector('button').addEventListener('click',()=>open(true));
 window.addEventListener('storage',event=>{if(event.key!==STORAGE)return;state=load();if(state){language=state.language;setLocale(language);update();}else if(document.body.dataset.srgPage!=='legal')open();});
+update();
 if(state){language=state.language;setLocale(language);update();}
 else if(document.body.dataset.srgPage!=='legal')open();
