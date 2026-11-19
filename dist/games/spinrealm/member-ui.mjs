@@ -21,7 +21,7 @@ export function initMemberUI({mount=document.querySelector('.topbar')||document.
   const navs=[['account','account.title','◎'],['wallet','wallet.title','◈'],['shop','shop.title','◐'],['friends','friends.title','♧'],['ranked','ranked.title','♜'],['plus','subscription.title','✦']];
   const message=(key,error=false)=>{status.textContent=t(key);status.classList.toggle('is-error',error);};
   const errorMessage=error=>{
-    const key=hasTranslation(error.code)?error.code:`errors.${error.code||'network_error'}`;const translated=t(key);status.textContent=translated===key?t('errors.network_error')+` (${error.code||'network_error'})`:translated;status.classList.add('is-error');
+    const code=String(error?.code||'network_error');const key=hasTranslation(code)?code:`errors.${code}`;const translated=t(key);const unsupported=code.toLowerCase()==='feature_not_supported';status.textContent=unsupported?'登入服務回報此註冊操作目前不受支援（feature_not_supported）。請聯絡管理員檢查 Neon Auth 設定與註冊請求；這不代表你的網路斷線。':translated===key?t('errors.network_error')+` (${code})`:translated;status.classList.add('is-error');
   };
   const signedIn=()=>Boolean(memberState().user);
   const profile=()=>memberState().profile;
