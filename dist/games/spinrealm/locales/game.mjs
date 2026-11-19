@@ -4,6 +4,22 @@ game.description|旋轉、拆解、反擊。SPINREALM 旋界的對戰方塊手�
 game.homeLabel|SPINREALM 旋界首頁|SPINREALM 旋界首页|SPINREALM home|SPINREALM ホーム|SPINREALM 홈
 game.titleLine|讓每一轉，都算數|让每一转，都算数|Make every rotation count|すべての回転に、意味を|모든 회전에 의미를
 game.modes|遊戲模式|游戏模式|Game modes|ゲームモード|게임 모드
+arena.lobbyTitle|旋界競技大廳|旋界竞技大厅|SPINREALM Arena Lobby|旋界アリーナロビー|SPINREALM 아레나 로비
+arena.lobbyDesc|選擇自己的節奏。反擊、真人排位、好友房與自由練習都在這裡。遊戲資料與獎勵仍由伺服器驗證。|选择自己的节奏。反击、真人排位、好友房与自由练习都在这里。游戏数据与奖励仍由服务器验证。|Choose your pace: counterplay, ranked, friend rooms or practice. The server verifies match results and rewards.|好きなモードを選ぼう。対戦、ランク戦、フレンドルーム、練習を用意。結果と報酬はサーバーが検証します。|원하는 방식으로 즐기세요. 대전, 랭크, 친구 방, 연습을 모두 지원하며 결과와 보상은 서버가 검증합니다.
+arena.lobbyPlay|▶ 開始對戰|▶ 开始对战|▶ Play Battle|▶ 対戦開始|▶ 대전 시작
+arena.lobbyRanked|♛ 真人排位|♛ 真人排位|♛ Ranked Match|♛ ランク戦|♛ 랭크 대전
+arena.lobbyFriends|◎ 多人好友房|◎ 多人好友房|◎ Multiplayer Room|◎ フレンドルーム|◎ 친구 방
+arena.lobbyPractice|◇ 自由練習|◇ 自由练习|◇ Free Practice|◇ 自由練習|◇ 자유 연습
+arena.lobbyDrill|↻ T-Spin 道場|↻ T-Spin 道场|↻ T-Spin Dojo|↻ T-Spin 道場|↻ T-Spin 도장
+arena.currentSeason|本季排位|本季排位|Ranked Season|ランクシーズン|랭크 시즌
+arena.testingStage|測試階段|测试阶段|Playtest|テスト段階|테스트 단계
+arena.realtimeStatus|多人即時連線|多人实时连线|Live Multiplayer|リアルタイム対戦|실시간 멀티플레이
+arena.serverPending|測試服務待部署|测试服务待部署|Test server not deployed|テストサーバー未配信|테스트 서버 미배포
+arena.playerSettings|玩家設定|玩家设置|Player settings|プレイヤー設定|플레이어 설정
+arena.handlingStyle|可調手感與外觀|可调操作与外观|Custom controls and looks|操作感と外観を調整可能|조작감과 외형 설정
+arena.seasonRewards|正式賽季獎勵|正式赛季奖励|Season Rewards|シーズン報酬|시즌 보상
+arena.notLaunched|尚未開放|尚未开放|Not yet available|未実装|아직 이용 불가
+arena.v2Version|v0.4 · 競技場 V2|v0.4 · 竞技场 V2|v0.4 · Arena V2|v0.4 · アリーナ V2|v0.4 · 아레나 V2
 game.multiRoom|多人房|多人房|Friend room|フレンドルーム|친구 방
 game.multiRoomPreview|2～4 人好友房（測試服務需部署）|2～4 人好友房（测试服务需部署）|2–4 player friend room (requires live server)|2～4人のフレンドルーム（サーバー準備中）|2~4명 친구 방 (서버 필요)
 game.duel|反擊對戰|反击对战|Counterplay|カウンター戦|반격 대전
