@@ -4,4 +4,6 @@ export const CONFIG = Object.freeze({
   apiUrl: 'https://br-winter-thunder-b3ozovl2-cube1api.compute.c-4.ap-southeast-1.aws.neon.tech',
   build: '0.4.0',
   billingAvailable: false,
+  // Set after Cloudflare Durable Objects room gateway is actually deployed.
+  realtimeUrl: '',
 });
