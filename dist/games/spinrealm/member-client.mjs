@@ -55,7 +55,7 @@ async function accessToken(force=false) {
       // Better Auth JWT plugin exposes GET /token. Some session caches only contain
       // an opaque session token, and must never be passed to the game API.
       // Fetch with the browser-managed Auth cookie; no token is written to storage.
-      const tokenUrl=CONFIG.authUrl.replace(/\\/$/,'')+'/token';
+      const tokenUrl=CONFIG.authUrl.replace(/\/$/,'')+'/token';
       let tokenResponse;
       try{
         tokenResponse=await fetch(tokenUrl,{method:'GET',credentials:'include',cache:'no-store',headers:{Accept:'application/json'}});
