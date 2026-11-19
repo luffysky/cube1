@@ -1,0 +1,51 @@
+name: Deploy SPINREALM Realtime (Cloudflare)
+
+# Manual deployment only. No production deploys on ordinary code pushes.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spinrealm-cloudflare-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Test and deploy 2-4 player room Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CI: "true"
+    steps:
+      - name: Checkout cube1
+        uses: actions/checkout@v4
+      - name: Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify Cloudflare credentials are configured
+        shell: bash
+        run: |
+          if [[ -z "${CLOUDFLARE_API_TOKEN}" || -z "${CLOUDFLARE_ACCOUNT_ID}" ]]; then
+            echo "::error::Configure GitHub Actions secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID. Do not put them into repository files or chat."
+            exit 1
+          fi
+      - name: Test gameplay, rooms, security and PWA
+        run: npm test
+      - name: Check Worker syntax
+        run: node --check realtime/worker.mjs
+      - name: Install Wrangler
+        working-directory: realtime
+        run: npm install --no-audit --no-fund
+      - name: Deploy Worker and Durable Object
+        working-directory: realtime
+        run: npx wrangler deploy --strict
+      - name: What to do after deploying
+        run: |
+          echo "Worker deployed. Look for the actual workers.dev URL in the Wrangler output."
+          echo "Test 2 independent browsers before enabling CONFIG.realtimeUrl."
+          echo "To connect a custom domain, configure it in Cloudflare and update dist/games/spinrealm/config.mjs in a separate reviewed commit."
