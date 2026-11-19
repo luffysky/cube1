@@ -1,6 +1,6 @@
 /* Original SnowRealm Games offline shell. No libraries or runtime cache rules. */
 // Bump VERSION whenever a precached file changes. Install is all-or-nothing.
-const VERSION = '2026-11-19-v23';
+const VERSION = '2026-11-19-v24';
 const CACHE_PREFIX = 'snowrealm-games-shell-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 
@@ -23,6 +23,7 @@ const AUDIO_ASSETS = [
 const ASSETS = [
   '/styles.css', '/app.mjs', '/pwa.mjs', '/member-platform.mjs', '/manifest.webmanifest',
   '/legal.css', '/legal.mjs',
+  '/region-policies.mjs', '/region-policy-locales.mjs',
   '/assets/icon-192.png', '/assets/icon-512.png',
   '/assets/realm-mark.svg', '/assets/spinrealm-cover.svg', '/assets/brickduel-cover.svg',
   '/assets/hunt-cover.svg', '/assets/floor-cover.svg',
