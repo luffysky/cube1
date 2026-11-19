@@ -39,11 +39,21 @@ async function accessToken(force=false) {
   if(tokenRequest?.generation===generation&&tokenRequest.userId===userId)return tokenRequest.promise;
   const pending={generation,userId,promise:null};
   pending.promise=(async()=>{
-    const data=result(await (await auth()).token());
+    let data=result(await (await auth()).getSession());
     if(!sameSession(generation,userId))throw new ServiceError('session_expired',401);
-    if(!data?.token)throw new ServiceError('session_expired',401);
-    cachedToken={userId,token:data.token,expiresAt:tokenExpiry(data.token)};
-    return data.token;
+    // Neon Auth attaches its signed JWT to the get-session response via Set-Auth-Jwt.
+    // The SDK injects it into data.session.token; an opaque Better Auth session
+    // token is NOT a valid JWT and must never be sent to our game API.
+    let token=data?.session?.token;
+    if(typeof token!=='string'||token.split('.').length!==3){
+      // Force a fresh session response if an SDK cache returned an opaque session token.
+      data=result(await (await auth()).getSession({fetchOptions:{headers:{'X-Force-Fetch':'true'}}}));
+      if(!sameSession(generation,userId))throw new ServiceError('session_expired',401);
+      token=data?.session?.token;
+    }
+    if(typeof token!=='string'||token.split('.').length!==3)throw new ServiceError('session_token_unavailable',401);
+    cachedToken={userId,token,expiresAt:tokenExpiry(token)};
+    return token;
   })();
   tokenRequest=pending;
   try{return await pending.promise;}finally{if(tokenRequest===pending)tokenRequest=null;}
