@@ -52,3 +52,24 @@ test('room rejects a fifth seat and never allows the wrong player to start',()=>
   assert.equal(fifth.ws.messages.at(-1).code,'room_full');
   room.start(sockets[1].ws);assert.equal(room.phase,'lobby');
 });
+
+
+test('RTC offer relay requires both players to opt in; host moves on disconnect',()=>{
+  const room=new SpinrealmRoom({},{});
+  const alice=join(room,'Alice'),bob=join(room,'Bob');
+  const offer={type:'offer',sdp:'test-offer'};
+  room.signal(alice.ws,{to:bob.id,payload:offer});
+  assert.equal(bob.ws.messages.some(m=>m.type==='rtc_signal'),false);
+  room.onMessage(alice.ws,JSON.stringify({type:'rtc_ready',enabled:true}));
+  room.signal(alice.ws,{to:bob.id,payload:offer});
+  assert.equal(bob.ws.messages.some(m=>m.type==='rtc_signal'),false);
+  room.onMessage(bob.ws,JSON.stringify({type:'rtc_ready',enabled:true}));
+  room.signal(alice.ws,{to:bob.id,payload:offer});
+  assert.equal(bob.ws.messages.filter(m=>m.type==='rtc_signal').length,1);
+  room.onMessage(bob.ws,JSON.stringify({type:'rtc_ready',enabled:false}));
+  room.signal(alice.ws,{to:bob.id,payload:offer});
+  assert.equal(bob.ws.messages.filter(m=>m.type==='rtc_signal').length,1);
+  room.onClose(alice.ws);
+  assert.equal(room.host,bob.id);
+  assert.equal(room.players.get(alice.id).rtcReady,false);
+});
