@@ -73,7 +73,7 @@ async function memberModule(t,{fetcher,sessionToken}={}){
   const key=`__memberTest${crypto.randomUUID().replaceAll('-','')}`,oldFetch=globalThis.fetch;
   let tokenCalls=0;const entitlements=[];
   const profile={profile:{id:'alice'},wallet:{balance:250},appearance:{theme:'obsidian'},entitlement:{plus:false,customImages:false}};
-  const signed=`e30.${Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+900})).toString('base64url')}.test`;
+  const signed=`e30.${Buffer.from(JSON.stringify({sub:'alice',exp:Math.floor(Date.now()/1000)+900})).toString('base64url')}.test`;
   const env={CONFIG:{authUrl:'https://auth.example',apiUrl:'https://api.example'},setEntitlements:value=>entitlements.push(value),setAppearance:()=>{},restoreCustomImage:async()=>{},clearCustomPreview:()=>{},setImageScope:()=>{},auth:{getSession:async()=>{tokenCalls++;return{data:{user:{id:'alice'},session:{token:sessionToken??signed}}};},signOut:async()=>({data:{}})}};
   globalThis[key]=env;globalThis.fetch=fetcher||(async()=>Response.json(profile));
   let source=await readFile(new URL('../../dist/games/spinrealm/member-client.mjs',import.meta.url),'utf8');
@@ -118,10 +118,30 @@ test('late profile response cannot restore membership after sign-out',async t=>{
 });
 
 
-test('opaque session token cannot be used to call the trusted game API',async t=>{
-  let requests=0;
-  const fixture=await memberModule(t,{sessionToken:'opaque-session-value',fetcher:async()=>{requests++;return Response.json({});}});
+test('opaque session token falls back to Better Auth JWT endpoint but never sends opaque credentials to game API',async t=>{
+  const calls=[];
+  const signed='e30.'+Buffer.from(JSON.stringify({sub:'alice',exp:Math.floor(Date.now()/1000)+600})).toString('base64url')+'.sig';
+  const fixture=await memberModule(t,{sessionToken:'opaque-session-value',fetcher:async(url,options)=>{
+    calls.push({url,options});
+    if(url==='https://auth.example/token')return Response.json({token:signed});
+    return Response.json(fixture.profile);
+  }});
+  await fixture.module.initMember();
+  assert.equal(fixture.module.memberState().profile?.profile?.id,'alice');
+  assert.equal(calls.filter(c=>c.url==='https://auth.example/token').length,1);
+  const apiRequest=calls.find(c=>c.url==='https://api.example/v1/profile');
+  assert.equal(apiRequest?.options?.headers?.Authorization,'Bearer '+signed);
+  assert.equal(calls.find(c=>c.url==='https://auth.example/token').options.credentials,'include');
+});
+
+test('opaque session token is rejected when Better Auth JWT endpoint is unavailable',async t=>{
+  const calls=[];
+  const fixture=await memberModule(t,{sessionToken:'opaque-session-value',fetcher:async(url)=>{
+    calls.push(url);
+    if(url==='https://auth.example/token')return Response.json({error:'no token'},{status:404});
+    return Response.json({});
+  }});
   await fixture.module.initMember();
   await assert.rejects(fixture.module.api('/v1/profile'),{code:'session_token_unavailable'});
-  assert.equal(requests,0);
+  assert.equal(calls.some(url=>url.startsWith('https://api.example/')),false);
 });
