@@ -4,7 +4,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { fail, exactKeys } from './domain.mjs';
 
-export const AD_REWARD=Object.freeze({coins:15,limitPerUTCDate:3,maxPending:1,ttlMs:10*60*1000,provider:'google-ad-manager-web'});
+export const AD_REWARD=Object.freeze({coins:15,limitPerUTCDate:30,maxPending:1,ttlMs:10*60*1000,provider:'google-ad-manager-web'});
 export function adsEnabled({secret='',publisherReady=false}={}){
  return publisherReady===true&&typeof secret==='string'&&secret.length>=32;
 }
