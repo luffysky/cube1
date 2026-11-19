@@ -5,7 +5,6 @@ ads.rewardButton|觀看廣告，領取 15 金幣|观看广告，领取 15 金币
 ads.rewardLimit|每日最多 3 次，必須由伺服器驗證。|每天最多 3 次，必须经过服务器验证。|Up to 3 per day; server verification required.|1日3回まで。サーバー認証が必要です。|하루 최대 3회, 서버 검증 필수
 ads.rewardWait|廣告服務暫未開放，請稍後再試。|广告服务暂未开放，请稍后重试。|Rewarded ads are not yet enabled.|リワード広告はまだ利用できません。|보상형 광고가 아직 활성화되지 않았습니다.
 ledger.rewarded_ad|廣告獎勵|广告奖励|Rewarded ad|広告報酬|광고 보상
-
 game.pageTitle|SPINREALM 旋界｜讓每一轉，都算數。|SPINREALM 旋界｜让每一转，都算数。|SPINREALM — Make every rotation count.|SPINREALM｜すべての回転に、意味を。|SPINREALM｜모든 회전에 의미를.
 game.description|旋轉、拆解、反擊。SPINREALM 旋界的對戰方塊手感試玩場。|旋转、拆解、反击。SPINREALM 旋界的对战方块操作试玩场。|Rotate, clear and counter. The SPINREALM competitive block playtest.|回して、消して、反撃。対戦ブロックゲーム SPINREALM のプレイテスト。|회전하고, 지우고, 반격하세요. 블록 대전 게임 SPINREALM 플레이테스트.
 game.homeLabel|SPINREALM 旋界首頁|SPINREALM 旋界首页|SPINREALM home|SPINREALM ホーム|SPINREALM 홈
