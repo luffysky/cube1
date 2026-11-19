@@ -10,13 +10,13 @@ export class InputRepeater {
     this.horizontalTime = 0; this.horizontalNext = 0;
     this.softTime = 0; this.softNext = 0;
   }
-  press(action) {
+  press(action, { minDas = 0 } = {}) {
     if (this.held.has(action)) return;
     this.held.set(action, ++this.order);
     if (action === 'left' || action === 'right') {
       this.direction = action;
       this.horizontalTime = 0;
-      this.horizontalNext = this.getSettings().das;
+      this.horizontalNext = Math.max(this.getSettings().das, minDas);
       this.perform(action, false);
     } else if (action === 'soft') {
       this.softTime = 0;
@@ -34,7 +34,7 @@ export class InputRepeater {
       if (this.direction) this.perform(this.direction, false);
     }
   }
-  step(dt) {
+  step(dt, { maxHorizontalRepeats = 32 } = {}) {
     const {das, arr, soft} = this.getSettings();
     if (this.direction) {
       this.horizontalTime += dt;
@@ -42,9 +42,14 @@ export class InputRepeater {
         if (this.horizontalTime >= das) this.perform(this.direction, true);
       } else {
         let guard = 0;
-        while (this.horizontalTime + 1e-7 >= this.horizontalNext && guard++ < 32) {
+        const maxRepeats = Math.max(1, Math.min(32, Math.floor(maxHorizontalRepeats) || 1));
+        while (this.horizontalTime + 1e-7 >= this.horizontalNext && guard++ < maxRepeats) {
           this.perform(this.direction, false);
           this.horizontalNext += arr;
+        }
+        // Do not replay delayed horizontal presses in a burst after a missed frame.
+        if (maxRepeats < 32 && this.horizontalTime + 1e-7 >= this.horizontalNext) {
+          this.horizontalNext = this.horizontalTime + arr;
         }
       }
     }
