@@ -1,6 +1,7 @@
 import { Game, COLORS, SHAPES, WIDTH, HEIGHT, HIDDEN } from './engine.mjs';
 import { Bot } from './bot.mjs';
 import { InputRepeater } from './input.mjs';
+import { boardHeight } from './board-fit.mjs';
 import { resolveExchange } from './combat.mjs';
 import { ITEMS, PARTY_REASON_TEXT, createPartyState, chargeEnergy, getPartyStatus, canUseItem, useItem, absorbGarbage, chooseCpuItem } from './party.mjs';
 import { createSoundController } from './sound.mjs';
@@ -662,9 +663,13 @@ function fitBoard(){
   // Keep the complete touch deck in view; do not reserve a 400px board on short tablets.
   const visibleHeight=window.visualViewport?.scale===1?window.visualViewport.height:window.innerHeight;
   const viewport=visibleHeight-top-below;
-  const minimum=touch?(holdGuide?180:200):holdGuide?240:400;
-  const full=Math.min(900,Math.max(minimum,viewport),Math.max(180,maxWidth*2));
-  const height=Math.floor(full*(settings.boardSize==='standard'?.82:1));
+  const landscape=matchMedia('(orientation:landscape) and (max-height:600px)').matches;
+  const height=boardHeight({
+    availableWidth:maxWidth,viewportHeight:visibleHeight,
+    top:landscape?Math.max(0,top-window.scrollY):Math.max(0,top-window.scrollY),
+    below,orientation:landscape?'landscape':'portrait',
+    touch,standard:settings.boardSize==='standard',guide:Boolean(holdGuide)
+  });
   const value=height+'px';
   if(arena.style.getPropertyValue('--board-h')!==value)arena.style.setProperty('--board-h',value);
   draw();
