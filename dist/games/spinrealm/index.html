@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b1115">
+  <meta name="theme-color" content="#080d24">
   <meta name="description" content="旋轉、拆解、反擊。SPINREALM 旋界的對戰方塊手感試玩場。">
   <title>SPINREALM 旋界｜讓每一轉，都算數。</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="./arena-layout.css">
   <link rel="stylesheet" href="./member.css">
   <link rel="stylesheet" href="./appearance.css">
+  <link rel="stylesheet" href="./arena-v2.css">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/assets/icon-192.png">
 </head>
@@ -29,7 +30,27 @@
   <div class="header-actions"><button id="soundBtn" class="icon-button" title="音樂與音效" aria-label="音樂與音效" aria-haspopup="dialog">♪<span class="sound-off"></span></button><button id="settingsBtn" class="icon-button" title="手感設定" aria-label="手感設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/></svg></button><button id="helpBtn" class="icon-button help-button" aria-label="操作說明">?</button></div>
 </header>
 <main>
-  <section class="page-heading"><div><p class="eyebrow"><span class="live-dot"></span>THE NEXT MOVE IS YOURS</p><h1>讓每一轉，都算數<span>。</span></h1></div><div class="build-tag"><span>EARLY PLAYTEST</span><small>v0.3 · 大棋盤 / 道具派對</small></div></section>
+  <section class="srg-lobby" id="arenaLobby" aria-label="旋界競技大廳">
+    <div>
+      <p class="eyebrow">SNOWREALM · COMPETITIVE ARENA</p>
+      <h2>旋界競技大廳</h2>
+      <p>選擇自己的節奏。反擊、真人排位、好友房與自由練習都在這裡。遊戲資料與獎勵仍由伺服器驗證。</p>
+      <div class="srg-lobby-actions">
+        <button type="button" class="srg-featured" data-lobby-mode="duel">▶ 開始對戰</button>
+        <button type="button" data-lobby-mode="ranked">♛ 真人排位</button>
+        <a href="./room.html" id="lobbyRoomLink">◎ 多人好友房</a>
+        <button type="button" data-lobby-mode="practice">◇ 自由練習</button>
+        <button type="button" data-lobby-mode="drill">↻ T-Spin 道場</button>
+      </div>
+    </div>
+    <div class="srg-lobby-meta">
+      <div><span>本季排位</span><strong>測試階段</strong></div>
+      <div><span>多人即時連線</span><strong>測試服務待部署</strong></div>
+      <div><span>玩家設定</span><strong>可調手感與外觀</strong></div>
+      <div><span>正式賽季獎勵</span><strong>尚未開放</strong></div>
+    </div>
+  </section>
+  <section class="page-heading"><div><p class="eyebrow"><span class="live-dot"></span>THE NEXT MOVE IS YOURS</p><h1>讓每一轉，都算數<span>。</span></h1></div><div class="build-tag"><span>EARLY PLAYTEST</span><small>v0.4 · 競技場 V2</small></div></section>
   <div class="workspace left-collapsed">
     <aside class="right-rail opponent-rail" aria-label="對手與戰況">
       <section class="opponent-card" id="opponentCard"><div class="opponent-header"><div><span class="mini-label">OPPONENT</span><h3><span id="opponentName" translate="no">MICA</span> <span id="opponentBadge">CPU</span></h3></div><span class="cpu-indicator"></span></div><div class="opponent-view-toggle" role="group" aria-label="對手顯示方式"><button type="button" data-opponent-view="board" aria-pressed="true">對手棋盤</button><button type="button" data-opponent-view="stats" aria-pressed="false">戰況數據</button></div><div class="opponent-signal" role="status" aria-label="對手對局狀態"><span class="opponent-signal-dot" aria-hidden="true"></span><span id="cpuIdle" class="opponent-signal-label">READY</span></div><div id="opponentBoardPanel" class="opponent-board-panel"><canvas id="cpuCanvas" width="150" height="300" aria-label="對手目前棋盤排列"></canvas></div><div id="opponentStatsPanel" class="opponent-stats" hidden><span>淨送出 <b id="cpuSent">0</b></span><span>消行 <b id="cpuLines">0</b></span></div><div id="cpuPartyStatus" class="cpu-party-status" hidden></div><p class="cpu-note" id="opponentNote">本機對手 · 同一組方塊序列</p></section>
