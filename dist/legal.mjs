@@ -1,6 +1,7 @@
 // Locale-first privacy and regional information. This is not ID or guardian verification.
 import { REGION_POLICIES, REGIONS, AGE_GROUPS, legalWarning } from './region-policies.mjs';
 import { setLocale } from './games/spinrealm/i18n.mjs';
+import { localizedRegionSummary } from './region-policy-locales.mjs';
 const STORAGE='srg.consent.v2',VERSION='2026-11-20.2';
 const LANGS=['zh-TW','zh-CN','en','ja','ko'],LANG_NAMES=['繁體中文','简体中文','English','日本語','한국어'];
 const REGION_NAMES={
@@ -47,9 +48,8 @@ function updateRegion(){
  const rule=REGION_POLICIES[region.value];
  if(rule){
   const heading=document.createElement('h3');heading.textContent=language==='zh-TW'||language==='zh-CN'?rule.headline:regionName(region.value)+' · '+t('policy');box.append(heading);
-  const note=document.createElement('p');note.textContent=rule.summary;box.append(note);
-  const gap=document.createElement('p');gap.className='srg-compliance-gap';gap.textContent=t('gap')+'：'+rule.gap;box.append(gap);
-  if(language!=='zh-TW'&&language!=='zh-CN'){const unverified=document.createElement('p');unverified.textContent=t('unverified');box.append(unverified);}
+  const note=document.createElement('p');note.textContent=localizedRegionSummary(region.value,language)||rule.summary;box.append(note);
+  const gap=document.createElement('p');gap.className='srg-compliance-gap';gap.textContent=t('gap')+'：'+(['zh-TW','zh-CN'].includes(language)?rule.gap:t('unverified'));box.append(gap);
   const sources=document.createElement('div');sources.className='srg-policy-sources';
   for(const [name,url] of rule.sources){const link=document.createElement('a');link.href=url;link.rel='noopener noreferrer';link.target='_blank';link.textContent=t('source')+'：'+name;sources.append(link);}
   box.append(sources);
