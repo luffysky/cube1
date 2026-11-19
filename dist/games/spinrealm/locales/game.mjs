@@ -4,6 +4,8 @@ game.description|旋轉、拆解、反擊。SPINREALM 旋界的對戰方塊手�
 game.homeLabel|SPINREALM 旋界首頁|SPINREALM 旋界首页|SPINREALM home|SPINREALM ホーム|SPINREALM 홈
 game.titleLine|讓每一轉，都算數|让每一转，都算数|Make every rotation count|すべての回転に、意味を|모든 회전에 의미를
 game.modes|遊戲模式|游戏模式|Game modes|ゲームモード|게임 모드
+game.multiRoom|多人房|多人房|Friend room|フレンドルーム|친구 방
+game.multiRoomPreview|2～4 人好友房（測試服務需部署）|2～4 人好友房（测试服务需部署）|2–4 player friend room (requires live server)|2～4人のフレンドルーム（サーバー準備中）|2~4명 친구 방 (서버 필요)
 game.duel|反擊對戰|反击对战|Counterplay|カウンター戦|반격 대전
 game.party|道具派對|道具派对|Item party|アイテム戦|아이템 파티
 game.practice|自由練習|自由练习|Practice|自由練習|자유 연습
