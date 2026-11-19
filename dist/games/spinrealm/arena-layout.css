@@ -357,3 +357,23 @@ main { max-width: 1500px; padding: 8px 28px 0; }
   .battle-summary span { font-size:8px; }
   .battle-summary strong { font-size:16px; }
 }
+
+
+/* Opponent visibility is a personal UI preference, never a game-rule toggle. */
+.opponent-view-toggle { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px; }
+.opponent-view-toggle button { min-height:34px;padding:6px;border:1px solid #35485f;border-radius:7px;background:#122135;color:#9db7cf;font-size:11px; }
+.opponent-view-toggle button[aria-pressed="true"] { color:#d3f7ff;border-color:#57cfe4;background:#19364c;box-shadow:inset 0 0 0 1px #50b4cd33; }
+.opponent-board-panel { display:flex;justify-content:center;align-items:flex-start;min-width:0; }
+.opponent-board-panel[hidden],.opponent-stats[hidden] { display:none !important; }
+.opponent-board-panel canvas { display:block;width:min(100%,150px);aspect-ratio:1/2;height:auto;border:1px solid #385d79;background:#081521;box-shadow:0 0 15px #4fc7e71b;image-rendering:pixelated; }
+.opponent-card { min-height:0; }
+@media (max-width:900px) {
+  .opponent-board-panel canvas { width:min(100%,74px);max-height:148px; }
+  .opponent-view-toggle button { min-height:32px;font-size:10px;padding:5px 3px; }
+  .opponent-card .cpu-note { display:none; }
+}
+@media (max-width:540px) {
+  .opponent-board-panel canvas { width:min(100%,60px);max-height:120px; }
+  .opponent-view-toggle button { font-size:9px;min-height:30px; }
+  .opponent-card { gap:6px; }
+}
