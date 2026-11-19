@@ -2,8 +2,9 @@ import { randomUUID } from 'node:crypto';
 import { ApiError, exactKeys, fail, hash, readBody, requestKey, verifyEntitlementSignature } from './domain.mjs';
 import { Ranked, validateInputs } from './ranked.mjs';
 import { assertAdmin, adminAllowlist, adminRead } from './admin.mjs';
+import { adsEnabled, checkAdapterSignature, validateAdapterEvent, rewardedAdsConfig } from './rewarded-ads.mjs';
 
-export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, entitlementWebhookSecret = '', expectedDatabase = 'cube1', logger = console }) {
+export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
   const origins = new Set(allowedOrigins.filter(Boolean).map(origin => new URL(origin).origin));
   const ranked = new Ranked(store);
   const admins = adminAllowlist(adminSubjects);
@@ -46,6 +47,14 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
           verifyEntitlementSignature(raw, request.headers.get('x-snowrealm-signature'), entitlementWebhookSecret, store.clock());
           return respond(await store.entitlementEvent(data, hash(raw)));
         }
+        if (path === '/v1/webhooks/rewarded-ad' && method === 'POST') {
+          if (!adsEnabled({secret:rewardedAdSecret,publisherReady:rewardedAdsReady})||!rewardedAdUnit) fail('ads_unavailable',503);
+          const {raw,data}=await readBody(request);
+          checkAdapterSignature(raw,request.headers.get('x-snowrealm-ad-signature'),rewardedAdSecret,store.clock());
+          const event=validateAdapterEvent(data);
+          if(event.adUnit!==rewardedAdUnit)fail('invalid_ad_event',403);
+          return respond(await store.acceptRewardedAdEvent(event));
+        }
         const userId = await authenticate(request);
         if (typeof userId !== 'string' || !userId.length || userId.length > 128 || ['__proto__', 'constructor', 'prototype'].includes(userId)) fail('unauthorized', 401);
         if(path.startsWith('/v1/admin/')){
@@ -60,6 +69,16 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
         if (path === '/v1/profile' && method === 'PATCH') {
           await store.limit(userId, 'profile_write', 20);
           return respond(await store.patchProfile(userId, (await readBody(request)).data));
+        }
+        if (path === '/v1/ads/rewarded/status' && method === 'GET') {
+          const cfg=rewardedAdsConfig({publisherReady:rewardedAdsReady&&Boolean(rewardedAdUnit),secret:rewardedAdSecret});
+          return respond({...cfg,...await store.rewardedAdStatus(userId,{enabled:cfg.enabled})});
+        }
+        if (path === '/v1/ads/rewarded/start' && method === 'POST') {
+          if(!adsEnabled({secret:rewardedAdSecret,publisherReady:rewardedAdsReady})||!rewardedAdUnit)fail('ads_unavailable',503);
+          await store.limit(userId,'reward_ad_start',8,60000);
+          exactKeys((await readBody(request)).data,[]);
+          return respond(await store.startRewardedAd(userId,rewardedAdUnit));
         }
         if (path === '/v1/wallet/history' && method === 'GET') return respond(await store.walletHistory(userId));
         if (path === '/v1/wallet/daily' && method === 'POST') {
