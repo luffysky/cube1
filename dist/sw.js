@@ -57,8 +57,11 @@ const ENTRIES = [...PAGE_MARKERS.keys(), ...ASSETS];
 const ASSET_SET = new Set(ASSETS);
 const PAGE_ALIASES = new Map();
 for (const canonical of PAGE_MARKERS.keys()) {
-  const directory = canonical.slice(0, -'index.html'.length);
   PAGE_ALIASES.set(canonical, canonical);
+  // Only index.html represents its directory. A second HTML page must never
+  // shadow the primary game URL or GitHub Pages alias.
+  if (!canonical.endsWith('/index.html')) continue;
+  const directory = canonical.slice(0, -'index.html'.length);
   PAGE_ALIASES.set(directory, canonical);
   if (directory !== '/') PAGE_ALIASES.set(directory.slice(0, -1), canonical);
 }
