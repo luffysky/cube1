@@ -1,10 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { ApiError, exactKeys, fail, hash, readBody, requestKey, verifyEntitlementSignature } from './domain.mjs';
 import { Ranked, validateInputs } from './ranked.mjs';
+import { assertAdmin, adminAllowlist, adminRead } from './admin.mjs';
 
-export function createApp({ store, authenticate, allowedOrigins = [], entitlementWebhookSecret = '', expectedDatabase = 'cube1', logger = console }) {
+export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, entitlementWebhookSecret = '', expectedDatabase = 'cube1', logger = console }) {
   const origins = new Set(allowedOrigins.filter(Boolean).map(origin => new URL(origin).origin));
   const ranked = new Ranked(store);
+  const admins = adminAllowlist(adminSubjects);
   let readinessCache = null, readinessPending = null;
   const readiness = async () => {
     if (readinessCache && readinessCache.until > store.clock()) return readinessCache.ready;
@@ -46,6 +48,12 @@ export function createApp({ store, authenticate, allowedOrigins = [], entitlemen
         }
         const userId = await authenticate(request);
         if (typeof userId !== 'string' || !userId.length || userId.length > 128 || ['__proto__', 'constructor', 'prototype'].includes(userId)) fail('unauthorized', 401);
+        if(path.startsWith('/v1/admin/')){
+          assertAdmin(userId,admins);
+          if(!adminStore)fail('admin_unavailable',503);
+          await store.limit(userId,'admin_read',60);
+          return respond(await adminRead(path,method,adminStore));
+        }
         await store.limit(userId, 'all', 1800);
         await store.ensureUser(userId);
         if (path === '/v1/profile' && method === 'GET') return respond(await store.profile(userId));
