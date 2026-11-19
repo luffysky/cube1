@@ -1,6 +1,6 @@
 /* Original SnowRealm Games offline shell. No libraries or runtime cache rules. */
 // Bump VERSION whenever a precached file changes. Install is all-or-nothing.
-const VERSION = '2026-11-19-v19';
+const VERSION = '2026-11-19-v20';
 const CACHE_PREFIX = 'snowrealm-games-shell-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 
@@ -23,6 +23,7 @@ const ASSETS = [
   '/assets/hunt-cover.svg', '/assets/floor-cover.svg',
   '/games/spinrealm/styles.css', '/games/spinrealm/arena-layout.css', '/games/spinrealm/app.mjs',
   '/games/spinrealm/room.css', '/games/spinrealm/room-app.mjs', '/games/spinrealm/room-client.mjs',
+  '/games/spinrealm/rtc-peers.mjs',
   '/games/spinrealm/engine.mjs', '/games/spinrealm/input.mjs',
   '/games/spinrealm/bot.mjs', '/games/spinrealm/combat.mjs',
   '/games/spinrealm/party.mjs', '/games/spinrealm/sound.mjs',
