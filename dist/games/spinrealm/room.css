@@ -3,3 +3,14 @@
 @media(max-width:850px){main{width:min(100% - 22px,700px)}.room-intro{padding:15px 0}.room-header{padding:12px}.room-header>div{flex-wrap:wrap;justify-content:flex-end}.play-layout{grid-template-columns:1fr}.rivals{order:2}.rival-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.rival-card canvas{width:min(100%,80px)}.my-panel{order:1}.my-board-grid .board{width:min(40vw,290px)}.rivals .micro-note{display:none}.match-head{padding:9px 12px}.match-clock strong{font-size:20px}}
 @media(pointer:coarse),(max-width:700px){.keyboard-note{display:none}.touch-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.touch-grid button{min-height:66px;padding:6px 1px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:25px;user-select:none;-webkit-user-select:none;touch-action:none}.touch-grid button small{font-size:11px;font-weight:400}.touch-grid .wide{grid-column:span 2;font-size:16px;min-height:64px}.touch-grid .hard{background:linear-gradient(120deg,#3a41a3,#5c3397);border-color:#8f87f5}.touch-grid .hold-action{grid-column:1/-1;font-size:13px;min-height:48px;border-color:#819d5a;color:#d9f7c0}.touch-grid .pressed{border-color:var(--cyan);transform:scale(.98)}}
 @media(max-width:520px){.room-brand{font-size:14px}.room-badge{font-size:8px}.socket-status{font-size:8px}.entry-panel,.lobby-panel{padding:16px}.entry-grid{grid-template-columns:1fr}.entry-action>p{min-height:0}.room-lobby-head{flex-direction:column}.roster{grid-template-columns:1fr}.room-intro h1{font-size:25px}.room-intro p:last-child{font-size:11px}.my-panel{padding:10px 8px}.my-board-grid{gap:6px}.my-board-grid .board{width:min(54vw,260px)}.hold-preview,.next-preview{width:52px}.my-stats strong{font-size:16px}.rival-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.rivals{padding:12px}.rival-card{padding:5px}.rival-card header{flex-direction:column}.match-head{gap:5px}.match-head>div:first-child strong{font-size:10px}.match-head>button{font-size:9px;padding:8px}.touch-grid{gap:7px}.touch-grid button{min-height:60px}.touch-grid .wide{min-height:60px}}
+
+
+.rtc-controls { display:grid;justify-items:center;gap:4px;min-width:0; }
+.rtc-controls>button { font-size:10px;padding:7px 9px;white-space:nowrap; }
+.rtc-controls>button[aria-pressed="true"] { border-color:#5edfc1;color:#b8fff1; }
+.rtc-state { font-size:9px;max-width:230px;overflow-wrap:anywhere;color:#91b8cd;text-align:center; }
+@media(max-width:650px) {
+  .match-head { flex-wrap:wrap; }
+  .rtc-controls { order:4;flex:1 0 100%;display:flex;justify-content:center;gap:8px; }
+  .rtc-state { text-align:left; }
+}
