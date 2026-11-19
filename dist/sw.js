@@ -1,12 +1,13 @@
 /* Original SnowRealm Games offline shell. No libraries or runtime cache rules. */
 // Bump VERSION whenever a precached file changes. Install is all-or-nothing.
-const VERSION = '2026-11-19-v18';
+const VERSION = '2026-11-19-v19';
 const CACHE_PREFIX = 'snowrealm-games-shell-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 
 const PAGE_MARKERS = new Map([
   ['/index.html', 'platform'],
   ['/games/spinrealm/index.html', 'spinrealm'],
+  ['/games/spinrealm/room.html', 'room'],
   ['/games/52hunt/index.html', '52hunt'],
   ['/games/next-floor/index.html', 'next-floor'],
 ]);
@@ -21,6 +22,7 @@ const ASSETS = [
   '/assets/realm-mark.svg', '/assets/spinrealm-cover.svg', '/assets/brickduel-cover.svg',
   '/assets/hunt-cover.svg', '/assets/floor-cover.svg',
   '/games/spinrealm/styles.css', '/games/spinrealm/arena-layout.css', '/games/spinrealm/app.mjs',
+  '/games/spinrealm/room.css', '/games/spinrealm/room-app.mjs', '/games/spinrealm/room-client.mjs',
   '/games/spinrealm/engine.mjs', '/games/spinrealm/input.mjs',
   '/games/spinrealm/bot.mjs', '/games/spinrealm/combat.mjs',
   '/games/spinrealm/party.mjs', '/games/spinrealm/sound.mjs',
