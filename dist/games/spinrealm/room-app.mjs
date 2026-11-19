@@ -5,6 +5,7 @@ import { SHAPES, COLORS, HIDDEN, HEIGHT, WIDTH } from './engine.mjs';
 import { predictionFromSnapshot } from './prediction.mjs';
 import { InputRepeater } from './input.mjs';
 import { RoomClient } from './room-client.mjs';
+import { RtcPeerLinks } from './rtc-peers.mjs';
 
 const $=id=>document.getElementById(id);
 const INPUT_KEYS={ArrowLeft:'left',ArrowRight:'right',ArrowDown:'soft',KeyA:'left',KeyD:'right',KeyS:'soft',KeyZ:'ccw',KeyX:'cw',KeyW:'cw',KeyQ:'ccw',Space:'hard',KeyC:'hold',KeyE:'hold',ShiftLeft:'hold',ShiftRight:'hold'};
@@ -22,8 +23,20 @@ const room=new RoomClient({
   onStatus:status=>{
     $('socketStatus').textContent=({connecting:'連線中',connected:'已連線',disconnected:'重新連線中',closed:'未連線'})[status]||status;
     $('socketStatus').dataset.status=status;
-    if(status==='disconnected')$('roomBattleNotice').textContent='網路暫時中斷，正嘗試重連；不會補發已確認的操作。';
+    if(status==='disconnected'){
+      $('roomBattleNotice').textContent='網路暫時中斷，正嘗試重連；不會補發已確認的操作。';
+      rtc.optOut();$('roomRtc').setAttribute('aria-pressed','false');
+    }
   }
+});
+const rtc=new RtcPeerLinks({signal:(to,payload)=>room.rtcSignal(to,payload),changed:message=>{$('roomRtcState').textContent=message;}});
+$('roomRtc').addEventListener('click',()=>{
+  if(stage!=='playing'||!you)return;
+  if(rtc.enabled){rtc.optOut();room.send('rtc_ready',{enabled:false});}
+  else if(rtc.optIn(you,roster)){room.send('rtc_ready',{enabled:true});}
+  else $('roomRtcState').textContent='此瀏覽器不支援 WebRTC。';
+  $('roomRtc').setAttribute('aria-pressed',String(rtc.enabled));
+  $('roomRtc').textContent=rtc.enabled?'關閉 WebRTC 測試':'WebRTC 直連測試（可選）';
 });
 const notice=(message,error=false)=>{$('roomNotice').textContent=message;$('roomNotice').classList.toggle('error',error);};
 const showStage=phase=>{
@@ -67,7 +80,7 @@ $('leaveMatch').addEventListener('click',()=>{
 });
 $('roomLaunch').addEventListener('click',()=>{if(host)room.start();});
 function leaveRoom(){
-  room.close();roster=[];currentState=null;predicted=null;pending=[];you=null;host=false;
+  rtc.optOut();room.close();roster=[];currentState=null;predicted=null;pending=[];you=null;host=false;
   heldKeys.clear();repeater.clear();showStage('entry');notice('已離開房間。');
 }
 function renderLobby(){
@@ -188,6 +201,7 @@ function handleMessage(message){
   }else if(message.type==='lobby'){
     roster=Array.isArray(message.players)?message.players:[];
     host=message.host===you;
+    for(const member of roster)rtc.peerReady(member.id,member.rtcReady===true);
     if(message.phase==='lobby'||message.phase==='ended'){
       if(stage!=='playing'||message.phase==='ended')showStage(message.phase);
       renderLobby();
@@ -213,6 +227,10 @@ function handleMessage(message){
     const winner=currentState?.players?.find(p=>p.id===message.winner);
     $('roomBattleNotice').textContent=message.winner?(message.winner===you?'這局你贏了！':'獲勝者：'+(winner?.name||'其他玩家')):'這局平手。';
     showStage('ended');renderLobby();
+  }else if(message.type==='rtc_peer_ready'){
+    rtc.peerReady(message.id,message.enabled===true);
+  }else if(message.type==='rtc_signal'){
+    void rtc.handle(message.from,message.payload);
   }else if(message.type==='error'){
     const messages={need_two_players:'至少兩位玩家才能開始',room_full:'房間已滿',match_running:'這局已開始，請等下局',input_rate_limited:'操作頻率過高'};
     const text=messages[message.code]||message.code;
@@ -267,4 +285,4 @@ function frame(now){
 }
 requestAnimationFrame(frame);
 window.addEventListener('resize',displayState);
-window.addEventListener('beforeunload',()=>room.close());
+window.addEventListener('beforeunload',()=>{rtc.optOut();room.close();});
