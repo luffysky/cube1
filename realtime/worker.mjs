@@ -75,7 +75,7 @@ export class SpinrealmRoom {
   everyone(message){for(const ws of this.clients.keys())if(this.clients.get(ws))send(ws,message);}
   playerOf(ws){const id=this.clients.get(ws);return id?this.players.get(id):null;}
   lobby(){
-    const players=[...this.players.values()].map(p=>({id:p.id,name:p.name,online:!!p.ws,host:p.id===this.host}));
+    const players=[...this.players.values()].map(p=>({id:p.id,name:p.name,online:!!p.ws,host:p.id===this.host,rtcReady:!!p.rtcReady}));
     this.everyone({type:'lobby',phase:this.phase,players,host:this.host,maxPlayers:MAX_PLAYERS});
   }
   join(ws,msg){
@@ -89,7 +89,7 @@ export class SpinrealmRoom {
       if(this.phase!=='lobby'&&this.phase!=='ended')return send(ws,{type:'error',code:'match_running'});
       if(this.players.size>=MAX_PLAYERS)return send(ws,{type:'error',code:'room_full'});
       p={id:crypto.randomUUID(),name:safeName(msg.name),key:randomString(48),ws:null,
-        game:null,pending:[],sent:0,cancelled:0,seq:0,windowAt:0,windowInputs:0};
+        game:null,pending:[],sent:0,cancelled:0,seq:0,windowAt:0,windowInputs:0,rtcReady:false};
       this.players.set(p.id,p);if(!this.host)this.host=p.id;
     }
     p.ws=ws;this.clients.set(ws,p.id);
@@ -136,7 +136,7 @@ export class SpinrealmRoom {
     const sender=this.playerOf(ws);
     if(!sender||!msg||typeof msg.to!=='string'||typeof msg.payload!=='object'||msg.payload===null)return;
     const receiver=this.players.get(msg.to);
-    if(!receiver?.ws||receiver.id===sender.id||JSON.stringify(msg.payload).length>8192)return;
+    if(!receiver?.ws||receiver.id===sender.id||!sender.rtcReady||!receiver.rtcReady||JSON.stringify(msg.payload).length>8192)return;
     // Signaling is optional; all gameplay stays authoritative over WebSocket.
     const kind=msg.payload.type;
     if(!['offer','answer','candidate'].includes(kind))return;
@@ -150,12 +150,19 @@ export class SpinrealmRoom {
     if(msg.type==='start'){this.start(ws);return;}
     if(msg.type==='input'){this.input(ws,msg);return;}
     if(msg.type==='rtc_signal'){this.signal(ws,msg);return;}
+    if(msg.type==='rtc_ready'){
+      const player=this.playerOf(ws);if(!player)return;
+      player.rtcReady=msg.enabled===true;
+      this.everyone({type:'rtc_peer_ready',id:player.id,enabled:player.rtcReady});
+      this.lobby();return;
+    }
     if(msg.type==='ping'){send(ws,{type:'pong',now:Date.now()});return;}
   }
   onClose(ws){
     const p=this.playerOf(ws);this.clients.delete(ws);
     if(!p||p.ws!==ws)return;
-    p.ws=null;
+    p.ws=null;p.rtcReady=false;
+    this.everyone({type:'rtc_peer_ready',id:p.id,enabled:false});
     if(this.phase==='lobby'||this.phase==='ended'){
       // Reconnection keys stay valid for the lifetime of the room.
       if(p.id===this.host)this.host=[...this.players.values()].find(x=>x.ws)?.id||null;
