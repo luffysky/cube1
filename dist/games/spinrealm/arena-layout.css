@@ -377,3 +377,11 @@ main { max-width: 1500px; padding: 8px 28px 0; }
   .opponent-view-toggle button { font-size:9px;min-height:30px; }
   .opponent-card { gap:6px; }
 }
+
+/* Six compact game modes. Keep the match navigation in one row on narrow phones. */
+.mode-tabs .room-link { display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none; }
+@media (max-width:760px) {
+  .mode-tabs,.in-session .mode-tabs { grid-template-columns:repeat(6,minmax(0,1fr)); }
+  .mode-tab { padding:7px 1px;font-size:9px;letter-spacing:0; }
+  .mode-tab .tab-symbol { display:none; }
+}
