@@ -209,6 +209,7 @@ export class SpinrealmRoom {
       if(!id)continue;
       const roster=[...this.players.values()].map(p=>({
         id:p.id,name:p.name,online:!!p.ws,sent:p.sent,cancelled:p.cancelled,
+        ...(p.id===id?{ackSeq:p.seq}:{}),
         incoming:p.pending.reduce((total,packet)=>total+packet.n,0),
         game:p.game?visibleGame(p.game,p.id===id):null
       }));
