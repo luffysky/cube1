@@ -1,4 +1,12 @@
 export const gameRows = String.raw`
+ads.rewardTitle|自願觀看廣告獎勵|自愿观看广告奖励|Optional rewarded ads|任意のリワード広告|선택형 보상 광고
+ads.rewardDesc|完成一則由廣告平台驗證的獎勵廣告，可獲得 15 金幣，每日最多 3 次。拒絕觀看不影響遊戲。|完成广告平台验证的激励广告可获 15 金币，每天最多 3 次。不看也不影响游戏。|Earn 15 coins per verified rewarded ad, up to 3 daily. Watching is always optional.|広告会社により視聴確認された広告で15コイン、1日3回まで。視聴は任意です。|검증된 보상형 광고 1회당 15코인, 하루 최대 3회. 시청은 선택 사항입니다.
+ads.rewardPending|廣告系統尚未啟用，無法觀看或領取獎勵。|广告系统尚未启用，无法观看或领取奖励。|Rewarded ads are not available yet. No coins can be claimed.|広告配信は未設定です。報酬はまだ受け取れません。|보상형 광고가 아직 제공되지 않습니다.
+ads.rewardButton|觀看廣告，領取 15 金幣|观看广告，领取 15 金币|Watch ad for 15 coins|広告を見て15コイン獲得|광고 보고 15코인 받기
+ads.rewardLimit|每日最多 3 次，必須由伺服器驗證。|每天最多 3 次，必须经过服务器验证。|Up to 3 per day; server verification required.|1日3回まで。サーバー認証が必要です。|하루 최대 3회, 서버 검증 필수
+ads.rewardWait|廣告服務暫未開放，請稍後再試。|广告服务暂未开放，请稍后重试。|Rewarded ads are not yet enabled.|リワード広告はまだ利用できません。|보상형 광고가 아직 활성화되지 않았습니다.
+ledger.rewarded_ad|廣告獎勵|广告奖励|Rewarded ad|広告報酬|광고 보상
+
 game.pageTitle|SPINREALM 旋界｜讓每一轉，都算數。|SPINREALM 旋界｜让每一转，都算数。|SPINREALM — Make every rotation count.|SPINREALM｜すべての回転に、意味を。|SPINREALM｜모든 회전에 의미를.
 game.description|旋轉、拆解、反擊。SPINREALM 旋界的對戰方塊手感試玩場。|旋转、拆解、反击。SPINREALM 旋界的对战方块操作试玩场。|Rotate, clear and counter. The SPINREALM competitive block playtest.|回して、消して、反撃。対戦ブロックゲーム SPINREALM のプレイテスト。|회전하고, 지우고, 반격하세요. 블록 대전 게임 SPINREALM 플레이테스트.
 game.homeLabel|SPINREALM 旋界首頁|SPINREALM 旋界首页|SPINREALM home|SPINREALM ホーム|SPINREALM 홈
