@@ -63,12 +63,14 @@ export class SpinrealmRoom {
     this.nextStateAt=0;this.targetCursor=0;
   }
   async fetch(request){
+    if(this.clients.size>=MAX_PLAYERS+2)return new Response('Room connection limit',{status:429});
     const pair=new WebSocketPair();
     const client=pair[0],ws=pair[1];ws.accept();
     this.clients.set(ws,null);
+    const helloDeadline=setTimeout(()=>{if(!this.clients.get(ws))try{ws.close(4000,'hello timeout');}catch{}},8000);
     ws.addEventListener('message',e=>this.onMessage(ws,e.data));
-    ws.addEventListener('close',()=>this.onClose(ws));
-    ws.addEventListener('error',()=>this.onClose(ws));
+    ws.addEventListener('close',()=>{clearTimeout(helloDeadline);this.onClose(ws);});
+    ws.addEventListener('error',()=>{clearTimeout(helloDeadline);this.onClose(ws);});
     send(ws,{type:'hello_required',rules:'guest-casual-1',maxPlayers:MAX_PLAYERS});
     return new Response(null,{status:101,webSocket:client});
   }
@@ -163,11 +165,9 @@ export class SpinrealmRoom {
     if(!p||p.ws!==ws)return;
     p.ws=null;p.rtcReady=false;
     this.everyone({type:'rtc_peer_ready',id:p.id,enabled:false});
-    if(this.phase==='lobby'||this.phase==='ended'){
-      // Reconnection keys stay valid for the lifetime of the room.
-      if(p.id===this.host)this.host=[...this.players.values()].find(x=>x.ws)?.id||null;
-      this.lobby();
-    }else this.lobby();
+    // A disconnected host must not freeze the next round permanently.
+    if(p.id===this.host)this.host=[...this.players.values()].find(x=>x.ws)?.id||null;
+    this.lobby();
   }
   resolveAttack(attacker,n){
     while(n>0&&attacker.pending.length){
