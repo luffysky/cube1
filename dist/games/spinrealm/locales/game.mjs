@@ -1,5 +1,4 @@
-export const gameRows = String.raw`
-ads.rewardTitle|自願觀看廣告獎勵|自愿观看广告奖励|Optional rewarded ads|任意のリワード広告|선택형 보상 광고
+export const gameRows = String.raw`ads.rewardTitle|自願觀看廣告獎勵|自愿观看广告奖励|Optional rewarded ads|任意のリワード広告|선택형 보상 광고
 ads.rewardDesc|完成一則由廣告平台驗證的獎勵廣告，可獲得 15 金幣，每日最多 3 次。拒絕觀看不影響遊戲。|完成广告平台验证的激励广告可获 15 金币，每天最多 3 次。不看也不影响游戏。|Earn 15 coins per verified rewarded ad, up to 3 daily. Watching is always optional.|広告会社により視聴確認された広告で15コイン、1日3回まで。視聴は任意です。|검증된 보상형 광고 1회당 15코인, 하루 최대 3회. 시청은 선택 사항입니다.
 ads.rewardPending|廣告系統尚未啟用，無法觀看或領取獎勵。|广告系统尚未启用，无法观看或领取奖励。|Rewarded ads are not available yet. No coins can be claimed.|広告配信は未設定です。報酬はまだ受け取れません。|보상형 광고가 아직 제공되지 않습니다.
 ads.rewardButton|觀看廣告，領取 15 金幣|观看广告，领取 15 金币|Watch ad for 15 coins|広告を見て15コイン獲得|광고 보고 15코인 받기
