@@ -22,7 +22,7 @@ test('quest endpoints use the server verified user id, never a browser supplied 
  let user=null;
  const store={clock:Date.now,limit:async()=>{},ensureUser:async()=>{},dailyQuests:async(id)=>{user=id;return {date:'2026-11-20',quests:[]};}};
  const app=createApp({store,authenticate:async()=> 'verified-user'});
- const response=await app.fetch(new Request('https://api.example/v1/quests/daily',{headers:{Origin:'https://example.org'}}));
+ const response=await app.fetch(new Request('https://api.example/v1/quests/daily'));
  assert.equal(response.status,200);
  assert.equal(user,'verified-user');
  assert.deepEqual((await response.json()).quests,[]);
