@@ -69,12 +69,12 @@ test('logout disables ranked inputs and ignores a pending server response',async
   assert.equal(events.at(-1).reason,'session_changed');
 });
 
-async function memberModule(t,{fetcher}={}){
+async function memberModule(t,{fetcher,sessionToken}={}){
   const key=`__memberTest${crypto.randomUUID().replaceAll('-','')}`,oldFetch=globalThis.fetch;
   let tokenCalls=0;const entitlements=[];
   const profile={profile:{id:'alice'},wallet:{balance:250},appearance:{theme:'obsidian'},entitlement:{plus:false,customImages:false}};
   const signed=`e30.${Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+900})).toString('base64url')}.test`;
-  const env={CONFIG:{authUrl:'https://auth.example',apiUrl:'https://api.example'},setEntitlements:value=>entitlements.push(value),setAppearance:()=>{},restoreCustomImage:async()=>{},clearCustomPreview:()=>{},setImageScope:()=>{},auth:{getSession:async()=>{tokenCalls++;return{data:{user:{id:'alice'},session:{token:signed}}};},signOut:async()=>({data:{}})}};
+  const env={CONFIG:{authUrl:'https://auth.example',apiUrl:'https://api.example'},setEntitlements:value=>entitlements.push(value),setAppearance:()=>{},restoreCustomImage:async()=>{},clearCustomPreview:()=>{},setImageScope:()=>{},auth:{getSession:async()=>{tokenCalls++;return{data:{user:{id:'alice'},session:{token:sessionToken??signed}}};},signOut:async()=>({data:{}})}};
   globalThis[key]=env;globalThis.fetch=fetcher||(async()=>Response.json(profile));
   let source=await readFile(new URL('../../dist/games/spinrealm/member-client.mjs',import.meta.url),'utf8');
   source=source.replace("import { CONFIG } from './config.mjs';",`const {CONFIG}=globalThis['${key}'];`)
@@ -115,4 +115,13 @@ test('late profile response cannot restore membership after sign-out',async t=>{
   await fixture.module.signOut();reply.resolve(Response.json({...fixture.profile,entitlement:{plus:true,customImages:true}}));
   assert.equal(await pending,null);assert.equal(fixture.module.memberState().user,null);assert.equal(fixture.module.memberState().profile,null);
   assert.deepEqual(fixture.entitlements.at(-1),{customImages:false});
+});
+
+
+test('opaque session token cannot be used to call the trusted game API',async t=>{
+  let requests=0;
+  const fixture=await memberModule(t,{sessionToken:'opaque-session-value',fetcher:async()=>{requests++;return Response.json({});}});
+  await fixture.module.initMember();
+  await assert.rejects(fixture.module.api('/v1/profile'),{code:'session_token_unavailable'});
+  assert.equal(requests,0);
 });
