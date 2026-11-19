@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#091324">
+  <meta name="description" content="SPINREALM 旋界 2～4 人即時好友房休閒測試，WebSocket 伺服器判定攻防。">
+  <title>SPINREALM 旋界｜多人即時好友房</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./room.css">
+</head>
+<body>
+<header class="room-header">
+  <a class="room-brand" href="./index.html">↶ <strong>SPINREALM <span>旋界</span></strong></a>
+  <div><span class="room-badge">FRIEND ROOM · BETA</span><span id="socketStatus" class="socket-status">尚未連線</span></div>
+</header>
+<main>
+  <section class="room-intro">
+    <div><p class="eyebrow">NEON ARENA / MULTIPLAYER</p><h1>讓這一局，<em>一起轉。</em></h1>
+      <p>2～4 人即時好友對戰。只需分享房間碼，伺服器統一處理棋盤與攻擊。這是休閒測試房，不影響正式排位、金幣或帳號資料。</p>
+    </div>
+  </section>
+  <section id="roomJoin" class="panel entry-panel">
+    <p class="eyebrow">01 / ENTER ARENA</p><h2>建立房間，或加入朋友。</h2>
+    <label for="roomNickname">你的顯示名稱</label>
+    <input id="roomNickname" maxlength="20" autocomplete="nickname" placeholder="玩家暱稱" value="旋界玩家">
+    <div class="entry-grid">
+      <div class="entry-action"><strong>當房主</strong><p>建立 10 碼邀請代碼，等朋友加入後開始對戰。</p><button id="roomCreate" class="primary">建立好友房 ↗</button></div>
+      <form id="roomJoinForm" class="entry-action"><strong>加入對戰</strong><p>輸入朋友分享的 10 碼房間碼。</p>
+        <label for="roomCode">房間碼</label><input id="roomCode" autocomplete="off" maxlength="10" placeholder="XXXXXXXXXX" spellcheck="false">
+        <button type="submit" class="secondary">加入房間 ↗</button>
+      </form>
+    </div>
+    <p id="roomNotice" class="notice" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="roomLobby" class="panel lobby-panel" hidden>
+    <div class="room-lobby-head"><div><p class="eyebrow">02 / MATCH LOBBY</p><h2>房間 <code id="roomCodeLabel"></code></h2><p>至少兩人在線才能開始，最多四人；沒有機器人冒充真人。</p></div>
+      <div class="lobby-actions"><button id="copyInvite" class="secondary">複製邀請連結</button><button id="leaveLobby" class="secondary">離開房間</button></div>
+    </div>
+    <div id="roomRoster" class="roster"></div>
+    <button id="roomLaunch" class="primary" disabled>等候房主開始</button>
+    <p class="notice">房內目前沒有金幣、道具購買、排位積分或跨裝置存檔獎勵。</p>
+  </section>
+
+  <section id="roomPlay" class="play-session" hidden>
+    <div class="match-head">
+      <div><p class="eyebrow">FRIENDLY REALTIME</p><strong id="roomRoundLabel">多人休閒對戰</strong></div>
+      <div class="match-clock"><small>剩餘時間</small><strong id="roomClock">02:00</strong></div>
+      <button id="leaveMatch" class="secondary">離開對戰</button>
+    </div>
+    <div class="play-layout">
+      <aside class="rivals panel">
+        <div class="rivals-title"><strong>對手戰況</strong><div class="switcher" role="group" aria-label="對手顯示方式"><button data-rival-view="board" aria-pressed="true">棋盤</button><button data-rival-view="stats" aria-pressed="false">數據</button></div></div>
+        <div id="rivalCards" class="rival-cards"></div>
+        <p class="micro-note">對方的方塊、消行與攻擊由伺服器同步。棋盤顯示不影響操作規則。</p>
+      </aside>
+      <section class="my-panel panel">
+        <div class="my-topline"><strong>YOUR FIELD</strong><span id="roomPhase">進行中</span></div>
+        <div class="my-board-grid">
+          <div class="hold-preview"><span>HOLD</span><canvas id="roomHold" width="80" height="70" aria-label="暫存方塊"></canvas></div>
+          <canvas id="roomBoard" class="board" width="300" height="600" aria-label="你的方塊棋盤"></canvas>
+          <div class="next-preview"><span>NEXT</span><canvas id="roomNext" width="80" height="340" aria-label="接下來的五顆方塊"></canvas></div>
+        </div>
+        <div class="my-stats"><div><small>得分</small><strong id="roomScore">0</strong></div><div><small>消行</small><strong id="roomLines">0</strong></div><div><small>送出</small><strong id="roomSent">0</strong></div><div><small>待抵消</small><strong id="roomIncoming">0</strong></div></div>
+        <p id="roomBattleNotice" class="battle-notice" role="status" aria-live="polite">等待其他玩家……</p>
+        <div class="touch-grid" aria-label="觸控操作">
+          <button data-room-action="left" aria-label="左移">◀<small>左移</small></button>
+          <button data-room-action="right" aria-label="右移">▶<small>右移</small></button>
+          <button data-room-action="ccw" aria-label="逆轉">↶<small>逆轉</small></button>
+          <button data-room-action="cw" aria-label="順轉">↷<small>順轉</small></button>
+          <button data-room-action="soft" class="wide" aria-label="軟降">↓　軟降</button>
+          <button data-room-action="hard" class="wide hard" aria-label="硬降">⇊　硬降</button>
+          <button data-room-action="hold" class="hold-action" aria-label="暫存交換">⇄　暫存交換</button>
+        </div>
+        <p class="keyboard-note">鍵盤：← → 移動、Z / X 旋轉、↓ 軟降、空白鍵硬降、C 暫存。對戰期間不暫停伺服器時間。</p>
+      </section>
+    </div>
+  </section>
+</main>
+<script type="module" src="./room-app.mjs"></script>
+</body>
+</html>
