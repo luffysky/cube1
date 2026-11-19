@@ -23,3 +23,19 @@
 .srg-consent-status{font-size:11px;color:#ffd5a9;min-height:17px}
 .srg-consent .srg-check{display:flex;align-items:flex-start;gap:9px;font-weight:500}
 @media(max-width:480px){.srg-consent{padding:9px}.srg-consent-panel{padding:16px;border-radius:12px}.srg-consent-actions{grid-template-columns:1fr}.srg-consent button[data-consent-action=accept]{grid-column:1}.srg-consent p{font-size:11px}}
+
+
+/* Two-stage language-first consent and researched jurisdiction details. */
+.srg-consent [hidden]{display:none!important}
+.srg-consent #srgLanguageStage>button{display:block;width:100%;background:linear-gradient(110deg,#1c71ad,#6342bd);border-color:#77d4ff;margin-top:15px}
+.srg-consent .srg-back{min-height:32px;padding:5px 12px;font-size:11px;margin-bottom:7px;background:transparent}
+.srg-consent .srg-jurisdiction{margin:13px 0 8px;border:1px solid #38608e;border-radius:10px;background:#0b2039;padding:11px}
+.srg-consent .srg-jurisdiction:empty{display:none}
+.srg-consent .srg-jurisdiction h3{font-size:13px;color:#b7e9ff;margin:0 0 8px}
+.srg-consent .srg-jurisdiction p{line-height:1.65;margin:7px 0;font-size:11px}
+.srg-consent .srg-compliance-gap{border-left:2px solid #ebc17b;padding-left:9px;color:#f5dcb8}
+.srg-consent .srg-policy-sources{display:flex;flex-wrap:wrap;gap:4px 11px;margin-top:9px}
+.srg-consent .srg-policy-sources a{font-size:10px;color:#8cddfa}
+.srg-consent .srg-policy-links{line-height:1.8;font-size:11px}
+.srg-consent-panel>div>label:not(.srg-consent-row):not(.srg-check){margin-top:12px}
+.srg-consent .srg-consent-row strong{margin-bottom:3px}
