@@ -191,7 +191,7 @@ function start(reuse=false){
   if(ticketBusy)return;
   if(mode==='ranked'){void startRanked();return;}
   initAudio();if(phase==='paused'){resume();return;}
-  prepare(reuse?matchSeed:newSeed());phase='running';lastFrame=performance.now();$('overlay').hidden=true;$('cpuIdle').hidden=isVersus();$('pauseBtn').disabled=false;$('pauseBtn').textContent='Ⅱ';
+  prepare(reuse?matchSeed:newSeed());phase='running';lastFrame=performance.now();$('overlay').hidden=true;$('pauseBtn').disabled=false;$('pauseBtn').textContent='Ⅱ';
   $('playerCanvas').focus({preventScroll:true});updateUI();draw();
 }
 function pause(){if(phase!=='running')return;if(mode==='ranked'){clearInputs();inform(t('ranked.noPause'));return;}phase='paused';clearInputs();$('pauseBtn').textContent='▶';showOverlay({kicker:'TAKE A BREATH',title:'先歇一下。',text:'棋盤和對手都在等你。',button:'繼續這一局',hint:`按 ${keyName(settings.keys.pause)} 或按鈕繼續`});updateUI();}
@@ -442,7 +442,7 @@ function drawPieces(canvas,types,dim=false){
   const ctx=ctxFor(canvas),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);const slot=types.length>1?h/5:h;
   types.forEach((type,i)=>{if(!type)return;const shape=SHAPES[type][0],size=Math.min(w/4.8,slot/3.1),minX=Math.min(...shape.map(c=>c[0])),maxX=Math.max(...shape.map(c=>c[0])),minY=Math.min(...shape.map(c=>c[1])),maxY=Math.max(...shape.map(c=>c[1]));const ox=(w-(maxX-minX+1)*size)/2,oy=i*slot+(slot-(maxY-minY+1)*size)/2;ctx.globalAlpha=dim?.35:1;for(const[x,y]of shape)block(ctx,ox+(x-minX)*size,oy+(y-minY)*size,size,COLORS[type]);ctx.globalAlpha=1;});
 }
-function draw(){if(!player)return;drawBoard($('playerCanvas'),player,true);if($('cpuCanvas').getBoundingClientRect().width)drawBoard($('cpuCanvas'),cpu);drawPieces($('holdCanvas'),[player.held],!player.canHold);drawPieces($('nextCanvas'),player.queue.slice(0,5));}
+function draw(){if(!player)return;drawBoard($('playerCanvas'),player,true);drawPieces($('holdCanvas'),[player.held],!player.canHold);drawPieces($('nextCanvas'),player.queue.slice(0,5));}
 
 function updateUI(){
   if(!player)return;
@@ -465,7 +465,7 @@ function updateUI(){
   $('holdEmpty').hidden=!!player.held;
   document.querySelectorAll('.touch-controls [data-action], #touchHoldBtn').forEach(button=>{button.disabled=phase!=='running'||(button.dataset.action==='hold'&&!player.canHold);});
   $('touchHoldState').textContent=phase==='running'&&!player.canHold?'待落子':'交換';
-  $('cpuSent').textContent=cpuSent;$('cpuLines').textContent=cpu.stats.lines;
+  $('cpuSent').textContent=cpuSent;$('cpuLines').textContent=cpu.stats.lines;$('cancelledValue').textContent=cancelled;$('sentBattleValue').textContent=sent;
   $('incomingValue').innerHTML=total+'<small>行</small>';$('incomingFill').style.height=Math.min(100,total/12*100)+'%';$('pressureFill').style.width=Math.min(100,total/12*100)+'%';$('pressureTitle').closest('section').classList.toggle('danger',total>0);
   $('pressureText').textContent=!isVersus()?'沒有壓力。把這一手做到順。':total?(incomingPlayer[0].at>elapsed?`${((incomingPlayer[0].at-elapsed)/1000).toFixed(1)} 秒後，於下一次落子入場`:'下一次落子入場。消行攻擊可先抵消。'):'目前安全。準備你的下一手。';
   if(mode==='ranked')$('arenaCaption').textContent=t('ranked.liveCaption',{sent:cpuSent,incoming:total});
@@ -473,7 +473,7 @@ function updateUI(){
   if(mode==='drill')$('arenaCaption').textContent=drillAltered?'已交換方塊；按 R 重擺洞型後，再練標準 T-Spin。':`${keyLabels('cw')} 順轉一次，再按 ${keyName(settings.keys.hard)} 硬降。`;
   if(holdGuide)$('arenaCaption').textContent='暫存引導中 · 不會自動下落 · 先交換，再落子解鎖';
   $('drillWins').textContent=String(drillWins).padStart(2,'0');$('pauseBtn').disabled=!['running','paused'].includes(phase);
-  $('cpuIdle').hidden=isVersus()&&phase==='running';$('cpuIdle').textContent=isVersus()?(phase==='paused'?'PAUSED':phase==='ended'?'FINISHED':'READY'):'SOLO';
+  $('cpuIdle').textContent=isVersus()?(phase==='paused'?'PAUSED':phase==='ended'?'FINISHED':phase==='running'?'LIVE':'READY'):'SOLO';
   updateHoldGuide();updatePartyUI();syncAudio();updateAudioStatus();
   const layoutKey=`${mode}:${phase}:${Boolean(holdGuide)}`;
   if(layoutKey!==lastLayoutKey){lastLayoutKey=layoutKey;scheduleBoardFit();}
