@@ -51,7 +51,27 @@ async function accessToken(force=false) {
       if(!sameSession(generation,userId))throw new ServiceError('session_expired',401);
       token=data?.session?.token;
     }
+    if(typeof token!=='string'||token.split('.').length!==3){
+      // Better Auth JWT plugin exposes GET /token. Some session caches only contain
+      // an opaque session token, and must never be passed to the game API.
+      // Fetch with the browser-managed Auth cookie; no token is written to storage.
+      const tokenUrl=CONFIG.authUrl.replace(/\\/$/,'')+'/token';
+      let tokenResponse;
+      try{
+        tokenResponse=await fetch(tokenUrl,{method:'GET',credentials:'include',cache:'no-store',headers:{Accept:'application/json'}});
+      }catch{throw new ServiceError('session_token_unavailable',401);}
+      if(!sameSession(generation,userId))throw new ServiceError('session_expired',401);
+      if(!tokenResponse.ok)throw new ServiceError('session_token_unavailable',401);
+      const payload=await tokenResponse.json().catch(()=>null);
+      token=payload?.token;
+    }
     if(typeof token!=='string'||token.split('.').length!==3)throw new ServiceError('session_token_unavailable',401);
+    // Reject an obviously expired token or a token for a different signed-in user.
+    try{
+      const body=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+      if(body.sub!==userId||!Number.isFinite(body.exp)||body.exp*1000<=Date.now())
+        throw new ServiceError('session_token_unavailable',401);
+    }catch(error){if(error instanceof ServiceError)throw error;throw new ServiceError('session_token_unavailable',401);}
     cachedToken={userId,token,expiresAt:tokenExpiry(token)};
     return token;
   })();
