@@ -47,7 +47,7 @@
     <div class="match-head">
       <div><p class="eyebrow">FRIENDLY REALTIME</p><strong id="roomRoundLabel">多人休閒對戰</strong></div>
       <div class="match-clock"><small>剩餘時間</small><strong id="roomClock">02:00</strong></div>
-      <button id="leaveMatch" class="secondary">離開對戰</button>
+      <div class="rtc-controls"><button id="roomRtc" type="button" class="secondary" aria-pressed="false">WebRTC 直連測試（可選）</button><span id="roomRtcState" class="rtc-state">預設關閉，對戰由 WebSocket 負責</span></div><button id="leaveMatch" class="secondary">離開對戰</button>
     </div>
     <div class="play-layout">
       <aside class="rivals panel">
