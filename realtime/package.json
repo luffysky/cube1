@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test ../tests/spinrealm/realtime-room.test.mjs",
     "check": "node --check worker.mjs"
   },
   "devDependencies": {
