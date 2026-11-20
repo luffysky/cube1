@@ -45,7 +45,7 @@ Google 的網頁文件說明 GET 回呼，但未在該頁定義 AdMob 的 ECDSA 
 - `server/api/quests.mjs`：首批三個真人排位每日任務。
 - `dist/games/spinrealm/member-ui.mjs`：錢包內展示共用上限及任務，有效會員可手動領取，廣告觀看按鈕維持停用至供應商串接完成。
 - 五語系 `dist/games/spinrealm/locales/game.mjs` 及測試。
-- **GitHub 有程式碼不代表 Neon Function、Google SSV、正式 Vercel/PWA 已完成部署或真人領獎驗收。**
+- 2026-11-20 已部署 cube1 前端及 Neon Function 第 4 版。API 健康與資料庫就緒探測通過，未登入的獎勵狀態請求回 401。離線 SQL 測試涵蓋共用額度、重送與跨日。正式 Plus 帳號實領仍待驗收；網頁廣告供應商與回呼保持停用。
 
 ## Claude 的 cube2 待實作與交付
 

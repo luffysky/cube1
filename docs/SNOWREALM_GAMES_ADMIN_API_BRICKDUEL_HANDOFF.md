@@ -18,11 +18,11 @@
 
 ## 3. 目前管理 API（僅 cube1）
 
-基底目前同 SnowRealm Games Neon Function API（部署前不可視為正式可用）。
+程式已隨 cube1 會員 API 部署至 Neon Function 第 4 版。正式 `/health/ready` 回 200，未帶憑證讀 `/v1/admin/overview` 回 401。獨立管理站尚未部署，已授權管理員讀取資料的端到端驗收仍待完成。對接 cube2 的機器簽發及呼叫端另見第 5 節。
 
 | Method | Path | 現行授權 | 回應 | 狀態 |
 |---|---|---|---|---|
-| GET | `/v1/admin/overview` | 個人 JWT＋管理員白名單 | `{service,scope,readOnly,players,wallets,outstandingCoins,rankedMatches,runningMatches,queuedPlayers,settlements,fetchedAt}` | 已寫入 GitHub，部署待驗收 |
+| GET | `/v1/admin/overview` | 個人 JWT＋管理員白名單 | `{service,scope,readOnly,players,wallets,outstandingCoins,rankedMatches,runningMatches,queuedPlayers,settlements,fetchedAt}` | 已部署，管理員權限待驗收 |
 | GET | `/v1/admin/players` | 個人 JWT＋管理員白名單 | `{scope,limit,items:[{playerId,nickname,friendCode,createdAt,coins,rating,games}]}` | 同上 |
 | GET | `/v1/admin/ledger` | 個人 JWT＋管理員白名單 | `{scope,limit,items:[{eventId,playerId,delta,balanceAfter,reason,createdAt}]}` | 同上 |
 | GET | `/v1/admin/matches` | 個人 JWT＋管理員白名單 | `{scope,limit,items:[{matchId,players,status,startedAt,settledAt}]}` | 同上 |
