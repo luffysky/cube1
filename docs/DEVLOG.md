@@ -203,3 +203,9 @@
 - production Neon Function 清單只有 cube1api deployment 4。Identity 尚無部署或正式部署機密配置。本次沒有 DB 或 DNS 異動。
 - cube2 唯讀查核 main 6199b73。已存在綁定／復原的旗標檢查，尚未找到正式 callback 或 BFF token exchange 路由。
 - 仍需完成可信伺服器同意、BFF Session、正式秘密配置與部署。回滾此變更前須維持 Identity 路由未公開，避免恢復前端布林同意放行。
+
+## 2026-11-21｜Identity Function 正式連線與撤銷 API 防護
+
+- 正式連線限定已與 Neon production 核對的 compute（含 pooler）、cube1 與 sr_identity_service。pg 保持憑證驗證，URL query 不得覆蓋 TLS。DB readiness 檢查 session_user 與 current_user。
+- 撤銷 API 要求已配置的 BFF 伺服器憑證，拒絕帶 Origin 的請求，成功只回 active。OAuth 簽發與交換依 PR #14 持續回 503。
+- 正式尚無 Identity Function。此次未變動資料庫、DNS 或 cube2。若需回滾程式，回到 PR #14 基線並維持授權端點關閉。

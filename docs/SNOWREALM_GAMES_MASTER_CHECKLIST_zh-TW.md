@@ -261,3 +261,5 @@ Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成�
 - [管理後台安全部署](ADMIN_SECURITY_DEPLOYMENT.md)
 - [獎勵廣告、任務與 Plus](REWARDED_ADS_AND_QUESTS_CUBE1_CUBE2_SPEC.md)
 - [Steam 上架說明](steam/SnowRealmGames_Steam_Guide_zh-CN.md)
+
+Identity 續辦（2026-11-21）：已提出正式 DB 連線目標檢查與撤銷 API 的 BFF 身分驗證。正式秘密配置、Function、網域與 E2E 仍須取得實際驗收證據，總勾選維持 51/139。
