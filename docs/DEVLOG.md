@@ -4,6 +4,15 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-20｜Arcade 六款 MVP 正式合併與 CI 驗收
+- **Owner 決策**：D-003；GitHub Issue #3。
+- **結果**：六款原創單人遊戲的引擎、介面、測試、遊戲館搜尋／收藏入口與 PWA 資源白名單已合併至 cube1 `main`。
+- **合併證據**：[PR #6](https://github.com/luffysky/cube1/pull/6)；main squash commit `21ff117d6542a10a4dbf9a3f5887b6792421a2f3`。
+- **測試證據**：整合版 [GitHub Actions 44766629251](https://github.com/luffysky/cube1/actions/runs/44766629251) success；合併後 main [GitHub Actions 44766754938](https://github.com/luffysky/cube1/actions/runs/44766754938) success。包含原有 Web / API / PWA、Identity 核心及六款遊戲單元測試；不等於實機功能驗收。
+- **正式網站查核**：本輪環境無法解析 `games.snowrealm.pet` DNS，無法證明 Vercel 正式網址已部署六款；需在受控網路或 DNS 恢復後驗證首頁與每個 `/games/<slug>/`。
+- **變更安全**：未操作真實玩家資料庫、未刪除資料、未碰 cube2、不設任何付費方案；Identity 綁定仍關閉。
+- **後續門檻**：實際網站開啟、手機瀏覽器觸控/音效/旋轉測試、跨裝置存檔與正式獨立遊戲版本需另外驗收。
+
 ## 2026-11-20｜Arcade 其餘四款原創 MVP（開發分支）
 - **Owner 決策**：D-003 / Issue #3 六款全做。
 - **實際新增**：節奏超載（原創合成節奏、四鍵譜面判定/連擊/延遲校準）；環域逃脫（八方位三層旋轉環形迷宮與出口判定）；重力逆轉（固定網格碰撞、上下重力、三關與重開）；領域爭奪（九節點佔領、能量成本、回合制本機 AI、勝負判定）。每款均有獨立純邏輯引擎、Web 遊戲頁與單元測試。
