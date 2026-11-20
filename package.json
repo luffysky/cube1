@@ -11,7 +11,8 @@
     "build:api": "npm --prefix server/api run build",
     "build:desktop": "npm --prefix desktop run build:dir",
     "build:auth": "esbuild tools/auth-entry.mjs --bundle --format=esm --platform=browser --minify --outfile=dist/games/spinrealm/vendor/neon-auth.mjs",
-    "test:arcade": "node --test tests/arcade/*.test.mjs"
+    "test:arcade": "node --test tests/arcade/*.test.mjs",
+    "test:identity": "node --test tests/identity/*.test.mjs"
   },
   "dependencies": {
     "@neon/auth": "0.8.2"

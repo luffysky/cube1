@@ -27,6 +27,8 @@ jobs:
           node-version: '24'
       - name: Test gameplay and offline rules
         run: npm test
+      - name: Verify Identity signer, JWKS and fail-closed policies
+        run: npm run test:identity
       - name: Test original arcade MVP rules
         run: node --test tests/arcade/*.test.mjs
       - name: Install API test dependencies

@@ -26,7 +26,16 @@
 - **程式與玩家資料**：只新增遊戲頁與本機記錄；無正式資料庫新增／更新／刪除，無變動 cube2。
 - **提交**：分支 `feat/arcade-zero-dodge-mvp-20261120`，PR 內查看所有 commits 與 CI。
 - **測試與部署**：已新增自動化測試並交 GitHub Actions 驗證；尚未做手機真人操作驗收或正式部署，不宣稱 Steam/雲端排行已開通。
-- **待辦**：另外五款仍在 Issue #3，依不同機制逐項做 MVP，不以換皮完成計數。正式玩家錢包與跨裝置進度另需 Identity 服務。
+- **後續**：六款 MVP 源碼均已提交，但各遊戲正式發行、實機互動、多語和正式排行榜仍需後續驗收；跨裝置進度還需 Identity 服務。
+
+## 2026-11-20｜Identity Ed25519／JWKS 基礎（開發分支）
+- **Owner 決策**：D-005、D-007、D-008、D-010；Issue #4。
+- **實際變更**：建立 identity/authority.mjs（私鑰僅受信任端、平台 UUID、限縮 Brickduel audience/scope、JWT 有效期與嚴格驗簽、即時撤銷狀態失敗拒絕）；identity/app.mjs（公開 JWKS、health，ready=503；無公開簽發路由）；identity/README.md；tests/identity/authority.test.mjs。增加 package.json 測試命令及 Web tests CI。
+- **GitHub 分支**：feat/identity-jwks-ed25519-foundation-20261120；程式 commit ef9d8a64，後續測試／文件提交在同分支與 PR 留證。
+- **資料庫／刪除／機密**：未修改任何正式資料、schema、玩家資產或 cube2；未執行刪除；未產生正式簽發私鑰，亦未公開服務密鑰。
+- **測試**：新增 Node 單元測試並安排 GitHub Actions CI，CI 結果以實際 Workflow 為準。
+- **部署**：未部署。identity.snowrealm.pet、OAuth/PKCE、BFF、持久撤銷與兩帳號驗收均未完成；cube2 綁定保持 OFF。
+- **回滾**：本 PR 不合併即可撤回，不影響既有玩家與正式登入。
 
 ## 2026-11-20｜建立開發紀錄制度
 
