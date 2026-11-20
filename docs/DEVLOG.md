@@ -173,3 +173,9 @@
 - 加入待審的最小權限角色 SQL、RLS/撤銷 readiness 檢查及 Postgres 測試。尚待正式角色核准與配發、可信同意及 BFF 串接、部署和雙帳號驗收。
 - 回復方式：本次未改正式資料庫或部署。演練分支不得提升為正式分支。綁定開關依 C-021 維持關閉。
 - 授權端要求精確 Origin，交換端將工作階段持有的 state／nonce 與 PKCE 一起原子核對。
+
+## 2026-11-21｜P0 Identity PR #13 合併與正式庫權限交接
+
+- PR #13 已合併，合併 SHA `d546b8245a16bdff94f53b4f7970ea99977c65fa`，[main CI 已通過](https://github.com/luffysky/cube1/actions/runs/44792658198)。
+- 正式專用登入、角色與 8 條 RLS 政策已依 Owner 核准建立並做 ACL 核對，沿用既有配置。未重跑角色 SQL。
+- 專用登入的連線驗證、憑證與 Function 部署仍待完成。正式網域、跨遊戲 OAuth 和雙帳號驗收尚未執行，綁定維持 OFF。
