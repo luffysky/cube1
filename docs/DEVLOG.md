@@ -209,3 +209,8 @@
 - 正式連線限定已與 Neon production 核對的 compute（含 pooler）、cube1 與 sr_identity_service。pg 保持憑證驗證，URL query 不得覆蓋 TLS。DB readiness 檢查 session_user 與 current_user。
 - 撤銷 API 要求已配置的 BFF 伺服器憑證，拒絕帶 Origin 的請求，成功只回 active。OAuth 簽發與交換依 PR #14 持續回 503。
 - 正式尚無 Identity Function。此次未變動資料庫、DNS 或 cube2。若需回滾程式，回到 PR #14 基線並維持授權端點關閉。
+
+## 2026-11-21｜管理後台獨立發行準備
+
+- 獨立 Worker 先驗證 Access JWT 的簽名、issuer 與 audience，再允許後台 HTML、JS、CSS、圖示及固定的五個唯讀管理 API。對應測試納入 API suite。
+- 正式玩家站舊後台 HTML 與 JS 實測 404。Neon API 未登入讀取為 401。候選主機目前回 503，正式 Access/MFA、Cloudflare DNS/TLS 與部署尚待驗收。

@@ -31,3 +31,12 @@
 - [ ] Vercel 專案根目錄與發行步驟不會把 `internal/admin-console` 當成公開資產。
 
 **完成以上驗收前不要向一般使用者提供後台 URL，也不要將後台視為已安全上線。**
+
+## 獨立 Cloudflare Worker 發行
+
+使用 Node 24 執行 `npm --prefix server/api ci` 及 `node internal/admin-console/build.mjs`。
+`internal/admin-console/wrangler.toml` 只發佈建置輸出。Worker 在 Assets 前執行，且關閉 workers.dev 及預覽網址。正式 route 由 Owner 選定並存入 `ADMIN_ENTRY_PATH`，公開玩家站輸出不含後台。
+
+部署前先在 Zero Trust 建立覆蓋整個管理網域的 Access application。Allow 政策只包含核准管理員並要求 MFA。將驗證過的團隊 issuer 和 app audience 分別配置為 `ACCESS_ISSUER` 和 `ACCESS_AUDIENCE`。不得加入 Bypass。確認 Neon Auth 已信任此管理站 Origin，並沿用 server 的 Neon JWT 與 `SNOWREALM_ADMIN_SUBJECTS`。Worker 只轉送五個同源 GET 管理路徑至既有 API。
+
+回滾時移除管理 Worker 網域綁定，保留 Access 對整個主機的封鎖。任何版本不得直接發布 build/assets。

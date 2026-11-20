@@ -1,7 +1,7 @@
 // SnowRealm Games management console. No tokens are stored, logged or displayed.
 // Backend enforces a verified signed JWT + server-side explicit subject allowlist.
-import { CONFIG } from '../games/spinrealm/config.mjs';
-import { createAuthClient } from '../games/spinrealm/vendor/neon-auth.mjs';
+import { CONFIG } from '../../dist/games/spinrealm/config.mjs';
+import { createAuthClient } from '../../dist/games/spinrealm/vendor/neon-auth.mjs';
 
 const auth=createAuthClient(CONFIG.authUrl),$=id=>document.getElementById(id);
 const panels=['overview','trends','players','ledger','matches','integrations','compliance'];
@@ -88,7 +88,7 @@ async function signedToken(force=false){
 }
 async function api(path,refresh=false){
  const bearer=await signedToken(refresh);
- const response=await fetch(CONFIG.apiUrl.replace(/\/$/,'')+path,{method:'GET',mode:'cors',credentials:'omit',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+bearer}});
+ const response=await fetch('.'+path,{method:'GET',mode:'same-origin',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+bearer}});
  const payload=await response.json().catch(()=>null);
  if(response.status===401&&!refresh){token=null;return api(path,true);}
  if(!response.ok){const err=new Error(payload?.error?.code||'HTTP_'+response.status);err.status=response.status;throw err;}
