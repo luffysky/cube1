@@ -10,7 +10,8 @@
     "build:pages": "node scripts/build-github-pages.mjs",
     "build:api": "npm --prefix server/api run build",
     "build:desktop": "npm --prefix desktop run build:dir",
-    "build:auth": "esbuild tools/auth-entry.mjs --bundle --format=esm --platform=browser --minify --outfile=dist/games/spinrealm/vendor/neon-auth.mjs"
+    "build:auth": "esbuild tools/auth-entry.mjs --bundle --format=esm --platform=browser --minify --outfile=dist/games/spinrealm/vendor/neon-auth.mjs",
+    "test:identity": "node --test tests/identity/*.test.mjs"
   },
   "dependencies": {
     "@neon/auth": "0.8.2"

@@ -4,6 +4,15 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-20｜Identity Ed25519／JWKS 基礎（開發分支）
+- **Owner 決策**：D-005、D-007、D-008、D-010；Issue #4。
+- **實際變更**：建立 identity/authority.mjs（私鑰僅受信任端、平台 UUID、限縮 Brickduel audience/scope、JWT 有效期與嚴格驗簽、即時撤銷狀態失敗拒絕）；identity/app.mjs（公開 JWKS、health，ready=503；無公開簽發路由）；identity/README.md；tests/identity/authority.test.mjs。增加 package.json 測試命令及 Web tests CI。
+- **GitHub 分支**：feat/identity-jwks-ed25519-foundation-20261120；程式 commit ef9d8a64，後續測試／文件提交在同分支與 PR 留證。
+- **資料庫／刪除／機密**：未修改任何正式資料、schema、玩家資產或 cube2；未執行刪除；未產生正式簽發私鑰，亦未公開服務密鑰。
+- **測試**：新增 Node 單元測試並安排 GitHub Actions CI，CI 結果以實際 Workflow 為準。
+- **部署**：未部署。identity.snowrealm.pet、OAuth/PKCE、BFF、持久撤銷與兩帳號驗收均未完成；cube2 綁定保持 OFF。
+- **回滾**：本 PR 不合併即可撤回，不影響既有玩家與正式登入。
+
 ## 2026-11-20｜建立開發紀錄制度
 
 - **執行者**：GPT（cube1）
