@@ -23,6 +23,7 @@
 | Method | Path | 現行授權 | 回應 | 狀態 |
 |---|---|---|---|---|
 | GET | `/v1/admin/overview` | 個人 JWT＋管理員白名單 | `{service,scope,readOnly,players,wallets,outstandingCoins,rankedMatches,runningMatches,queuedPlayers,settlements,fetchedAt}` | 已部署，管理員權限待驗收 |
+| GET | `/v1/admin/trends` | 個人 JWT＋管理員白名單 | `{scope,readOnly,timezone:'UTC',days:7,items:[{day,newPlayers,rankedMatches,coinsEarned,coinsSpent}],fetchedAt}` | 程式已提交，正式 API 部署及管理員實機存取待驗收 |
 | GET | `/v1/admin/players` | 個人 JWT＋管理員白名單 | `{scope,limit,items:[{playerId,nickname,friendCode,createdAt,coins,rating,games}]}` | 同上 |
 | GET | `/v1/admin/ledger` | 個人 JWT＋管理員白名單 | `{scope,limit,items:[{eventId,playerId,delta,balanceAfter,reason,createdAt}]}` | 同上 |
 | GET | `/v1/admin/matches` | 個人 JWT＋管理員白名單 | `{scope,limit,items:[{matchId,players,status,startedAt,settledAt}]}` | 同上 |
@@ -30,7 +31,7 @@
 規則：
 - 管理端必須用有效、簽章驗證的 Neon Auth EdDSA JWT，且 `sub` 出現在伺服器環境變數 `SNOWREALM_ADMIN_SUBJECTS`；未授權回 HTTP 403。
 - 缺少管理模組回 503；未部署路由回 404；未登入 JWT 回 401；寫入方式回 405。
-- 列表固定最多 50 筆，本版頁面只看前 25 筆。不得從公開頁面直接枚舉所有玩家或取得 Email、密碼與 Session。
+- 列表固定最多 50 筆，本版頁面只看前 25 筆。七日趨勢固定以 UTC 日曆日查詢，空白日回 0，僅 cube1；不能拿它當跨遊戲 DAU 或付費收入。不得從公開頁面直接枚舉所有玩家或取得 Email、密碼與 Session。
 - 將來 `admin:write` 必須另外具備二次授權、分級權限、審計、回滾和操作原因。不應直接在 v0.1 開放。
 
 ## 4. BRICKDUEL 唯讀資料契約
