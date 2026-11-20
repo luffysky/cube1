@@ -40,6 +40,17 @@
 - **安全與未完成**：`cube2` 只透過未來的 server-to-server 機器 JWT 介面接入，尚無真實資料；不會把未接通寫成 0。管理前端目前有跨站登入/靜態資產打包問題，需於獨立部署前修正並驗收。管理操作目前仍限只讀，避免在缺 MFA／稽核時開放玩家資產寫入。
 - **回滾**：此輪純程式與文件修改，必要時可由 GitHub 回復對應提交；無資料搬遷需回滾。
 
+## 2026-11-20｜SnowRealm Identity 帳號綁定上線前置核查
+
+- **Owner 指令**：「等你把開關打開」，要求完成 SnowRealm Games 與《轉磚》正式登入綁定。
+- **查核**：`cube2/server/identity.js` 已有 Ed25519 JWT 驗證，`cube2/server/app.js` 已有 `idStatus/idLink/idRecover`；`cube1/server/api/auth.mjs` 仍僅實作 Neon Auth API 身分驗證，尚非正式跨站 Identity/OIDC 服務。
+- **新增文件**：`docs/SNOWREALM_IDENTITY_LAUNCH_GATE_zh-TW.md`（commit `94dbd92e`），逐項列出正式 issuer/JWKS、平台 UUID 映射、PKCE／BFF、撤銷、資料所有權、跨裝置測試與安全啟用條件。
+- **追蹤**：[GitHub Issue #4](https://github.com/luffysky/cube1/issues/4) 記錄 P0 阻塞項。
+- **程式／資料庫**：本次未更改正式登入程式，沒有執行 Migration、寫入玩家資料或任何刪除。
+- **部署狀態**：SnowRealm Identity 尚未核實正式可用，`IDENTITY_LINK_ENABLED` 維持關閉；不能宣稱帳號已互通。
+- **測試**：已比對原始碼與對接文件；**無正式跨站整合測試成功證據**。
+- **下一步**：在 `cube1` 開發並部署可驗證的統一身分服務，取得授權網域與安全金鑰部署、進行兩帳號綁定驗收，最後讓 `cube2` 設定正式旗標。未完成前不冒險開關。
+
 ## 後續紀錄格式
 
 ```markdown
