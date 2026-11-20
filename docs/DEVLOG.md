@@ -4,6 +4,15 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-20｜Arcade《零界閃避》原創單人 MVP（開發分支）
+- **Owner 決策**：D-003 六款原創遊戲全部開發；Issue #3。
+- **實際內容**：新增 `dist/games/zero-dodge/` 三個檔案（可玩頁、純邏輯引擎、Canvas 操作），支援 60 秒計時、隨時間增加彈幕、三命碰撞、受傷無敵時間、勝負、重開、暫停、鍵盤與指標拖曳、背景暫停、本機最佳分數。
+- **平台整合**：`dist/index.html` 新增可玩遊戲卡與實際計數；`dist/app.mjs` 收藏支援 Zero Dodge；`dist/sw.js` 加入安全白名單快取；`tests/arcade/zero-dodge.test.mjs` 新增純引擎測試；CI 增加 Arcade 測試。
+- **程式與玩家資料**：只新增遊戲頁與本機記錄；無正式資料庫新增／更新／刪除，無變動 cube2。
+- **提交**：分支 `feat/arcade-zero-dodge-mvp-20261120`，PR 內查看所有 commits 與 CI。
+- **測試與部署**：已新增自動化測試並交 GitHub Actions 驗證；尚未做手機真人操作驗收或正式部署，不宣稱 Steam/雲端排行已開通。
+- **待辦**：另外五款仍在 Issue #3，依不同機制逐項做 MVP，不以換皮完成計數。正式玩家錢包與跨裝置進度另需 Identity 服務。
+
 ## 2026-11-20｜建立開發紀錄制度
 
 - **執行者**：GPT（cube1）
