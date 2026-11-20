@@ -1,0 +1,20 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>領域爭奪｜SnowRealm Games</title><style>
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#3c2a29,#090e20 80%);font-family:system-ui,sans-serif;color:#f3f5ff}
+header,main{max-width:980px;margin:auto;padding:16px}header{display:flex;justify-content:space-between}
+a{color:#d6c399}p{line-height:1.6;color:#c6c5cf}h1{font-size:clamp(28px,5vw,43px)}
+.layout{display:grid;grid-template-columns:minmax(280px,650px) 240px;gap:18px}
+svg{width:100%;height:auto;background:linear-gradient(145deg,#151c2f,#202334);border:1px solid #69626c;border-radius:16px}
+aside{background:#202334;border:1px solid #655b5d;padding:16px;border-radius:15px}
+button{padding:13px 17px;border:0;border-radius:10px;background:#f8d483;color:#24160c;font-size:16px;font-weight:750;cursor:pointer}
+button:disabled{opacity:.4}#status{min-height:3em}strong{color:#ffd88f}
+@media(max-width:740px){.layout{grid-template-columns:1fr}aside{order:-1}}
+</style></head><body><header><a href="/">← 雪域遊戲館</a><span>ARCADE / MVP 06</span></header>
+<main><h1>領域爭奪 <small style="font-size:.4em;color:#f6ca83">TERRITORY CONQUEST</small></h1>
+<p>一場節點版的領土攻防。你是青色陣營，紅色 AI 會在每回合擴張。搶下六個節點就能獲勝。</p>
+<div class="layout"><svg id="map" viewBox="0 0 600 600" role="img" aria-label="九個互通據點的單人策略對抗"></svg>
+<aside><h2>戰局狀態</h2><p>回合：<strong id="round">1</strong></p><p>玩家能量：<strong id="energy">5</strong> / 10</p>
+<p>AI 能量：<strong id="aiEnergy">5</strong> / 10</p><p>佔領節點 玩家 / AI：<strong id="count">1 / 1</strong></p>
+<p id="status" role="status">選擇相鄰的中立節點展開攻勢。</p><button id="restart">重開戰局</button>
+<p>點擊地圖上的節點佔領。中立節點 2 能量，敵方節點 4 能量；每回合雙方回復 2 點。</p>
+<p>目前是本機 AI 競技 MVP，不是假真人對戰，無雲端段位或金幣。</p></aside></div></main><script type="module" src="./game.mjs"></script></body></html>
