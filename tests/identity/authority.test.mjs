@@ -19,7 +19,7 @@ function signer(pair,kid,extra={}) {
 }
 const authority = signer(key1,'identity-test-key-01');
 const issue = (server=authority,fields={}) => server.issuePlayerToken({
-  playerId,audience:PLAYER_AUDIENCE,scope:LINK_SCOPE,...fields
+  playerId,audience:PLAYER_AUDIENCE,scope:LINK_SCOPE,nonce:'n'.repeat(32),...fields
 });
 const verify = (token,opts={}) => verifyBrickduelLinkToken(token,{
   jwks:authority.publicJwks(),checkStatus:async()=>true,

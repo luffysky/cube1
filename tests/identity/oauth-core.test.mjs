@@ -50,6 +50,7 @@ test('short code is bound to PKCE and redeemable only once',async()=>{
  assert.equal(auth.code.length,43);assert.equal(auth.state,params.state);
  await assert.rejects(oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier+'BAD'}),/invalid_grant/);
+ await assert.rejects(oauth.exchange({...params,nonce:undefined,code:auth.code,codeVerifier:verifier}),/invalid_grant/);
  for (const field of ['state','nonce']) {
   await assert.rejects(oauth.exchange({
    ...params,code:auth.code,codeVerifier:verifier,[field]:'x'.repeat(43)
@@ -59,6 +60,7 @@ test('short code is bound to PKCE and redeemable only once',async()=>{
   code:auth.code,codeVerifier:verifier});
  assert.equal(grant.token_type,'Bearer');assert.equal(grant.expires_in,300);
  const claims=JSON.parse(Buffer.from(grant.access_token.split('.')[1],'base64url').toString());
+ assert.equal(claims.nonce,params.nonce);
  assert.equal(claims.sub,uuid);assert.equal(claims.aud,'snowrealm:brickduel:api');
  await assert.rejects(oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier}),/invalid_grant/);

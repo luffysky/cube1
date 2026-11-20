@@ -251,3 +251,5 @@
 - 正式連線限定已與 Neon production 核對的 compute（含 pooler）、cube1 與 sr_identity_service。pg 保持憑證驗證，URL query 不得覆蓋 TLS。DB readiness 檢查 session_user 與 current_user。
 - 撤銷 API 要求已配置的 BFF 伺服器憑證，拒絕帶 Origin 的請求，成功只回 active。OAuth 簽發與交換依 PR #14 持續回 503。
 - 正式尚無 Identity Function。此次未變動資料庫、DNS 或 cube2。若需回滾程式，回到 PR #14 基線並維持授權端點關閉。
+
+- Identity OAuth 在成功比對授權碼的 nonce 雜湊後，把該 nonce 加入玩家 JWT。新增獨立 Admin Ed25519 簽發模組及本機測試。兩者均未接上正式簽發流程。
