@@ -4,6 +4,14 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜PR #14 Identity HTTP 授權安全閘門合併與正式部署查核
+- **交接來源**：Work 完成 PR #14，修正客戶端 `consent:true` 可直接觸發授權的安全漏洞；使用者回報後，本對話以 GitHub 實際差異與 Neon 正式部署清單獨立核對。
+- **程式**：[PR #14](https://github.com/luffysky/cube1/pull/14) 已 squash 合併至 main，commit `db8aba8215a0dde1c9757b6ae09aa7360ea9d824`。Identity HTTP `/oauth/authorize`、`/oauth/token` 在缺乏受信任伺服器端同意時統一回應 503；`/health/ready` 即使 DB ready 也回 503 並單獨提供 `databaseReady`；既有 OAuth core、撤銷及離線驗證仍保留。
+- **測試**：PR GitHub Actions [44812843133](https://github.com/luffysky/cube1/actions/runs/44812843133) success；合併後 main CI [44813437598](https://github.com/luffysky/cube1/actions/runs/44813437598) success。新增測試確保客戶端 `consent:true`、具有 Authorization header 的呼叫和任意 BFF Secret 均無法繞過 503。
+- **正式服務獨立查核**：Neon 正式 `raspy-king-43847627` / `br-winter-thunder-b3ozovl2` 的 Functions 清單仍僅 `cube1api` active deployment 4；沒有 Identity Function deployment，也無已註冊的 Function custom domain。未從這個查核推定 `identity.snowrealm.pet` 503 的伺服器來源。
+- **未完成／風險**：`IDENTITY_DATABASE_URL`、Ed25519 私鑰、BFF Client Secret 的正式安全部署、可信同意與 BFF Session、Identity HTTPS/JWKS/撤銷實測、cube2 callback、雙帳號 E2E 均未完成。`IDENTITY_LINK_ENABLED` 保持 OFF；本輪未修改正式 DB、cube2、DNS、Secret 或玩家資產。
+- **總待辦**：延續 51/139；此 PR 是既有 SRG-042～046 的安全閘門修補，不把「禁止授權」記成「授權服務完成」。
+
 ## 2026-11-21｜Work PR #13 合併與正式 Neon 專用登入驗收
 - **原始交接**：Work 回報 PR #13 已合併，正式 `sr_identity_service` 使用真實登入執行 RLS 驗收；使用者已將回報直接帶回本對話。
 - **GitHub 獨立核實**：[PR #13](https://github.com/luffysky/cube1/pull/13) merged=`true`，merge commit `d546b8245a16bdff94f53b4f7970ea99977c65fa`；[main CI #44792842791](https://github.com/luffysky/cube1/actions/runs/44792842791) completed/success。Work 驗收紀錄：[Issue #4 comment 7049561777](https://github.com/luffysky/cube1/issues/4#issuecomment-7049561777)。
