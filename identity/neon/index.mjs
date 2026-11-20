@@ -6,6 +6,7 @@ import {createOAuthCore} from '../oauth-core.mjs';
 import {OAuthStore} from '../oauth-store.mjs';
 import {PlatformIdentityStore} from '../../server/api/platform-identity.mjs';
 import {createTrustedIdentityApp} from './trusted-app.mjs';
+import {identityDatabaseReady} from './database-readiness.mjs';
 
 const issuer='https://identity.snowrealm.pet';
 const neonBase=process.env.NEON_AUTH_BASE_URL;
@@ -44,12 +45,7 @@ async function initialize(){
     jwks:authority.publicJwks(),
     checkStatus:async info=>store.isTokenActive(info)
   });
-  const dbReady=async()=>{
-    try {
-      const result=await pool.query("SELECT to_regclass('public.sr_identity_authorization_codes') IS NOT NULL AS ready");
-      return result.rows[0]?.ready===true;
-    }catch{return false;}
-  };
+  const dbReady=()=>identityDatabaseReady(pool,store,kid);
   return createTrustedIdentityApp({authority,authenticate,oauth,verifyToken,dbReady,clientSecret});
 }
 

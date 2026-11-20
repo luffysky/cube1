@@ -66,6 +66,7 @@ export function createTrustedIdentityApp({authority,authenticate,oauth,verifyTok
         if(request.method==='POST'&&path==='/oauth/authorize'){
           const subject=await authenticate(request);
           if(typeof subject!=='string'||subject.length<8) return json(401,{error:'login_required'},headers);
+          if(origin!==allowedOrigin)return json(403,{error:'origin_denied'},headers);
           const data=await readJson(request);
           // User confirmation must be a deliberate UI action from the exact
           // allowed origin; no session/token is accepted from query parameters.
@@ -84,7 +85,7 @@ export function createTrustedIdentityApp({authority,authenticate,oauth,verifyTok
             return json(401,{error:'invalid_client'});
           const data=await readJson(request);
           const token=await oauth.exchange({clientId:data.clientId,redirectUri:data.redirectUri,
-            code:data.code,codeVerifier:data.codeVerifier});
+            code:data.code,codeVerifier:data.codeVerifier,state:data.state,nonce:data.nonce});
           return json(200,token);
         }
         if(request.method==='POST'&&path==='/v1/token/status'){

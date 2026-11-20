@@ -26,6 +26,8 @@ test('authorization requires signed Neon identity, exact origin and explicit con
  const body={consent:true,clientId:'brickduel-bff',redirectUri:callback,codeChallenge:'a'.repeat(43),state:'b'.repeat(43),nonce:'c'.repeat(43)};
  let r=await app.fetch(req('/oauth/authorize',body));
  assert.equal(r.status,401);
+ r=await app.fetch(req('/oauth/authorize',body,{authorization:'Bearer verified-neon'}));
+ assert.equal(r.status,403);
  r=await app.fetch(req('/oauth/authorize',body,{origin:'https://evil.invalid',authorization:'Bearer verified-neon'}));
  assert.equal(r.status,403);
  r=await app.fetch(req('/oauth/authorize',{...body,consent:false},{origin:'https://games.snowrealm.pet',authorization:'Bearer verified-neon'}));

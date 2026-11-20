@@ -49,11 +49,12 @@ export function createOAuthCore({store,identityMapping,signer,clients=[],clock=D
     playerId,stateHash:hash(state),nonceHash:hash(nonce),expiresAt:new Date(clock()+90000)});
    return {code,state,issuer:ISSUER,redirectUri};
   },
-  async exchange({clientId,redirectUri,code,codeVerifier}){
+  async exchange({clientId,redirectUri,code,codeVerifier,state,nonce}){
    checkClient(clientId,redirectUri);
-   if(!CODE.test(code||'')||!VERIFIER.test(codeVerifier||''))deny('invalid_grant');
+   if(!CODE.test(code||'')||!VERIFIER.test(codeVerifier||'')||
+      typeof state!=='string'||!STATE.test(state)||typeof nonce!=='string'||!STATE.test(nonce))deny('invalid_grant');
    const playerId=await store.consumeCode({codeHash:hash(code),clientId,redirectUri,
-    codeChallenge:pkceS256(codeVerifier)});
+    codeChallenge:pkceS256(codeVerifier),stateHash:hash(state),nonceHash:hash(nonce)});
    if(!UUID.test(playerId||''))deny('invalid_grant');
    if((await store.isActive(playerId))!==true)deny('account_disabled',403);
    // A compromised signer must NEVER mint tokens after its kid is revoked.

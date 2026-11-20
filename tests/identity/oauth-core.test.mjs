@@ -14,9 +14,9 @@ function makeHarness(){
  const records=new Map();let active=true,keyActive=true;
  const store={
   saveCode:async r=>{if(records.has(r.codeHash))throw Error('duplicate');records.set(r.codeHash,{...r,used:false});},
-  consumeCode:async ({codeHash,clientId,redirectUri,codeChallenge})=>{
+  consumeCode:async ({codeHash,clientId,redirectUri,codeChallenge,stateHash,nonceHash})=>{
    const r=records.get(codeHash);
-   if(!r||r.used||r.clientId!==clientId||r.redirectUri!==redirectUri||r.codeChallenge!==codeChallenge)return null;
+   if(!r||r.used||r.clientId!==clientId||r.redirectUri!==redirectUri||r.codeChallenge!==codeChallenge||r.stateHash!==stateHash||r.nonceHash!==nonceHash)return null;
    r.used=true;return r.playerId;
   },
   isActive:async()=>active,
@@ -48,21 +48,26 @@ test('short code is bound to PKCE and redeemable only once',async()=>{
  const {oauth}=makeHarness();
  const auth=await oauth.authorize(params);
  assert.equal(auth.code.length,43);assert.equal(auth.state,params.state);
- await assert.rejects(oauth.exchange({clientId:params.clientId,redirectUri:params.redirectUri,
+ await assert.rejects(oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier+'BAD'}),/invalid_grant/);
- const grant=await oauth.exchange({clientId:params.clientId,redirectUri:params.redirectUri,
+ for (const field of ['state','nonce']) {
+  await assert.rejects(oauth.exchange({
+   ...params,code:auth.code,codeVerifier:verifier,[field]:'x'.repeat(43)
+  }),/invalid_grant/);
+ }
+ const grant=await oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier});
  assert.equal(grant.token_type,'Bearer');assert.equal(grant.expires_in,300);
  const claims=JSON.parse(Buffer.from(grant.access_token.split('.')[1],'base64url').toString());
  assert.equal(claims.sub,uuid);assert.equal(claims.aud,'snowrealm:brickduel:api');
- await assert.rejects(oauth.exchange({clientId:params.clientId,redirectUri:params.redirectUri,
+ await assert.rejects(oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier}),/invalid_grant/);
 });
 test('suspension blocks both issuance and pending code redemption',async()=>{
  const {oauth,setActive}=makeHarness();setActive(false);
  await assert.rejects(oauth.authorize(params),/account_disabled/);
  setActive(true);const auth=await oauth.authorize(params);setActive(false);
- await assert.rejects(oauth.exchange({clientId:params.clientId,redirectUri:params.redirectUri,
+ await assert.rejects(oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier}),/account_disabled/);
 });
 test('persistent store parameterizes writes, locks code via UPDATE and checks revocation',async()=>{
@@ -91,6 +96,6 @@ test('revoked or unavailable active kid denies authorization code token issuance
  const {oauth,setKeyActive}=makeHarness();
  const grant=await oauth.authorize(params);
  setKeyActive(false);
- await assert.rejects(oauth.exchange({clientId:params.clientId,redirectUri:params.redirectUri,
+ await assert.rejects(oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:grant.code,codeVerifier:verifier}),/signing_key_revoked_or_unavailable/);
 });
