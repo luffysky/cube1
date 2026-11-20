@@ -4,6 +4,14 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜cube1/Work 與 cube2/Claude 雙線開發交辦
+- **Owner 方向**：不得因 Identity 尚未部署而停止 cube2 API 或 BFF 的安全開發；兩條線同步推進。不能擅自停用既有功能，也不能在雙方正式驗收前擅自切換跨遊戲綁定。
+- **現場核對**：Cube1 main `62bbd15e030b706dc3f0b47748e682299cf1b36a`，cube2 main `5324f3a1431dc4b4de34a45cc0026eb999cc7a21`。Cube2 管理 API 規格已存在，最新 tree 查無實作的 `/internal/admin/v1/*` handler，也未見正式 OAuth callback/token exchange handler。
+- **Claude 接辦範圍**：只在 cube2 實作唯讀營運 API（overview/players/draws/matches/metrics/metrics-daily/player detail）及 `brickduel.snowrealm.pet/api/auth/callback` BFF 狀態機；要求短效機器 JWT、精確受眾與 scope、PKCE/session、409 不覆蓋、匿名模式及原有 30 天刪除政策。僅程式或測試通過不能視為正式啟用。
+- **Work 接辦範圍**：只在 cube1 做 Games 專屬受 MFA 保護的管理後台、伺服器對伺服器 cube2 Adapter；繼續以既有最小權限部署 identity Function、可信使用者同意、正式 TLS/JWKS/撤銷驗證，最後雙帳號 E2E。
+- **交接證據**：已在 [cube1 Issue #2](https://github.com/luffysky/cube1/issues/2#issuecomment-7052509965) 與 [Issue #4](https://github.com/luffysky/cube1/issues/4#issuecomment-7052510626) 寫入詳細執行交接；另提供本次 ChatGPT 對話中的兩份 Markdown 交辦附件。這是交接文件，**不是已直接在 Claude 或 Work 建立新執行工作階段**。
+- **權限與現況**：本輪沒有修改 cube2、正式 DB、Player 資產、部署機密或 `IDENTITY_LINK_ENABLED`。總待辦沿用 52/140，尚未將 API/BFF/Identity 正式驗收標記完成。
+
 ## 2026-11-21｜Owner D-012 修正 Games 專屬後台網址與權限範圍
 - **Owner 新指令**：「這只是 games 的 admin，不是整個 SnowRealm；admin.snowrealm.pet 不給過」。此決策取代此前在聊天中建議的 `admin.snowrealm.pet` 方案，與 Identity P0 不混用。
 - **路由正式方案**：Games 管理後台入口應在 `games.snowrealm.pet/<RANDOM_GAMES_CONSOLE_PATH>/`，使用受保護的獨立管理部署與同網域路徑代理。舊 `/admin/` 保持退役。隨機路徑不等於安全控制。
