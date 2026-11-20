@@ -50,7 +50,7 @@
 
 **本機資料庫型別注意：** `cube2/server/db.js` 現行 `zz.players.id` 是 **UUID**。既有 `cube2/docs/BRICKDUEL_IDENTITY_ADAPTER_SPEC.md` 草案寫 `pid bigint` 與現況矛盾；Claude **必須先修正 Migration 草案為 UUID 外鍵**，不得直接執行錯誤草案。
 
-建議的**僅供審核**模型：`zz.identity(platform_id uuid PRIMARY KEY, pid uuid UNIQUE REFERENCES zz.players(id), linked_at timestamptz NOT NULL, provider_hint text)`。確切表名、欄位、索引、RLS、保留期由 Owner 核准；此例不是執行指令。
+建議的**僅供審核**模型：`zz.identity(platform_id uuid PRIMARY KEY, pid uuid UNIQUE REFERENCES zz.players(id), linked_at timestamptz NOT NULL, provider_hint text)`。確切表名、欄位、索引、RLS、保留期由各自專案工程負責人依 Owner 最新非刪除更新授權規劃、測試及留存 Log；涉及刪除／不可逆覆蓋的變更才須 Owner 事前核准；此例不是執行指令。
 
 ## 4. 已有匿名玩家與綁定保護
 
@@ -73,7 +73,7 @@
 
 `cube2/docs/BRICKDUEL_ADMIN_API_ADAPTER_SPEC.md` 的管理機器 JWT（`snowrealm:brickduel:admin` / `brickduel:admin:read`）**不能**兼用玩家登入；管理 API 只能由授權的服務對服務調用，不能公開給瀏覽器。
 
-管理後台、CRM、ERP、玩家綁定、錢包等跨服務資料存取各自受 RBAC、最小權限與可稽核的操作控管；未獲 Owner 核准，不得新增管理寫入能力。
+管理後台、CRM、ERP、玩家綁定、錢包等跨服務資料存取各自受 RBAC、最小權限與可稽核的操作控管；管理寫入能力若屬已授權的一般新增／更新，可經權限、審計及安全驗收後實作；凡刪除、實質抹除、不可逆覆蓋仍須 Owner 事前核准。
 
 ## 7. 分階段放行
 
@@ -99,7 +99,18 @@
 - `BRICKDUEL_IDENTITY_ADAPTER_SPEC.md` 更新版與具體修改清單。
 - 完整的登入／註冊導引 UI、BFF/Auth Adapter、JWT 驗證與綁定端點（正式關閉）、錯誤／衝突／離線處理。
 - **單獨文件**：DDL Migration、回滾方案、資料保全與備份檢查、最小資料庫權限申請。非刪除性變更可按最新授權執行，清楚標註「已執行／未執行」及實際驗收證據；刪除類仍需 Owner 核准。
-- 測試案例、CI URL、commit SHA；所有正式資源和資料庫變更需另列核准請求。
+- 測試案例、CI URL、commit SHA；所有正式資源和資料庫變更均須記錄於各自 DEVLOG；只有刪除、不可逆抹除、付費方案或高風險權限擴大等保留事項需另列核准請求。
+
+## 9. 變更紀錄義務（Owner 最新指令）
+
+本核准書已連結 [《Owner 決策與強制開發 Log 制度》](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)，**其日誌義務同樣適用 Claude**：
+
+- GPT：`cube1/docs/DEVLOG.md`
+- Claude：`cube2/docs/DEVLOG.md`
+- 每次實際新增、編輯、更新或部署須自行記錄目的、改動檔案／API／資料庫、commit、測試、部署與尚未完成事項。
+- **Owner 口頭／聊天指令須先或同步補進 Markdown**，不可只保存在聊天對話裡。
+- 已授權的普通新增／更新仍無須逐次核准；日誌是**事後透明與追溯**，不是恢復審批流程。
+- GPT 不直接修改 Claude 專用 repo；Claude 應自行將本規範落實於 `cube2`。
 
 ## 核准總結
 
