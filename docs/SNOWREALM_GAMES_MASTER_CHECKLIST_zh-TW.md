@@ -1,6 +1,6 @@
 # SnowRealm Games｜全專案待辦總表（唯一勾選基準）
 
-**版本**：v1.1 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
+**版本**：v1.2 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
 
 > 本文件永久保存 Owner 已確認需求、已交付功能與尚待驗收事項。**[x] 只代表該行描述的「程式／CI／規格」等明確成果已找到證據，不表示其所在系統正式上線。** 例如六款 Arcade 已通過單元測試，不等於 iOS/Android 實機驗收通過；Identity 金鑰模組已測試，不等於 SSO 服務已部署。
 
@@ -22,7 +22,7 @@
 - 六款完整原始碼在 `dist/games/`；另有 `tests/arcade/`；遊戲館、PWA、API、桌面工程分別列於下方。
 - 受控跨專案工作：[Issue #4](https://github.com/luffysky/cube1/issues/4)（Identity）、[Issue #3](https://github.com/luffysky/cube1/issues/3)（Arcade）、[Issue #2](https://github.com/luffysky/cube1/issues/2)（後台）。
 
-**統計**：45 / 135 條已完成；90 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
+**統計**：46 / 135 條已完成；89 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
 
 ## A｜專案治理、交接與開發流程
 
@@ -76,7 +76,7 @@
 
 ## D｜SnowRealm Identity（P0 上線阻塞）
 
-狀態：6/17 項已完成（僅限勾選文字描述的明確範圍）。
+狀態：7/17 項已完成（僅限勾選文字描述的明確範圍）。
 
 - [x] [P0] 定義獨立 SnowRealm 平台玩家 UUID；Neon subject 不直接冒充跨遊戲 UUID <!-- SRG-036 -->
 - [x] [P0] sr_platform_identities SQL Migration 檔、映射 Store、已驗證會員註冊／查詢 API（程式／CI） <!-- SRG-037 -->
@@ -89,7 +89,7 @@
 - [ ] [P0] 永續撤銷／停權／token jti 與 kid 查詢、敏感操作 fail-closed 及稽核 <!-- SRG-044 -->
 - [ ] [P0] 使用秘密管理服務部署私鑰、金鑰輪替，公開 jwks.json（不得把私鑰上 GitHub） <!-- SRG-045 -->
 - [ ] [P0] 部署 identity.snowrealm.pet、確認 DNS/TLS、健康端點、實際授權登入與受控日誌 <!-- SRG-046 -->
-- [ ] [P0] 與 cube2 確定 brickduel.snowrealm.pet 的正式 BFF callback path <!-- SRG-047 -->
+- [x] [P0] 已依 cube2 C-022 文件定案 BFF 正式 callback 為 https://brickduel.snowrealm.pet/api/auth/callback（僅路徑規格，路由尚未實作） <!-- SRG-047 -->
 - [ ] [P0] 用兩名測試帳號驗證登入、跨裝置恢復、409 衝突、重試、撤銷及金鑰輪替 <!-- SRG-048 -->
 - [ ] [P0] 與 Claude 完成雙方驗收後才准由 cube2 啟用 IDENTITY_LINK_ENABLED（GPT 不擅改 cube2） <!-- SRG-049 -->
 - [ ] [P1] Steam-only 玩家與 Neon Auth 來源的多身分綁定、遷移與去重策略 <!-- SRG-050 -->
