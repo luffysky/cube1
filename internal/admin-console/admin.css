@@ -26,3 +26,9 @@
 }
 #ownerForm textarea { min-height: 58px; resize: vertical; }
 #ownerAuditLog { overflow-x: auto; }
+
+.table-filter{display:grid;gap:.4rem;max-width:24rem;margin:0 0 .55rem}
+.table-filter input{width:100%;padding:.65rem;background:var(--panel,#101e34);border:1px solid var(--border,#2f4667);border-radius:.5rem;color:inherit}
+.table-count{font-size:.85rem;margin:0 0 .75rem}
+.row-actions{display:flex;flex-wrap:wrap;gap:.35rem}
+.row-actions button{padding:.35rem .55rem;white-space:nowrap}

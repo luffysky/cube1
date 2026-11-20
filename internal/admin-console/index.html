@@ -17,6 +17,7 @@
    <button data-panel="players">♙ <span>玩家管理</span></button>
    <button data-panel="ledger">◉ <span>金幣帳本</span></button>
    <button data-panel="matches">♜ <span>對局紀錄</span></button>
+   <button id="operationsNav" data-panel="operations" hidden>⚙ <span>營運操作</span></button>
    <button data-panel="integrations">◇ <span>遊戲串接</span></button>
    <button data-panel="compliance">⚖ <span>隱私與地區</span></button>
   </nav>
@@ -33,8 +34,8 @@
     <p id="authMessage" role="status" aria-live="polite"></p>
   </section>
   <section id="dashboard" hidden>
-    <section id="ownerActions" class="card" hidden>
-      <h2>營運操作</h2>
+    <section id="operationsPanel" class="panel-view card" hidden>
+      <h2 id="operationHeading">選擇操作與目標</h2>
       <form id="ownerForm">
         <label for="ownerAction">操作</label>
         <select id="ownerAction" name="operation">
@@ -96,9 +97,9 @@
       </article>
       <article class="card"><h3>每日帳本異動</h3><div class="table-wrap"><table><thead><tr><th>日期（UTC）</th><th>新增玩家</th><th>排位對局</th><th>獲得金幣</th><th>花費金幣</th></tr></thead><tbody id="trendsBody"></tbody></table></div></article>
     </section>
-    <section id="playersPanel" class="panel-view" hidden><div class="section-head"><h2>玩家管理</h2><span>僅列出最新 25 筆 · 不顯示電子郵件</span></div><div class="table-wrap"><table><thead><tr><th>玩家 ID</th><th>暱稱</th><th>好友代碼</th><th>金幣</th><th>排位</th><th>場次</th><th>建立日期</th></tr></thead><tbody id="playersBody"></tbody></table></div></section>
-    <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>帳本與營運調整紀錄</span></div><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
-    <section id="matchesPanel" class="panel-view" hidden><div class="section-head"><h2>排位對局</h2><span>最多 25 筆 · 伺服器結果為準</span></div><div class="table-wrap"><table><thead><tr><th>對局 ID</th><th>雙方玩家 ID</th><th>狀態</th><th>開始時間</th><th>結算時間</th></tr></thead><tbody id="matchesBody"></tbody></table></div></section>
+    <section id="playersPanel" class="panel-view" hidden><div class="section-head"><h2>玩家管理</h2><span>僅列出最新 25 筆 · 不顯示電子郵件</span></div><label class="table-filter" for="playersFilter">篩選已載入玩家<input id="playersFilter" type="search" placeholder="暱稱、好友代碼或玩家 ID"></label><p id="playersCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>玩家 ID</th><th>暱稱</th><th>好友代碼</th><th>金幣</th><th>排位</th><th>場次</th><th>建立日期</th><th id="playersOperations" hidden>操作</th></tr></thead><tbody id="playersBody"></tbody></table></div></section>
+    <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>帳本與營運調整紀錄</span></div><label class="table-filter" for="ledgerFilter">篩選已載入帳本<input id="ledgerFilter" type="search" placeholder="玩家 ID、事件 ID 或原因"></label><p id="ledgerCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
+    <section id="matchesPanel" class="panel-view" hidden><div class="section-head"><h2>排位對局</h2><span>最多 25 筆 · 伺服器結果為準</span></div><label class="table-filter" for="matchesFilter">篩選已載入對局<input id="matchesFilter" type="search" placeholder="對局 ID、玩家 ID 或狀態"></label><p id="matchesCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>對局 ID</th><th>雙方玩家 ID</th><th>狀態</th><th>開始時間</th><th>結算時間</th><th id="matchesOperations" hidden>操作</th></tr></thead><tbody id="matchesBody"></tbody></table></div></section>
     <section id="integrationsPanel" class="panel-view" hidden><div class="section-head"><h2>跨遊戲接入</h2><span>後台不共享 cube1 的錢包與資料庫給 cube2</span></div>
       <div class="grid-two"><article class="card"><h3>cube1 · SPINREALM</h3><p>已建立唯讀管理 API：總覽、玩家、錢包帳本、對局。</p><span class="chip">程式已實作 · 後端部署待驗收</span></article><article class="card"><h3>cube2 · BRICKDUEL</h3><p>待 Claude 依照整合契約建立 server-to-server 的遊戲命名空間、專用 Audience、事件格式與權限。</p><span class="chip muted">尚未接入 · 無權限</span></article></div>
       <article class="card"><h3>整合底線</h3><p>使用短效簽章憑證、固定來源、逐遊戲 scope、冪等事件、稽核與最小權限。禁止讓轉磚前端呼叫管理 API，也不可把資料庫密碼交給另一款遊戲。</p></article>
