@@ -3,6 +3,14 @@
 import { CONFIG } from '../../dist/games/spinrealm/config.mjs';
 import { createAuthClient } from '../../dist/games/spinrealm/vendor/neon-auth.mjs';
 
+import { panelRoutes } from './routes.mjs';
+
+const mount=new URL('.',document.baseURI);
+function panelFromLocation(){
+ const route=location.pathname.slice(mount.pathname.length);
+ return Object.keys(panelRoutes).find(panel=>panelRoutes[panel]===route)??'overview';
+}
+
 const auth=createAuthClient(CONFIG.authUrl),$=id=>document.getElementById(id);
 const panels=['overview','trends','players','ledger','matches','operations','integrations','compliance'];
 const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',ledger:'金幣帳本',matches:'排位對局',operations:'營運操作',integrations:'跨遊戲整合',compliance:'隱私與法規'};
@@ -13,8 +21,12 @@ function status(value,type=''){
  $('apiStatus').textContent=value;$('apiStatus').className='status '+type;
 }
 function message(value){$('authMessage').textContent=value;}
-function showPanel(name){
+function showPanel(name,{navigate=true}={}){
  if(!panels.includes(name)||(name==='operations'&&!operationsEnabled))return;
+ if(navigate&&panelRoutes[name]){
+  const url=new URL(panelRoutes[name],mount);
+  if(url.pathname!==location.pathname)history.pushState(null,'',url);
+ }
  active=name;$('sectionTitle').textContent=titles[name];
  $('refresh').disabled=!authorized||busy||!dataPanels.includes(name);
  for(const panel of panels){
@@ -126,7 +138,7 @@ async function signedToken(force=false){
 }
 async function api(path,refresh=false){
  const bearer=await signedToken(refresh);
- const response=await fetch('.'+path,{method:'GET',mode:'same-origin',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+bearer}});
+ const response=await fetch(new URL(path.slice(1),mount),{method:'GET',mode:'same-origin',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+bearer}});
  const payload=await response.json().catch(()=>null);
  if(response.status===401&&!refresh){token=null;return api(path,true);}
  if(!response.ok){const err=new Error(payload?.error?.code||'HTTP_'+response.status);err.status=response.status;throw err;}
@@ -198,6 +210,8 @@ async function verify(){
 $('checkAuth').addEventListener('click',()=>void verify());
 $('refresh').addEventListener('click',()=>void fetchPanel(active));
 for(const button of document.querySelectorAll('[data-panel]'))button.addEventListener('click',()=>showPanel(button.dataset.panel));
+showPanel(panelFromLocation(),{navigate:false});
+window.addEventListener('popstate',()=>showPanel(panelFromLocation(),{navigate:false}));
 window.addEventListener('focus',()=>{if(!document.hidden&&authorized&&expiry<Date.now()){authorized=false;token=null;$('dashboard').hidden=true;status('需重新驗證');}});
 async function fillOperationTargets(){
  const isMatch=$('ownerAction').value==='match-correction';
@@ -250,7 +264,7 @@ $('ownerForm').addEventListener('submit',async event=>{
  button.disabled=true;
  try{
   const bearer=await signedToken();
-  const response=await fetch('./v1/admin/owner/'+operation,{
+  const response=await fetch(new URL('v1/admin/owner/'+operation,mount),{
    method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+bearer,
     'Content-Type':'application/json','Idempotency-Key':ownerRetry.key},body:payload
   });

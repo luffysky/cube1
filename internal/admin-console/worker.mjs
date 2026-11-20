@@ -1,4 +1,5 @@
 import {createRemoteJWKSet,jwtVerify} from 'jose';
+import {pageRoutes} from './routes.mjs';
 
 const apiOrigin='https://br-winter-thunder-b3ozovl2-cube1api.compute.c-4.ap-southeast-1.aws.neon.tech';
 const adminReads=new Set(['overview','trends','players','ledger','matches']
@@ -77,11 +78,16 @@ export default {
     return deny(502,{'X-SnowRealm-Admin-Error':'upstream_request_failed'});
    }
   }
-  if(!['index.html','admin.mjs','admin.css','realm-mark.svg'].includes(asset))return deny(404);
+  const isPage=asset==='index.html'||pageRoutes.has(asset);
+  if(!isPage&&!['admin.mjs','admin.css','realm-mark.svg'].includes(asset))return deny(404);
   if(!['GET','HEAD'].includes(request.method))return deny(405,{Allow:'GET, HEAD'});
-  const response=await env.ASSETS.fetch(new Request(new URL('/'+asset,url),{method:request.method}));
+  const response=await env.ASSETS.fetch(new Request(new URL(isPage?'/index.html':'/'+asset,url),{method:request.method}));
   const result=new Headers(response.headers);
   for(const [key,value] of Object.entries(headers))result.set(key,value);
-  return new Response(response.body,{status:response.status,headers:result});
+  const outgoing=new Response(response.body,{status:response.status,headers:result});
+  if(!isPage||request.method==='HEAD'||!response.ok)return outgoing;
+  return new HTMLRewriter().on('head',{
+   element(head){head.prepend('<base href="'+entry+'">',{html:true});}
+  }).transform(outgoing);
  }
 };
