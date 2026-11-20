@@ -95,7 +95,7 @@
 - [ ] [P1] Steam-only 玩家與 Neon Auth 來源的多身分綁定、遷移與去重策略 <!-- SRG-050 -->
 - [x] [P0] 正式 Cube1 Neon 已非破壞性建立 003 身分 UUID 映射表；證明 RLS 與 PUBLIC 權限，玩家錢包未動（獨立備份/最小角色另列未完成） <!-- SRG-134 -->
 - [x] [P0] Identity 已完成只在受信任後端使用的一次性授權碼／PKCE 核心、持久化撤銷 Store 與測試程式（未部署/未接 BFF） <!-- SRG-135 -->
-- [x] [P0] 已建立正式 Cube1 Neon 手動 Snapshot pre-identity-004-20261121（尚未實測還原） <!-- SRG-136 -->
+- [x] [P0] 已建立正式 Cube1 Neon 手動 Snapshot pre-identity-004-20261121，並已在隔離分支驗證還原 <!-- SRG-136 -->
 - [x] [P0] 已依正式 Neon 004 Identity Migration 新增授權碼、停權與 jti/kid 撤銷四張表；四表 RLS=true、PUBLIC SELECT=false，舊錢包帳本筆數未改 <!-- SRG-137 -->
 - [x] [P0] 已合併可打包 Node24 的可信 Neon JWT + PKCE/BFF client-secret + 即時撤銷後端 Adapter（原始碼/CI，未正式部署） <!-- SRG-138 -->
 - [x] [P0] SnowRealm Games 已建立玩家主動同意的《轉磚》SSO 入口、固定 callback/PKCE 輸入校驗及 Neon JWT 授權請求（原始碼與 CI，未完成正式跨站 E2E） <!-- SRG-139 -->
