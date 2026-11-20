@@ -90,6 +90,7 @@ PWA 不缓存会员 API、JWT、支付通知或认证页面。修改预缓存资
 
 ## 文档
 
+- **[SnowRealm Games 全專案總待辦（133 項，可追蹤已完成與剩餘工作）](docs/SNOWREALM_GAMES_MASTER_CHECKLIST_zh-TW.md)**
 - [Steam 上架教程 PDF（简体，20 页）](docs/steam/SnowRealmGames_Steam_Guide_zh-CN.pdf)
 - [Steam 教程 HTML（UTF-8，可直接打开）](docs/steam/SnowRealmGames_Steam_Guide_zh-CN.html)
 - [Steam 教程 Markdown（UTF-8 BOM）](docs/steam/SnowRealmGames_Steam_Guide_zh-CN.md)
