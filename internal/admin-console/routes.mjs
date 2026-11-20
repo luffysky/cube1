@@ -6,6 +6,7 @@ export const panelRoutes = Object.freeze({
   matches: 'games/matches',
   ledger: 'economy/ledger',
   integrations: 'system/integrations',
+  audit: 'system/audit',
   compliance: 'system/compliance',
 });
 export const pageRoutes = new Set(Object.values(panelRoutes));

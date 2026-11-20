@@ -18,6 +18,7 @@
    <button data-panel="ledger">◉ <span>金幣帳本</span></button>
    <button data-panel="matches">♜ <span>對局紀錄</span></button>
    <button id="operationsNav" data-panel="operations" hidden>⚙ <span>營運操作</span></button>
+   <button data-panel="audit">≡ <span>操作稽核</span></button>
    <button data-panel="integrations">◇ <span>遊戲串接</span></button>
    <button data-panel="compliance">⚖ <span>隱私與地區</span></button>
   </nav>
@@ -63,8 +64,16 @@
         <button type="button" id="ownerAudit">查看操作紀錄</button>
         <p id="ownerResult" role="status"></p>
       </form>
-      <div id="ownerAuditLog" hidden><table>
-        <thead><tr><th>操作</th><th>目標</th><th>理由</th><th id="ownerAuditNote">備註</th><th>時間</th></tr></thead>
+    </section>
+    <section id="auditPanel" class="panel-view" hidden>
+      <div class="section-head"><h2>營運操作紀錄</h2><span>最近 50 筆已儲存操作 · 日期使用本機時區</span></div>
+      <div class="row-actions">
+        <label class="table-filter">操作人或目標 ID<input id="auditFilter" type="search"></label>
+        <label class="table-filter">操作日期<input id="auditDate" type="date"></label>
+      </div>
+      <p id="auditStatus" role="status"></p>
+      <div class="table-wrap" id="ownerAuditLog" hidden><table>
+        <thead><tr><th>操作人 ID</th><th>操作</th><th>目標 ID</th><th>理由</th><th id="ownerAuditNote" hidden>備註</th><th>時間</th></tr></thead>
         <tbody id="ownerAuditBody"></tbody>
       </table></div>
     </section>

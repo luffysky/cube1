@@ -64,6 +64,7 @@ test('Games owner writes preserve audit privacy, rollback and idempotency',async
   assert.equal((await ops.playerNotices(opponent)).items.length,1);
   assert.doesNotMatch(JSON.stringify(notices),/Private campaign note/);
   assert.doesNotMatch(JSON.stringify(await ops.audit(false)),/Private campaign note/);
+  assert.ok((await ops.audit(false)).items.some(row=>row.actorId===owner));
   assert.match(JSON.stringify(await ops.audit(true)),/Private campaign note/);
   const rows=(await pool.query('SELECT result FROM sr_ranked_matches WHERE id=$1',[matchId])).rows;
   assert.equal(rows[0].result.winnerId,null);

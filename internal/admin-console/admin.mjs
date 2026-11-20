@@ -13,8 +13,8 @@ function panelFromLocation(){
 }
 
 const auth=createAuthClient(CONFIG.authUrl),$=id=>document.getElementById(id);
-const panels=['overview','trends','players','player','ledger','matches','operations','integrations','compliance'];
-const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',player:'玩家詳情',ledger:'金幣帳本',matches:'排位對局',operations:'營運操作',integrations:'跨遊戲整合',compliance:'隱私與法規'};
+const panels=['overview','trends','players','player','ledger','matches','operations','audit','integrations','compliance'];
+const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',player:'玩家詳情',ledger:'金幣帳本',matches:'排位對局',operations:'營運操作',audit:'操作稽核',integrations:'跨遊戲整合',compliance:'隱私與法規'};
 let subject=null,token=null,expiry=0,authorized=false,active='overview',busy=false,ownerRetry=null,operationsEnabled=false;
 const fmt=n=>Number(n||0).toLocaleString('zh-TW');
 const date=value=>{if(!value)return'—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('zh-TW');};
@@ -34,7 +34,7 @@ function showPanel(name,{navigate=true}={}){
   $(panel+'Panel').hidden=panel!==name;
   document.querySelector('[data-panel="'+panel+'"]')?.setAttribute('aria-current',panel===name?'page':'false');
  }
- if(authorized&&['overview','trends','players','player','ledger','matches'].includes(name))void fetchPanel(name);
+ if(authorized&&['overview','trends','players','player','ledger','matches','audit'].includes(name))void fetchPanel(name);
 }
 function toRows(body,rows){
  body.replaceChildren();
@@ -47,7 +47,7 @@ function toRows(body,rows){
   body.append(tr);
  }
 }
-const dataPanels=['overview','trends','players','player','ledger','matches'];
+const dataPanels=['overview','trends','players','player','ledger','matches','audit'];
 const tableRows={players:[],ledger:[],matches:[]};
 function operationButton(label,operation,target){
  const button=document.createElement('button');
@@ -179,7 +179,7 @@ function renderPlayer({profile,ledger,matches}){
  $('playerData').hidden=false;
 }
 async function fetchPanel(which=active){
- if(busy||!authorized||!['overview','trends','players','player','ledger','matches'].includes(which))return;
+ if(busy||!authorized||!['overview','trends','players','player','ledger','matches','audit'].includes(which))return;
  busy=true;$('refresh').disabled=true;status('更新中');
  const playerRoute=which==='player'?location.pathname.slice(mount.pathname.length):null;
  try{
@@ -187,7 +187,17 @@ async function fetchPanel(which=active){
    $('playerData').hidden=true;
    $('playerStatus').textContent='正在載入玩家資料…';
   }
-  const info=await api('/v1/admin/'+(playerRoute??which));
+  if(which==='audit'){
+   $('ownerAuditLog').hidden=true;
+   $('auditStatus').textContent=operationsEnabled?'正在載入操作紀錄…':'操作稽核尚未啟用。';
+   if(!operationsEnabled){status('管理權限已驗證','ready');return;}
+  }
+  const info=await api('/v1/admin/'+(playerRoute??(which==='audit'?'owner/audit':which)));
+  if(which==='audit'){
+   auditRows=info.items;
+   renderAudit();
+   $('ownerAuditLog').hidden=false;
+  }
   if(playerRoute&&playerRoute!==location.pathname.slice(mount.pathname.length))return;
   if(playerRoute)renderPlayer(info);
   if(which==='overview'){
@@ -206,6 +216,7 @@ async function fetchPanel(which=active){
   }
   status('管理權限已驗證','ready');message('管理身分已驗證。');
  }catch(error){
+  if(which==='audit')$('auditStatus').textContent='無法載入操作紀錄。';
   if(playerRoute)$('playerStatus').textContent='無法載入玩家資料。';
   if(error.status===403){authorized=false;$('dashboard').hidden=true;status('沒有管理權限','error');message('目前帳號不在後端管理員白名單內。');}
   else if(playerRoute&&error.message==='player_not_found'){$('playerStatus').textContent='找不到此玩家。';status('管理權限已驗證','ready');}
@@ -236,6 +247,7 @@ async function verify(){
   $('ownerForm').elements.note.disabled=!response.owner;
   $('ownerAuditNote').hidden=!response.owner;
   $('ownerAuditLog').hidden=true;
+  auditRows=[];
   $('ownerAuditBody').replaceChildren();
   if(!response.owner)$('ownerForm').elements.note.value='';
   if(response.operationsEnabled)void fillOperationTargets();
@@ -319,13 +331,20 @@ $('ownerForm').addEventListener('submit',async event=>{
  }catch(error){$('ownerResult').textContent='未確認儲存結果：'+error.message;}
  finally{button.disabled=false;}
 });
-$('ownerAudit').addEventListener('click',async()=>{
- if(!authorized)return;
- try{
-  const result=await api('/v1/admin/owner/audit');
-  toRows($('ownerAuditBody'),result.items.map(row=>[row.operation,row.targetId,row.reason,
-   ...(!$('ownerAuditNote').hidden?[row.note]:[]),date(row.createdAt)]));
-  $('ownerAuditLog').hidden=false;
- }catch{$('ownerResult').textContent='無法載入操作紀錄。';}
-});
-showPanel('overview');
+let auditRows=[];
+const auditOperations={'suspension':'停權／解封','coins':'金幣加扣','match-correction':'對局更正'};
+const auditDay=new Intl.DateTimeFormat('sv-SE',{year:'numeric',month:'2-digit',day:'2-digit'});
+function renderAudit(){
+ const query=$('auditFilter').value.trim().toLowerCase();
+ const selectedDate=$('auditDate').value;
+ const rows=auditRows.filter(row=>
+  [row.actorId,row.targetId].some(id=>String(id??'').toLowerCase().includes(query))&&
+  (!selectedDate||auditDay.format(new Date(row.createdAt))===selectedDate)
+ );
+ toRows($('ownerAuditBody'),rows.map(row=>[row.actorId,auditOperations[row.operation]??row.operation,row.targetId,row.reason,
+  ...(!$('ownerAuditNote').hidden?[row.note]:[]),date(row.createdAt)]));
+ $('auditStatus').textContent=rows.length+' / '+auditRows.length+' 筆已載入紀錄';
+}
+$('auditFilter').addEventListener('input',renderAudit);
+$('auditDate').addEventListener('input',renderAudit);
+$('ownerAudit').addEventListener('click',()=>showPanel('audit'));

@@ -29,9 +29,9 @@ export class GamesOwnerStore {
  }
  async audit(includeNotes){
   const {rows}=await this.pool.query(`
-   SELECT operation,target_id,public_reason,internal_note,result,created_at
-   FROM sr_games_owner_actions ORDER BY created_at DESC LIMIT 50`);
-  return {items:rows.map(row=>({operation:row.operation,targetId:row.target_id,reason:row.public_reason,
+   SELECT owner_subject,operation,target_id,public_reason,internal_note,result,created_at
+   FROM sr_games_owner_actions ORDER BY created_at DESC,owner_subject,request_key LIMIT 50`);
+  return {items:rows.map(row=>({actorId:row.owner_subject,operation:row.operation,targetId:row.target_id,reason:row.public_reason,
    ...(includeNotes?{note:row.internal_note}:{}),result:row.result,createdAt:row.created_at}))};
  }
  async apply(owner,key,operation,data,protectedOwner=owner){
