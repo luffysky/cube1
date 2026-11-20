@@ -63,12 +63,19 @@ export default {
       upstreamHeaders.set('Idempotency-Key',key);
      }
     }
-    const upstream=await fetch(new URL('/'+asset,apiOrigin),{
-     method,body,headers:upstreamHeaders,redirect:'error'
+    const upstream=await fetch(new URL('/'+asset,apiOrigin).href,{
+     method,...(body===undefined?{}:{body}),headers:upstreamHeaders,redirect:'manual'
     });
+    if(upstream.status>=300&&upstream.status<400){
+     console.warn('admin_upstream_redirect',{status:upstream.status});
+     return deny(502,{'X-SnowRealm-Admin-Error':'upstream_redirect'});
+    }
     return new Response(upstream.body,{status:upstream.status,
      headers:{...headers,'Content-Type':'application/json; charset=utf-8'}});
-   }catch{return deny(502);}
+   }catch(error){
+    console.warn('admin_upstream_failure',{kind:error instanceof TypeError?'type_error':'request_error'});
+    return deny(502,{'X-SnowRealm-Admin-Error':'upstream_request_failed'});
+   }
   }
   if(!['index.html','admin.mjs','admin.css','realm-mark.svg'].includes(asset))return deny(404);
   if(!['GET','HEAD'].includes(request.method))return deny(405,{Allow:'GET, HEAD'});
