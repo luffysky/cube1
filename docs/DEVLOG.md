@@ -4,6 +4,15 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜Work PR #13 合併與正式 Neon 專用登入驗收
+- **原始交接**：Work 回報 PR #13 已合併，正式 `sr_identity_service` 使用真實登入執行 RLS 驗收；使用者已將回報直接帶回本對話。
+- **GitHub 獨立核實**：[PR #13](https://github.com/luffysky/cube1/pull/13) merged=`true`，merge commit `d546b8245a16bdff94f53b4f7970ea99977c65fa`；[main CI #44792842791](https://github.com/luffysky/cube1/actions/runs/44792842791) completed/success。Work 驗收紀錄：[Issue #4 comment 7049561777](https://github.com/luffysky/cube1/issues/4#issuecomment-7049561777)。
+- **正式 Neon 親自查核**：Neon Cube1 專案 `raspy-king-43847627`、production `br-winter-thunder-b3ozovl2`、DB `cube1`。使用專用 `sr_identity_service` 角色執行唯讀 SQL，`session_user`、`current_user` 均為 `sr_identity_service`，`row_security_active('public.sr_platform_identities')` 與 `row_security_active('public.sr_identity_authorization_codes')` 均為 true；該登入密碼已存在、BYPASSRLS=false；正式 8 條 RLS Policy 和最小欄位 grants 前次已核對。
+- **Work 完成的回滾測試**：Issue #4 記載合成資料的 UUID 建立、授權碼新增和消耗、撤銷狀態讀取成功；存取錢包和刪除授權碼被拒，測試交易回滾。此項以 Work 的 GitHub 操作紀錄為證據，未由本次唯讀查核再次寫入正式資料庫。
+- **備份與最小權限**：已有 Snapshot `snap-curly-resonance-b3xxwfup`，PR #13 記載在隔離分支復原演練。總待辦 SRG-040 依可驗證條件完成（51/139）；整套系統的完整災難回滾 SRG-116 仍未通過。
+- **尚未完成、不得提前打勾**：`IDENTITY_DATABASE_URL` 尚未配置至正式 Identity Function，簽發私鑰/BFF Client Secret、可信同意鏈、Identity 部署與 DNS/TLS/JWKS、cube2 callback、兩個實際帳號跨裝置測試。`IDENTITY_LINK_ENABLED` 仍為 OFF。
+- **安全**：本次僅唯讀查核正式資料庫與更新 cube1 Markdown 文件，無正式玩家資料異動、無刪除、無私鑰或資料庫密碼外洩。
+
 ## 2026-11-21｜P0 Revoked kid 禁簽與 SnowRealm Games 平台明確同意連結入口
 - **修補安全漏洞**：[PR #11](https://github.com/luffysky/cube1/pull/11) (`adb3b2d7`) 已對 OAuth 發行端增加持久化 revoked kid 查詢，撤銷後停發 JWT；PR CI [44780625206](https://github.com/luffysky/cube1/actions/runs/44780625206) success。
 - **平台登入橋接**：[PR #12](https://github.com/luffysky/cube1/pull/12) (`4f5944ba`) 已加入 `dist/sso-flow.mjs`、`dist/sso-bridge.mjs`、會員 in-memory Neon JWT accessor、遊戲館互動入口與 PWA 安全快取清單；只接受 C-022 的精確 `https://brickduel.snowrealm.pet/api/auth/callback`，玩家點擊確認後才發出授權請求。

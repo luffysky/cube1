@@ -1,6 +1,6 @@
 # SnowRealm Games｜全專案待辦總表（唯一勾選基準）
 
-**版本**：v1.4 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
+**版本**：v1.5 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
 
 > 本文件永久保存 Owner 已確認需求、已交付功能與尚待驗收事項。**[x] 只代表該行描述的「程式／CI／規格」等明確成果已找到證據，不表示其所在系統正式上線。** 例如六款 Arcade 已通過單元測試，不等於 iOS/Android 實機驗收通過；Identity 金鑰模組已測試，不等於 SSO 服務已部署。
 
@@ -22,7 +22,7 @@
 - 六款完整原始碼在 `dist/games/`；另有 `tests/arcade/`；遊戲館、PWA、API、桌面工程分別列於下方。
 - 受控跨專案工作：[Issue #4](https://github.com/luffysky/cube1/issues/4)（Identity）、[Issue #3](https://github.com/luffysky/cube1/issues/3)（Arcade）、[Issue #2](https://github.com/luffysky/cube1/issues/2)（後台）。
 
-**統計**：50 / 139 條已完成；89 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
+**統計**：51 / 139 條已完成；88 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
 
 ## A｜專案治理、交接與開發流程
 
@@ -76,13 +76,13 @@
 
 ## D｜SnowRealm Identity（P0 上線阻塞）
 
-狀態：11/21 項已完成（僅限勾選文字描述的明確範圍）。
+狀態：12/21 項已完成（僅限勾選文字描述的明確範圍）。
 
 - [x] [P0] 定義獨立 SnowRealm 平台玩家 UUID；Neon subject 不直接冒充跨遊戲 UUID <!-- SRG-036 -->
 - [x] [P0] sr_platform_identities SQL Migration 檔、映射 Store、已驗證會員註冊／查詢 API（程式／CI） <!-- SRG-037 -->
 - [x] [P0] Ed25519 服務端簽發器、精確 audience/scope、短效 JWT 驗證與公開 JWKS 函式（程式／CI） <!-- SRG-038 -->
 - [x] [P0] 身分簽章、過期、錯 issuer/audience、停權查詢故障時拒絕、金鑰輪替的單元測試 <!-- SRG-039 -->
-- [ ] [P0] 確認 003_platform_identity.sql 已在正式庫安全執行、最小權限與備份可用 <!-- SRG-040 -->
+- [x] [P0] 確認 003_platform_identity.sql 已在正式庫安全執行、最小權限與備份可用 <!-- SRG-040 -->
 - [ ] [P0] 由可信任 Neon Auth session 完成平台 UUID 查找，不信任客戶端自報 user ID <!-- SRG-041 -->
 - [ ] [P0] 授權碼 OAuth 2.0 / OIDC + PKCE S256、CSRF state/nonce、精確 redirect_uri 白名單 <!-- SRG-042 -->
 - [ ] [P0] 身分 BFF、HttpOnly/Secure Cookie、Session/refresh 管理、短效 code 一次性消耗 <!-- SRG-043 -->
@@ -226,7 +226,7 @@
 
 - 003 身分表已在經核實的正式 Neon 專案執行，Identity UUID 表現在 0 筆、PUBLIC SELECT=false、RLS=true；未改寫真實玩家錢包。
 - OAuth 核心與 004 SQL 草案已提交專用分支，正式 Identity endpoint、Neon session 驗證、BFF、撤銷服務與真實跨遊戲登入仍未部署。
-- 正式 Neon 沒有可見獨立 Snapshot，且原有 owner role 可繞過 RLS；SRG-040 與 SRG-116 因此仍保持未完成。
+- **歷史紀錄（此項已被後續驗證取代）**：當時 Neon 尚無可見 Snapshot，只有 owner role；後續已建立 Snapshot、完成隔離還原演練並實際使用不繞過 RLS 的 `sr_identity_service` 登入。SRG-040 已完成，跨系統完整備份／發行回滾的 SRG-116 仍待驗收。
 - 參考：docs/IDENTITY_P0_OAUTH_REVOCATION_SECURITY_GATE_zh-TW.md。
 
 ## 2026-11-21 P0 現場更新
@@ -236,6 +236,14 @@
 - [PR #9](https://github.com/luffysky/cube1/pull/9) / [PR #10](https://github.com/luffysky/cube1/pull/10) 已併入 main；後者合併後 Actions [44780171358](https://github.com/luffysky/cube1/actions/runs/44780171358) success。
 - **Neon 身分服務實際部署未成功**：Neon deploy function 呼叫被工具安全檢查阻止，且缺受控簽名私鑰及專用最小 DB 角色。此狀態不算網域、JWKS、BFF 或跨裝置驗收完成。
 - cube2 BFF 仍待 Claude 實作；繼續保持 IDENTITY_LINK_ENABLED=OFF。
+
+## 2026-11-21｜Work 最小權限實際登入驗收（已獨立複核）
+
+- [PR #13](https://github.com/luffysky/cube1/pull/13) 已合併，commit `d546b8245a16bdff94f53b4f7970ea99977c65fa`；主分支 [CI #44792842791](https://github.com/luffysky/cube1/actions/runs/44792842791) success。
+- 正式 Neon `raspy-king-43847627`／production `br-winter-thunder-b3ozovl2`／`cube1`：`sr_identity_service` 成功以自身角色實際執行 SELECT，`session_user=current_user=sr_identity_service`，平台 UUID 與授權碼表 `row_security_active=true`。
+- 專用登入已有密碼、`BYPASSRLS=false`。8 條 Identity RLS Policy 與最小欄位權限先前已確認；Work 在 [Issue #4 驗證紀錄](https://github.com/luffysky/cube1/issues/4#issuecomment-7049561777) 證實合成資料的 UUID、授權碼建立與消耗、禁讀錢包及禁刪授權碼測試均通過且回滾。
+- Snapshot `snap-curly-resonance-b3xxwfup` 存在，PR #13 記錄隔離分支還原演練；因此 SRG-040 改勾選。**這不代表全站災難復原已驗收。**
+- `IDENTITY_DATABASE_URL` 與其他秘密尚未配置至正式 Identity Function，沒有實際上線服務；`identity.snowrealm.pet`、BFF、雙帳號 E2E 均仍未完成；cube2 `IDENTITY_LINK_ENABLED` 保持 OFF。
 
 ## 推理等級分流
 
