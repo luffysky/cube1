@@ -9,7 +9,7 @@
 - **cube2 管理 API**：已在原始碼實作 7 支 `/internal/admin/v1/*` 唯讀路由及 EdDSA/JWKS 身分驗證、稽核與分頁；Claude 回報 Vercel READY，但當前管理信任未設定，正式 `overview` 與 `metrics/daily` 回 503 `disabled`。本輪無已驗證的有效機器 JWT 正式 200/401/403 E2E，不能當已串通。
 - **cube2 OAuth BFF**：`POST /api/auth/start`、`GET /api/auth/callback`、`POST /api/auth/result` 已存在；測試回報 `test/bff.test.js` 66 件及前端 9 件通過，具有 PKCE S256／一次性 session、HttpOnly/Secure/Lax 必要 Cookie 與 409 存檔隔離。正式 Identity 尚缺可信同意和授權端，故沒有真實跨裝置 E2E。
 - **隱私文案**：已核對繁中／英／日／韓四語 `src/consent.js` 說明了一個必要的 `__Host-zzauth` Cookie；繁中隱私政策第 4 節列出設定時機、內容、用途與 10 分鐘期限。技術文案完成不等於所有司法轄區的法律審查完成。
-- **cube1 必補契約**：目前 `identity/oauth-core.mjs` 的 `exchange()` 簽發時未傳 `nonce`、`identity/authority.mjs` 的 `issuePlayerToken` 不支援 `nonce` claim；正式對接前應將 code 已驗證的 nonce 原文安全帶到短效 JWT，令 cube2 BFF 驗證**必填且完全相等**，更新授權碼資料模型與測試。BFF 目前只在 token 存在 nonce 時才比對，應由 Claude 跟進必填契約。Admin 機器簽發需獨立 `admin-jwks.json` 和機器身分、不得拿玩家 JWT 取代。
+- **cube1 必補契約**：目前 `identity/oauth-core.mjs` 的 `exchange()` 簽發時未傳 `nonce`、`identity/authority.mjs` 的 `issuePlayerToken` 不支援 `nonce` claim；正式對接前應保留授權碼資料庫只存 `nonceHash`，在 code 交換通過原子雜湊核對後，將已驗證的 nonce 傳給 Signer 寫入短效 JWT，令 cube2 BFF 驗證**必填且完全相等**，並補測試。BFF 目前只在 token 存在 nonce 時才比對，應由 Claude 跟進必填契約。Admin 機器簽發需獨立 `admin-jwks.json` 和機器身分、不得拿玩家 JWT 取代。
 - **追蹤**：主待辦新增 SRG-142～144，僅勾選 cube2 源碼/CI/文案階段，總數 56/144；原 SRG-128、SRG-131、SRG-093 仍未完成正式多端驗收，Identity/後台不開放未驗收的操作。源碼直接讀取之外的公開 HTTP 端點經網頁工具嘗試未取得可靠驗收證據。
 - **剩餘待 Owner 決策**：`zz.admin_log` 180 天保留後清除，以及 `zz.authsess` 過期暫存清理屬於資料刪除政策，先提受控清理及復原方案，不擅自執行批次 DELETE；R2 實際上傳保持待人工測試。
 - **安全邊界**：本輪未修改 cube2、Neon production、Secrets、Cloudflare/Vercel、玩家資料；只更新 cube1 文件與跨專案交辦。

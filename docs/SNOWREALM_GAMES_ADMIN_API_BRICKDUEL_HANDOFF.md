@@ -115,7 +115,7 @@ SnowRealm 平台 Identity 的**機器簽發端**負責簽發。cube1 的 Neon Fu
 ## 8. OAuth BFF 與必要 Cookie 的另一條依賴
 
 - Claude 已於 cube2 建立 start／callback／result BFF 路由與 `__Host-zzauth` 必要 Cookie（Secure／HttpOnly／SameSite=Lax，最長 10 分鐘）。四語同意文案和隱私政策已改，正式跨站 SSO 尚未 E2E。
-- **cube1 Token 契約決議（待實作驗收）**：link token 應攜帶 **必填 nonce claim**，其內容與可信授權碼流程中的 nonce 原文一致。為達成此事須調整 OAuth Store 的一次性 code 記錄與 exchange 綁定（目前僅保存 nonce hash）、Signer 及雙邊測試；不得改為相信瀏覽器傳來的 nonce。正式 cube2 BFF 一律拒絕 nonce 缺失或不符。
+- **cube1 Token 契約決議（待實作驗收）**：link token 應攜帶 **必填 nonce claim**，其內容與可信授權碼流程中的 nonce 原文一致。為達成此事，保留 OAuth Store 目前只存 `nonceHash` 的設計。`exchange()` 先在一次性消耗授權碼的交易中核對 BFF 提供的 `nonce` 雜湊，**只有核對成功後**才把已核對 nonce 原文交給 Signer 作為 JWT 的 `nonce` claim；更新簽發／驗證函式及雙端測試。不可直接相信瀏覽器自行傳來的 nonce，也不應為此改成在資料庫保存 nonce 明文。正式 cube2 BFF 一律拒絕 nonce 缺失或不符。
 - **不能自行開啟登入功能**：先完成可信伺服器端同意、Identity HTTPS/JWKS、回呼 code 交換、撤銷及兩帳號跨裝置／409 存檔保護驗收，再走核准的正式開通程序。
 
 ## 6. 驗收與交接
