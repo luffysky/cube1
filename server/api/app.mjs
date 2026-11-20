@@ -5,7 +5,7 @@ import { ownerOperations } from './games-owner.mjs';
 import { assertAdmin, adminAllowlist, adminRead } from './admin.mjs';
 import { adsEnabled, checkAdapterSignature, validateAdapterEvent, rewardedAdsConfig } from './rewarded-ads.mjs';
 
-export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, ownerStore = null, ownerSubject = '', ownerGatewaySecret = '', platformIdentity = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
+export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, ownerStore = null, ownerSubject = '', adminEntryPath = '', ownerGatewaySecret = '', platformIdentity = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
   const origins = new Set(allowedOrigins.filter(Boolean).map(origin => new URL(origin).origin));
   const ranked = new Ranked(store);
   const admins = adminAllowlist(adminSubjects);
@@ -97,6 +97,13 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
           const platformPlayerId=await platformIdentity.ensure(userId);
           // This endpoint does NOT issue link tokens. Brickduel's flag remains OFF.
           return respond({platformPlayerId,linked:true,source:'snowrealm-identity-mapping',readyForBrickduel:false});
+        }
+        if(path==='/v1/admin/entry'){
+          if(method!=='GET')fail('method_not_allowed',405);
+          if(userId!==configuredOwner)assertAdmin(userId,admins);
+          if(!/^\/srg-console-[A-Za-z0-9_-]{24,80}\/$/.test(adminEntryPath))fail('admin_unavailable',503);
+          await store.limit(userId,'admin_read',60);
+          return respond({path:adminEntryPath});
         }
         if(path.startsWith('/v1/admin/')){
           if(userId!==configuredOwner)assertAdmin(userId,admins);

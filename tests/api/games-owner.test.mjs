@@ -68,3 +68,25 @@ test('Games owner writes preserve audit privacy, rollback and idempotency',async
   assert.equal(rows[0].result.winnerId,null);
  }finally{await pool.end();}
 });
+
+test('homepage entry returns the configured path only to verified Games managers',async()=>{
+ const path='/srg-console-'+'x'.repeat(24)+'/';
+ const makeApp=adminEntryPath=>createApp({
+  store:{limit:async()=>{}},
+  authenticate:async request=>request.headers.get('x-test-actor'),
+  ownerSubject:owner,adminSubjects:operator,adminEntryPath
+ });
+ const request=(app,actor)=>app.fetch(new Request('https://api.example/v1/admin/entry',{
+  headers:actor?{'x-test-actor':actor}:{}
+ }));
+ const app=makeApp(path);
+ for(const actor of [owner,operator]){
+  const response=await request(app,actor);
+  assert.equal(response.status,200);
+  assert.match(response.headers.get('cache-control'),/no-store/);
+  assert.deepEqual(await response.json(),{path});
+ }
+ assert.equal((await request(app,player)).status,403);
+ assert.equal((await request(app,null)).status,401);
+ assert.equal((await request(makeApp('//other.example/'),owner)).status,503);
+});

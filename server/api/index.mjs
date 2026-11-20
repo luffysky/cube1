@@ -18,6 +18,7 @@ export default createApp({
   store: new Store(pool),
   adminStore: new AdminStore(pool),
   ownerStore: new GamesOwnerStore(pool),
+  adminEntryPath: process.env.ADMIN_ENTRY_PATH || '',
   ownerSubject: process.env.SNOWREALM_GAMES_OWNER_SUBJECT || '',
   ownerGatewaySecret: process.env.SNOWREALM_OWNER_GATEWAY_SECRET || '',
   platformIdentity: new PlatformIdentityStore(pool),
