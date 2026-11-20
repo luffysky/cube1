@@ -188,3 +188,10 @@
 - PR #13 已合併，合併 SHA `d546b8245a16bdff94f53b4f7970ea99977c65fa`，[main CI 已通過](https://github.com/luffysky/cube1/actions/runs/44792658198)。
 - 正式專用登入、角色與 8 條 RLS 政策已依 Owner 核准建立並做 ACL 核對，沿用既有配置。未重跑角色 SQL。
 - 專用登入的連線驗證、憑證與 Function 部署仍待完成。正式網域、跨遊戲 OAuth 和雙帳號驗收尚未執行，綁定維持 OFF。
+
+## 2026-11-21｜Identity HTTP 簽發上線閘門
+
+- Identity Function 目前不接受瀏覽器自行聲明的 consent。授權和交換 HTTP 路徑回 503。readiness 也維持 503，並獨立回報 DB 檢查結果。OAuth 核心、PKCE 和撤銷驗證仍可離線測試。
+- production Neon Function 清單只有 cube1api deployment 4。Identity 尚無部署或正式部署機密配置。本次沒有 DB 或 DNS 異動。
+- cube2 唯讀查核 main 6199b73。已存在綁定／復原的旗標檢查，尚未找到正式 callback 或 BFF token exchange 路由。
+- 仍需完成可信伺服器同意、BFF Session、正式秘密配置與部署。回滾此變更前須維持 Identity 路由未公開，避免恢復前端布林同意放行。
