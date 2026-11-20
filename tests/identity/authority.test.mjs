@@ -102,3 +102,11 @@ test('no public login or token minting endpoint; readiness is fail closed',async
   r=await app.fetch(new Request(ISSUER+'/health/live'));
   assert.equal((await r.json()).authorizationAvailable,false);
 });
+
+test('status callback receives signed issued-at for revocation-after checks',async()=>{
+ const token=issue();
+ let seen=null;
+ const result=await verify(token,{checkStatus:async detail=>{seen=detail;return true;}});
+ assert.equal(result.playerId,playerId);
+ assert.equal(seen.issuedAt,Math.floor(now/1000));
+});
