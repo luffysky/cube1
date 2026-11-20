@@ -15,6 +15,10 @@ const markers = new Map([
   ['/games/52hunt/index.html', '52hunt'], ['/games/next-floor/index.html', 'next-floor'],
   ['/games/zero-dodge/index.html', 'zero-dodge'],
   ['/games/refract-maze/index.html', 'refract-maze'],
+  ['/games/territory-conquest/index.html', 'territory-conquest'],
+  ['/games/gravity-reversal/index.html', 'gravity-reversal'],
+  ['/games/orbit-escape/index.html', 'orbit-escape'],
+  ['/games/beat-overdrive/index.html', 'beat-overdrive'],
 ]);
 const waveFixture = new Uint8Array(46);
 const waveView = new DataView(waveFixture.buffer);

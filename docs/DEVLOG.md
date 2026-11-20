@@ -4,6 +4,14 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-20｜Arcade 其餘四款原創 MVP（開發分支）
+- **Owner 決策**：D-003 / Issue #3 六款全做。
+- **實際新增**：節奏超載（原創合成節奏、四鍵譜面判定/連擊/延遲校準）；環域逃脫（八方位三層旋轉環形迷宮與出口判定）；重力逆轉（固定網格碰撞、上下重力、三關與重開）；領域爭奪（九節點佔領、能量成本、回合制本機 AI、勝負判定）。每款均有獨立純邏輯引擎、Web 遊戲頁與單元測試。
+- **共用平台**：更新遊戲館與收藏 ID 白名單、PWA 快取完整性與對應測試夾具。
+- **程式碼／測試**：dist/games/{beat-overdrive,orbit-escape,gravity-reversal,territory-conquest}/、tests/arcade/；以 PR 最新 Actions 運行結果為準。
+- **環境與資料**：無正式 DB 變更、沒有刪除或碰 cube2；沒有付費方案、雲端排行或真人對戰。
+- **部署與限制**：源碼提交開發分支；正式佈署、iOS/Android 真機、美術/音效品質、跨裝置存檔與伺服器防作弊未驗收，不能把 MVP 當成正式商業版。
+
 ## 2026-11-20｜Arcade《折光迷陣》原創光學解謎 MVP（開發分支）
 - **Owner 決策**：D-003 / Issue #3 六款原創遊戲。
 - **新增**：dist/games/refract-maze/ 中的光束反射引擎、三關旋轉鏡面、提示、重置、過關與 SVG 桌機/觸控/鍵盤操作頁；tests/arcade/refract-maze.test.mjs 的可解關卡、重置與邊界測試。

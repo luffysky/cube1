@@ -1,6 +1,6 @@
 /* Original SnowRealm Games offline shell. No libraries or runtime cache rules. */
 // Bump VERSION whenever a precached file changes. Install is all-or-nothing.
-const VERSION = '2026-11-20-v30';
+const VERSION = '2026-11-20-v31';
 const CACHE_PREFIX = 'snowrealm-games-shell-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 
@@ -16,6 +16,10 @@ const PAGE_MARKERS = new Map([
   ['/games/next-floor/index.html', 'next-floor'],
   ['/games/zero-dodge/index.html', 'zero-dodge'],
   ['/games/refract-maze/index.html', 'refract-maze'],
+  ['/games/territory-conquest/index.html', 'territory-conquest'],
+  ['/games/gravity-reversal/index.html', 'gravity-reversal'],
+  ['/games/orbit-escape/index.html', 'orbit-escape'],
+  ['/games/beat-overdrive/index.html', 'beat-overdrive'],
 ]);
 const AUDIO_ASSETS = [
   'move.wav', 'rotate.wav', 'hold.wav', 'drop.wav', 'clear.wav', 'spin.wav',
@@ -31,6 +35,14 @@ const ASSETS = [
   '/assets/hunt-cover.svg', '/assets/floor-cover.svg',
   '/games/zero-dodge/engine.mjs', '/games/zero-dodge/game.mjs',
   '/games/refract-maze/engine.mjs', '/games/refract-maze/game.mjs',
+  '/games/beat-overdrive/engine.mjs',
+  '/games/beat-overdrive/game.mjs',
+  '/games/orbit-escape/engine.mjs',
+  '/games/orbit-escape/game.mjs',
+  '/games/gravity-reversal/engine.mjs',
+  '/games/gravity-reversal/game.mjs',
+  '/games/territory-conquest/engine.mjs',
+  '/games/territory-conquest/game.mjs',
   '/games/spinrealm/styles.css', '/games/spinrealm/arena-layout.css', '/games/spinrealm/app.mjs',
   '/games/spinrealm/room.css', '/games/spinrealm/room-app.mjs', '/games/spinrealm/room-client.mjs',
   '/games/spinrealm/rtc-peers.mjs',
