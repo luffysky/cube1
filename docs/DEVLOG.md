@@ -10,7 +10,8 @@
 - **安全限制**：Neon 沒有列出可用 Snapshot；owner role 仍可 bypass RLS。未聲稱備份、最小權限或正式 OAuth 已完成。
 - **GitHub 實作**：identity/oauth-core.mjs（90 秒一次性授權碼、S256、精確 callback 白名單、300 秒玩家 JWT）、identity/oauth-store.mjs（Postgres 原子消耗與停權/jti/kid 狀態）、server/migrations/004_identity_authorization.sql（僅草案，**沒有**執行正式庫）、identity/authority.mjs（status callback 加入簽名 iat）及 tests/identity/oauth-core.test.mjs、tests/api/identity-schema.test.mjs。
 - **文件**：docs/IDENTITY_P0_OAUTH_REVOCATION_SECURITY_GATE_zh-TW.md；docs/SNOWREALM_GAMES_MASTER_CHECKLIST_zh-TW.md 將完成的結構與程式核心拆分勾選，總數更新為 45/135。
-- **測試**：單元測試及 PGlite/Postgres 模擬測試已納入 GitHub Actions；CI 必須以本分支/PR 的實際結果為準。測試不代表真實帳號登入。
+- **測試**：PR #7 GitHub Actions [44770816454](https://github.com/luffysky/cube1/actions/runs/44770816454) completed/success，包含 Identity JWT/PKCE 單元測試、Postgres/WASM 004 Migration 的原子 code 消耗與撤銷、既有 API/PWA 測試。尚無正式跨站雙帳號登入 E2E，不能視為已上線。
+- **GitHub 合併**：[PR #7](https://github.com/luffysky/cube1/pull/7) 已以 squash commit `440595e7feee71784c6a45b763d4b79bea56a83b` 合併到 main。
 - **部署及權限**：OAuth API / BFF 未接入、003 表以外不做正式 DB Migration、沒有任何 Secret、Token 或持續登入設定公開；cube2 身分綁定保持 OFF。
 - **剩餘風險**：正式 004 Migration／備份與恢復、最小權限、Neon session → BFF、OAuth authorize/token 路由、真實 callback、DNS/TLS、機器驗證的撤銷服務、兩帳號 E2E。
 
