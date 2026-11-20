@@ -1,6 +1,6 @@
 # SnowRealm Games｜全專案待辦總表（唯一勾選基準）
 
-**版本**：v1.6 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
+**版本**：v1.7 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
 
 > 本文件永久保存 Owner 已確認需求、已交付功能與尚待驗收事項。**[x] 只代表該行描述的「程式／CI／規格」等明確成果已找到證據，不表示其所在系統正式上線。** 例如六款 Arcade 已通過單元測試，不等於 iOS/Android 實機驗收通過；Identity 金鑰模組已測試，不等於 SSO 服務已部署。
 
@@ -22,7 +22,7 @@
 - 六款完整原始碼在 `dist/games/`；另有 `tests/arcade/`；遊戲館、PWA、API、桌面工程分別列於下方。
 - 受控跨專案工作：[Issue #4](https://github.com/luffysky/cube1/issues/4)（Identity）、[Issue #3](https://github.com/luffysky/cube1/issues/3)（Arcade）、[Issue #2](https://github.com/luffysky/cube1/issues/2)（後台）。
 
-**統計**：52 / 140 條已完成；88 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
+**統計**：53 / 141 條已完成；88 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
 
 ## A｜專案治理、交接與開發流程
 
@@ -155,11 +155,12 @@ Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成�
 
 ## H｜管理後台與跨遊戲統一管理
 
-狀態：3/11 項已完成（僅限勾選文字描述的明確範圍）。
+狀態：4/12 項已完成（僅限勾選文字描述的明確範圍）。
 
 - [x] [P1] cube1 只讀管理 API（玩家、錢包流水、比賽、近七日趨勢）與權限測試 <!-- SRG-087 -->
 - [x] [P1] 管理站 HTML/JS/CSS 原型已移出公開 dist，存 internal/admin-console <!-- SRG-088 -->
 - [x] [P0] Owner D-012 確認 Games 後台不使用 admin.snowrealm.pet，而採 games.snowrealm.pet 下隨機受保護路徑（已決策，未部署） <!-- SRG-140 -->
+- [x] [P1] 已交付 GA-01～GA-60 管理後台完整 60 主頁規格、建議 Route、開發分期、每頁驗收與 60 個未完成核取項（只有規格完成，非頁面部署） <!-- SRG-141 -->
 - [ ] [P0] 正式站 /admin 舊頁、舊 JS/CSS、CDN 快取全部 HTTP 404/403 驗證 <!-- SRG-089 -->
 - [ ] [P0] 建立獨立私人管理 Repo／部署，Cloudflare Access（或同級）與 MFA 限制完整靜態資產 <!-- SRG-090 -->
 - [ ] [P0] 後台角色 Owner、Operator、Support、Auditor 逐項 RBAC 與伺服器驗簽 <!-- SRG-091 -->

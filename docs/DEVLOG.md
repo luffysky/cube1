@@ -4,6 +4,14 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜SnowRealm Games 管理後台正式 60 頁規格交付
+- **Owner 決定**：本後台只屬於 SnowRealm Games，固定 GA-01～GA-60 共 60 個主功能頁、8 大模組，不屬於 SnowRealm 全業務後台。
+- **新文件**：`docs/SNOWREALM_GAMES_ADMIN_60_PAGES_SPEC_zh-TW.md`，每頁列功能、資料來源、Route、驗收重點。收錄 60 條未完成頁面核取項，分成首版 19 頁、營運擴充 26 頁、進階 15 頁。
+- **現況辨識**：7 個僅有界面原型，不代表正式完整頁面；正式管理路徑、Cloudflare Access/MFA、全部管理 API、cube2 統計對接仍須部署及驗收。
+- **網址／資安**：遵守 Owner D-012，不使用 `admin.snowrealm.pet`；正式候選入口為 `games.snowrealm.pet/<RANDOM_GAMES_CONSOLE_PATH>/`，前端與玩家公開站隔離，需 MFA／RBAC／origin 防旁路。
+- **主待辦更新**：只新增並勾選 SRG-141「正式 60 頁規格交付」，總數 53/141；60 頁 UI 完工仍在新規格清單中全部保持未完成，避免將規格等同部署。
+- **實際操作**：本次僅 cube1 文件 commit，不改 cube2、Neon 資料、Secret、遊戲資產、Identity 綁定或正式後台路由。
+
 ## 2026-11-21｜cube1/Work 與 cube2/Claude 雙線開發交辦
 - **Owner 方向**：不得因 Identity 尚未部署而停止 cube2 API 或 BFF 的安全開發；兩條線同步推進。不能擅自停用既有功能，也不能在雙方正式驗收前擅自切換跨遊戲綁定。
 - **現場核對**：Cube1 main `62bbd15e030b706dc3f0b47748e682299cf1b36a`，cube2 main `5324f3a1431dc4b4de34a45cc0026eb999cc7a21`。Cube2 管理 API 規格已存在，最新 tree 查無實作的 `/internal/admin/v1/*` handler，也未見正式 OAuth callback/token exchange handler。
