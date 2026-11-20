@@ -64,3 +64,43 @@ test('admin store only returns bounded, preselected data without password or ema
  assert.ok(sql.filter(x=>x.values.length).every(x=>x.values[0]===50));
  assert.ok(sql.every(x=>!/password|neon_auth|session_token/i.test(x.statement)));
 });
+
+test('admin trends are gated by the same explicit allowlist and remain read-only',async()=>{
+ let called=0;
+ const store={clock:Date.now,limit:async()=>{}};
+ const trends=async()=>{called++;return {scope:'cube1',readOnly:true,days:7,items:[]};};
+ const make=id=>createApp({store,authenticate:async()=>id,
+   adminSubjects:'approved-player-id',adminStore:{trends}});
+ const denied=await make('ordinary-player-id').fetch(new Request('https://api.test/v1/admin/trends'));
+ assert.equal(denied.status,403);assert.equal(called,0);
+ const allowed=await make('approved-player-id').fetch(new Request('https://api.test/v1/admin/trends'));
+ assert.equal(allowed.status,200);
+ assert.equal((await allowed.json()).readOnly,true);assert.equal(called,1);
+ const writing=await make('approved-player-id').fetch(new Request('https://api.test/v1/admin/trends',{method:'POST'}));
+ assert.equal(writing.status,405);assert.equal(called,1);
+});
+test('seven-day admin trends are UTC-aligned, sparse days become zeros and queries never touch credentials',async()=>{
+ const statements=[];
+ const pool={query:async(statement)=>{
+  statements.push(statement);
+  if(statement.includes('FROM sr_profiles'))return {rows:[{day:'2026-11-20',amount:2}]};
+  if(statement.includes('FROM sr_ranked_matches'))return {rows:[{day:'2026-11-20',amount:3}]};
+  if(statement.includes('FROM sr_wallet_ledger'))return {rows:[{day:'2026-11-20',earned:'100',spent:'35'}]};
+  throw Error('unexpected query');
+ }};
+ const original=globalThis.Date;
+ const fixed=new Date('2026-11-20T12:00:00Z');
+ class FixedDate extends Date{constructor(...args){super(...(args.length?args:[fixed]));}static now(){return fixed.getTime();}}
+ globalThis.Date=FixedDate;
+ try{
+  const data=await new AdminStore(pool).trends();
+  assert.equal(data.scope,'cube1');assert.equal(data.readOnly,true);
+  assert.equal(data.timezone,'UTC');assert.equal(data.items.length,7);
+  assert.equal(data.items[0].day,'2026-11-14');
+  assert.deepEqual(data.items[0],{day:'2026-11-14',newPlayers:0,rankedMatches:0,coinsEarned:'0',coinsSpent:'0'});
+  assert.deepEqual(data.items.at(-1),{day:'2026-11-20',newPlayers:2,rankedMatches:3,coinsEarned:'100',coinsSpent:'35'});
+  assert.equal(statements.length,3);
+  assert.ok(statements.every(q=>!/(neon_auth|password|session_token|delete|update|truncate)/i.test(q)));
+  assert.ok(statements.every(q=>q.includes("AT TIME ZONE 'UTC'")));
+ }finally{globalThis.Date=original;}
+});
