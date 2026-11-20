@@ -14,6 +14,7 @@ const markers = new Map([
   ['/terms.html', 'legal'], ['/minor-protection.html', 'legal'],
   ['/games/52hunt/index.html', '52hunt'], ['/games/next-floor/index.html', 'next-floor'],
   ['/games/zero-dodge/index.html', 'zero-dodge'],
+  ['/games/refract-maze/index.html', 'refract-maze'],
 ]);
 const waveFixture = new Uint8Array(46);
 const waveView = new DataView(waveFixture.buffer);

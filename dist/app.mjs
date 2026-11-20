@@ -1,7 +1,7 @@
 const FAVORITES_KEY='snowrealm.favorites.v1';
 const RECENT_KEY='snowrealm.recent.v1';
-const VALID_IDS=new Set(['spinrealm','brickduel','52hunt','next-floor','zero-dodge']);
-const NAMES={spinrealm:'旋界',brickduel:'轉磚對戰','52hunt':'52 HUNT','next-floor':'NEXT FLOOR 下一層','zero-dodge':'零界閃避'};
+const VALID_IDS=new Set(['spinrealm','brickduel','52hunt','next-floor','zero-dodge','refract-maze']);
+const NAMES={spinrealm:'旋界',brickduel:'轉磚對戰','52hunt':'52 HUNT','next-floor':'NEXT FLOOR 下一層','zero-dodge':'零界閃避','refract-maze':'折光迷陣'};
 const $=id=>document.getElementById(id);
 const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}};
 let favorites=new Set((Array.isArray(read(FAVORITES_KEY,[]))?read(FAVORITES_KEY,[]):[]).filter(id=>VALID_IDS.has(id)));

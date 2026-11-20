@@ -4,6 +4,13 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-20｜Arcade《折光迷陣》原創光學解謎 MVP（開發分支）
+- **Owner 決策**：D-003 / Issue #3 六款原創遊戲。
+- **新增**：dist/games/refract-maze/ 中的光束反射引擎、三關旋轉鏡面、提示、重置、過關與 SVG 桌機/觸控/鍵盤操作頁；tests/arcade/refract-maze.test.mjs 的可解關卡、重置與邊界測試。
+- **整合**：遊戲館新增可玩卡、收藏、PWA 明確資源白名單和測試用模擬頁。
+- **資料與刪除**：未改動正式玩家資料庫、旋界資料、cube2；無刪除或金流變更。
+- **驗證**：GitHub Actions 依 PR 實際結果；實機與正式站部署尚待驗收，雲端排名和會員存檔未啟用。
+
 ## 2026-11-20｜Arcade《零界閃避》原創單人 MVP（開發分支）
 - **Owner 決策**：D-003 六款原創遊戲全部開發；Issue #3。
 - **實際內容**：新增 `dist/games/zero-dodge/` 三個檔案（可玩頁、純邏輯引擎、Canvas 操作），支援 60 秒計時、隨時間增加彈幕、三命碰撞、受傷無敵時間、勝負、重開、暫停、鍵盤與指標拖曳、背景暫停、本機最佳分數。
