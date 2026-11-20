@@ -11,7 +11,7 @@ const params={verifiedSubject:'neon-sub-verified-12345',consentGranted:true,
  state:'state-0123456789abcdefghijklmnopqrstuvwxyz',nonce:'nonce-0123456789abcdefghijklmnopqrstuvwxyz',
  codeChallenge:pkceS256(verifier)};
 function makeHarness(){
- const records=new Map();let active=true;
+ const records=new Map();let active=true,keyActive=true;
  const store={
   saveCode:async r=>{if(records.has(r.codeHash))throw Error('duplicate');records.set(r.codeHash,{...r,used:false});},
   consumeCode:async ({codeHash,clientId,redirectUri,codeChallenge})=>{
@@ -19,14 +19,15 @@ function makeHarness(){
    if(!r||r.used||r.clientId!==clientId||r.redirectUri!==redirectUri||r.codeChallenge!==codeChallenge)return null;
    r.used=true;return r.playerId;
   },
-  isActive:async()=>active
+  isActive:async()=>active,
+  canIssue:async()=>keyActive
  };
  const pair=generateKeyPairSync('ed25519');
  const signer=createIdentityAuthority({privateKeyPem:pair.privateKey.export({type:'pkcs8',format:'pem'}),
   kid:'identity-oauth-test-01'});
  const oauth=createOAuthCore({store,signer,identityMapping:{ensure:async()=>uuid},
   clients:[{clientId:params.clientId,redirectUri:params.redirectUri}]});
- return {oauth,setActive:value=>active=value};
+ return {oauth,setActive:value=>active=value,setKeyActive:value=>keyActive=value};
 }
 test('exact HTTPS callback registration rejects wildcard, query and duplicates',()=>{
  for(const redirectUri of ['https://evil.test/cb','https://brickduel.snowrealm.pet/cb?next=evil',
@@ -84,4 +85,12 @@ test('persistent store parameterizes writes, locks code via UPDATE and checks re
   redirectUri:params.redirectUri,codeChallenge:params.codeChallenge}),null);
  assert.equal(await store.isTokenActive({playerId:uuid,jti:uuid,kid:'identity-oauth-test-01',issuedAt:100}),true);
  assert.equal(await store.isTokenActive({playerId:uuid,jti:uuid,kid:'identity-oauth-test-01'}),false);
+});
+
+test('revoked or unavailable active kid denies authorization code token issuance',async()=>{
+ const {oauth,setKeyActive}=makeHarness();
+ const grant=await oauth.authorize(params);
+ setKeyActive(false);
+ await assert.rejects(oauth.exchange({clientId:params.clientId,redirectUri:params.redirectUri,
+  code:grant.code,codeVerifier:verifier}),/signing_key_revoked_or_unavailable/);
 });

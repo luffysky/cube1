@@ -56,6 +56,10 @@ export function createOAuthCore({store,identityMapping,signer,clients=[],clock=D
     codeChallenge:pkceS256(codeVerifier)});
    if(!UUID.test(playerId||''))deny('invalid_grant');
    if((await store.isActive(playerId))!==true)deny('account_disabled',403);
+   // A compromised signer must NEVER mint tokens after its kid is revoked.
+   const kid=signer.publicJwks?.().keys?.[0]?.kid;
+   if(!kid||typeof store.canIssue!=='function'||(await store.canIssue(kid))!==true)
+     deny('signing_key_revoked_or_unavailable',503);
    const accessToken=signer.issuePlayerToken({playerId,audience:PLAYER_AUDIENCE,
     scope:LINK_SCOPE,lifetimeSeconds:300});
    return {access_token:accessToken,token_type:'Bearer',expires_in:300,scope:LINK_SCOPE};

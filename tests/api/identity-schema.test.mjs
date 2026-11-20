@@ -28,6 +28,7 @@ test('004: actual Postgres schema supports one-time PKCE code and fail-closed re
   assert.equal(await store.consumeCode({...values,codeChallenge:'x'.repeat(43)}),null);
   assert.equal(await store.consumeCode(values),uuid);
   assert.equal(await store.consumeCode(values),null,'replay must fail');
+  assert.equal(await store.canIssue('test-kid-000001'),true);
   assert.equal(await store.isTokenActive({playerId:uuid,jti,kid:'test-kid-000001',issuedAt:Math.floor(Date.now()/1000)}),true);
   await db.query('INSERT INTO sr_identity_revoked_jti(jti,player_id,reason_code) VALUES ($1,$2,$3)',
    [jti,uuid,'test_revoke']);
@@ -35,6 +36,8 @@ test('004: actual Postgres schema supports one-time PKCE code and fail-closed re
   await db.query('UPDATE sr_identity_account_status SET suspended=true WHERE player_id=$1',[uuid]);
   await db.query('INSERT INTO sr_identity_account_status(player_id,suspended) VALUES($1,true) ON CONFLICT(player_id) DO UPDATE SET suspended=true',[uuid]);
   assert.equal(await store.isActive(uuid),false);
+  await db.query('INSERT INTO sr_identity_revoked_kids(kid,reason_code) VALUES ($1,$2)', ['test-kid-000001','key_retired']);
+  assert.equal(await store.canIssue('test-kid-000001'),false);
   const flags=await db.query("SELECT relname,relrowsecurity FROM pg_class WHERE relname LIKE 'sr_identity_%' AND relkind='r'");
   assert.equal(flags.rows.length,4);
   assert.ok(flags.rows.every(row=>row.relrowsecurity===true));

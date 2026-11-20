@@ -18,6 +18,10 @@ export class OAuthStore {
   const {rows}=await this.pool.query(sql,[playerId]);
   return rows[0]?.identity_exists===true&&rows[0]?.suspended===false;
  }
+ async canIssue(kid){
+  const {rows}=await this.pool.query('SELECT NOT EXISTS (SELECT 1 FROM sr_identity_revoked_kids WHERE kid=$1) AS active',[kid]);
+  return rows[0]?.active===true;
+ }
  async isTokenActive({playerId,jti,kid,issuedAt}){
   const sql='SELECT EXISTS (SELECT 1 FROM sr_platform_identities WHERE platform_player_id=$1) AS identity_exists, COALESCE((SELECT suspended FROM sr_identity_account_status WHERE player_id=$1),false) AS suspended, (SELECT revoked_after FROM sr_identity_account_status WHERE player_id=$1) AS revoked_after, EXISTS (SELECT 1 FROM sr_identity_revoked_jti WHERE jti=$2) AS jti_revoked, EXISTS (SELECT 1 FROM sr_identity_revoked_kids WHERE kid=$3) AS kid_revoked';
   const {rows}=await this.pool.query(sql,[playerId,jti,kid]);const r=rows[0];
