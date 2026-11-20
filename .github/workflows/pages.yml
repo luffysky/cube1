@@ -27,6 +27,12 @@ jobs:
           node-version: '24'
       - name: Test gameplay and offline rules
         run: npm test
+      - name: Install API test dependencies
+        run: npm --prefix server/api ci --ignore-scripts --no-audit --no-fund
+      - name: Test protected management and game API
+        run: npm run test:api
+      - name: Validate admin console syntax
+        run: node --check internal/admin-console/admin.mjs
       - name: Validate multiplayer browser and Worker syntax
         run: |
           node --check dist/games/spinrealm/room-app.mjs
