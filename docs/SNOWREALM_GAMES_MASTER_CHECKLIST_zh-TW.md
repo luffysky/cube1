@@ -1,6 +1,6 @@
 # SnowRealm Games｜全專案待辦總表（唯一勾選基準）
 
-**版本**：v1.7 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
+**版本**：v1.8 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
 
 > 本文件永久保存 Owner 已確認需求、已交付功能與尚待驗收事項。**[x] 只代表該行描述的「程式／CI／規格」等明確成果已找到證據，不表示其所在系統正式上線。** 例如六款 Arcade 已通過單元測試，不等於 iOS/Android 實機驗收通過；Identity 金鑰模組已測試，不等於 SSO 服務已部署。
 
@@ -22,7 +22,7 @@
 - 六款完整原始碼在 `dist/games/`；另有 `tests/arcade/`；遊戲館、PWA、API、桌面工程分別列於下方。
 - 受控跨專案工作：[Issue #4](https://github.com/luffysky/cube1/issues/4)（Identity）、[Issue #3](https://github.com/luffysky/cube1/issues/3)（Arcade）、[Issue #2](https://github.com/luffysky/cube1/issues/2)（後台）。
 
-**統計**：53 / 141 條已完成；88 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
+**統計**：56 / 144 條已完成；88 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
 
 ## A｜專案治理、交接與開發流程
 
@@ -89,7 +89,7 @@
 - [ ] [P0] 永續撤銷／停權／token jti 與 kid 查詢、敏感操作 fail-closed 及稽核 <!-- SRG-044 -->
 - [ ] [P0] 使用秘密管理服務部署私鑰、金鑰輪替，公開 jwks.json（不得把私鑰上 GitHub） <!-- SRG-045 -->
 - [ ] [P0] 部署 identity.snowrealm.pet、確認 DNS/TLS、健康端點、實際授權登入與受控日誌 <!-- SRG-046 -->
-- [x] [P0] 已依 cube2 C-022 文件定案 BFF 正式 callback 為 https://brickduel.snowrealm.pet/api/auth/callback（僅路徑規格，路由尚未實作） <!-- SRG-047 -->
+- [x] [P0] 已依 cube2 C-022 文件定案 BFF callback 且 cube2 已實作 /api/auth/callback 程式／CI（正式 Identity 尚未完成跨站 E2E） <!-- SRG-047 -->
 - [ ] [P0] 用兩名測試帳號驗證登入、跨裝置恢復、409 衝突、重試、撤銷及金鑰輪替 <!-- SRG-048 -->
 - [ ] [P0] 與 Claude 完成雙方驗收後才准由 cube2 啟用 IDENTITY_LINK_ENABLED（GPT 不擅改 cube2） <!-- SRG-049 -->
 
@@ -217,7 +217,7 @@ Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成�
 
 ## L｜Claude cube2 跨專案依賴（僅追蹤，不由 GPT 改 Repo）
 
-狀態：1/7 項已完成（僅限勾選文字描述的明確範圍）。
+狀態：4/10 項已完成（僅限勾選文字描述的明確範圍）。
 
 - [x] [P1] 已正式核准 Claude 開發《轉磚》與 SnowRealm 平台帳號整合，雙方 Repo／資料庫獨立 <!-- SRG-127 -->
 - [ ] [P0] Claude 完成／驗證 cube2 的 Auth Adapter、精確 callback BFF、idLink/idRecover 正式流程 <!-- SRG-128 -->
@@ -226,6 +226,9 @@ Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成�
 - [ ] [P1] Claude 提交 cube2 的管理 API Adapter、版本、測試及與平台權限對接 <!-- SRG-131 -->
 - [ ] [P1] Claude 與 GPT 驗收不同遊戲金幣／道具／段位／個資不能互相讀寫或覆蓋 <!-- SRG-132 -->
 - [ ] [P1] 完成 cube2 更新紀錄與正式部署證據交接，未經查核不標已完成 <!-- SRG-133 -->
+- [x] [P1] Claude cube2 已提交 7 支唯讀營運 API、server/admin.js、測試與 CI（正式因管理機器簽發／JWKS 未接通，回 503；未驗收跨系統讀取） <!-- SRG-142 -->
+- [x] [P0] Claude cube2 已提交 OAuth PKCE BFF start/callback/result 路由、一次性 Session 與測試／CI（正式玩家登入／換裝置 E2E 未通過） <!-- SRG-143 -->
+- [x] [P1] Claude cube2 已更新四語必要 Cookie 同意說明與隱私政策第 4 節（`__Host-zzauth`，最長 10 分鐘，不做追蹤；法律合規仍需正式審查） <!-- SRG-144 -->
 ## P0 本輪狀態備註（2026-11-21）
 
 - 003 身分表已在經核實的正式 Neon 專案執行，Identity UUID 表現在 0 筆、PUBLIC SELECT=false、RLS=true；未改寫真實玩家錢包。

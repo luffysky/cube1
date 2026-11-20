@@ -1,5 +1,5 @@
 # SnowRealm Games｜共用管理後台 API 與 Claude《轉磚》對接規格
-版本 v0.2（2026-11-20）。本文確認 cube1 與 cube2 的唯讀介面契約。正式管理站、機器憑證與跨遊戲查詢仍待部署驗收。
+版本 v0.3（2026-11-21）。已依 cube2 main `853b5e9` 更新唯讀接口源碼實作狀態，**正式機器憑證與 E2E 尚未驗收**。
 
 ## 1. 分工與邊界
 
@@ -37,7 +37,7 @@
 
 ## 4. BRICKDUEL 唯讀資料契約
 
-以下路徑皆以 `/internal/admin/v1/` 開頭。cube1 接受 cube2 規格 §3.1–3.6 的資料語意。cube2 `5137358` 已有 `zz.matches`、`zz.ledger`，尚無對外管理 handler。兩者須分別驗收。[cube2 對接規格](https://github.com/luffysky/cube2/blob/5137358f93f750931a4017a869361557a0d6cc71/docs/BRICKDUEL_ADMIN_API_ADAPTER_SPEC.md)
+以下路徑皆以 `/internal/admin/v1/` 開頭。cube1 接受 cube2 規格 §3.1–3.6 的資料語意。cube2 main `853b5e9` 已完成 `server/admin.js`、`api/admin.js` 與 `vercel.json` `/internal/admin/v1/*` rewrite（功能 commit `0ff7364`），但目前因管理機器簽發／JWKS 未可用，正式呼叫仍 503 `disabled`。兩者須分別驗收。[cube2 對接規格](https://github.com/luffysky/cube2/blob/5137358f93f750931a4017a869361557a0d6cc71/docs/BRICKDUEL_ADMIN_API_ADAPTER_SPEC.md)
 
 | GET 路徑 | 回應與計數單位 |
 |---|---|
@@ -104,8 +104,22 @@ SnowRealm 平台 Identity 的**機器簽發端**負責簽發。cube1 的 Neon Fu
 
 **離線驗簽。** [測試 fixture](../tests/api/fixtures/brickduel-admin-jwt.json) 提供 Ed25519 公開 JWK、完整簽名 JWT、獨立的 `.invalid` 測試 issuer、服務帳號與驗證時鐘。私鑰僅在產生測試向量時存在於記憶體。fixture 已過期，專供本機測試。先以 `npm ci --prefix server/api` 安裝後端依賴，再於 repo 根目錄執行 `node --test tests/api/brickduel-admin-contract.test.mjs`。正式環境須使用正式信任設定。
 
+## 7. cube2 2026-11-21 實際交付補充（源碼／CI 已完成，正式機器串接未驗收）
+
+- 來源：[Claude 回覆](https://github.com/luffysky/cube2/blob/main/docs/CUBE1_REPLY_20261121.md)，cube2 main `853b5e9`，功能 `0ff7364`，CI [44835328522](https://github.com/luffysky/cube2/actions/runs/44835328522) success。
+- 七支管理 GET 已有 handler：overview、players、players/{gameUserId}、draws、matches、metrics、metrics/daily。GET 無 CORS、no-store、API JWT 規範依本文。待刪除存檔不列入計數，`draws.kind` 及 `summary.published`、`metrics.day/generatedAt` 為新增欄位；不可量測欄位要返回 null。
+- 目前 cube2 未配置機器身分 `BRICKDUEL_ADMIN_SUBJECTS`，公開 HTTP 僅見 503 disabled，不能把未串通當已上線成功。
+- **唯一允許的機器身分**：`iss=https://identity.snowrealm.pet`、`aud=snowrealm:brickduel:admin`、`scope=brickduel:admin:read`、`sub=svc:snowrealm-games-admin`。須由 **獨立 Admin Ed25519 簽發端**提供 `/.well-known/admin-jwks.json`，不得混用玩家 `/.well-known/jwks.json`。簽發和驗簽都只在後端，須有金鑰輪替、最小權限及審計。
+- cube1 下一工作：先提供可驗的受控 staging admin JWKS／短效機器 token，完成正反面合約測試（有效 200、錯 iss/aud/scope/sub/kid 401/403、已停用 503），再安全配置正式 Vercel；所有寫入與跨遊戲經濟異動維持禁止。提交 PR/CI/DEVLOG。
+
+## 8. OAuth BFF 與必要 Cookie 的另一條依賴
+
+- Claude 已於 cube2 建立 start／callback／result BFF 路由與 `__Host-zzauth` 必要 Cookie（Secure／HttpOnly／SameSite=Lax，最長 10 分鐘）。四語同意文案和隱私政策已改，正式跨站 SSO 尚未 E2E。
+- **cube1 Token 契約決議（待實作驗收）**：link token 應攜帶 **必填 nonce claim**，其內容與可信授權碼流程中的 nonce 原文一致。為達成此事須調整 OAuth Store 的一次性 code 記錄與 exchange 綁定（目前僅保存 nonce hash）、Signer 及雙邊測試；不得改為相信瀏覽器傳來的 nonce。正式 cube2 BFF 一律拒絕 nonce 缺失或不符。
+- **不能自行開啟登入功能**：先完成可信伺服器端同意、Identity HTTPS/JWKS、回呼 code 交換、撤銷及兩帳號跨裝置／409 存檔保護驗收，再走核准的正式開通程序。
+
 ## 6. 驗收與交接
 
 1. cube1 部署獨立管理站及個人 MFA，驗證一般帳號與已撤銷帳號無法讀資料。兩邊分別驗證機器用與玩家用 audience 隔離。
-2. Claude 在 cube2 實作唯讀 handler、欄位、分頁與稽核；cube1 實作受權管理查詢，設定逾時、回應上限和故障隔離。現有 cube1 原型只查 cube1 自有資料。
+2. Claude 已於 cube2 完成唯讀 handler、欄位、分頁與稽核的程式與 CI；cube1 仍須實作伺服器端機器簽發／受權管理查詢、逾時、回應上限和故障隔離，並做雙方端點正式驗收。現有 cube1 原型只查 cube1 自有資料。
 3. 用非正式環境測有效／過期 token、錯 `iss`／`aud`／`sub`／`scope`、重複 `jti` 的唯讀分頁、換鑰與撤銷；待身份與回應契約實測後再開通正式憑證。
