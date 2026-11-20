@@ -2,7 +2,7 @@ export const SIZE=7;
 export const LEVELS=[
  {name:'第一關・轉折',source:[0,3,'E'],target:[2,0],mirrors:[{x:2,y:3,kind:'\\'}],walls:[]},
  {name:'第二關・光之階梯',source:[0,4,'E'],target:[6,1],mirrors:[{x:3,y:4,kind:'\\'},{x:3,y:1,kind:'\\'}],walls:[[5,4]]},
- {name:'第三關・回折',source:[0,5,'E'],target:[1,0],mirrors:[{x:4,y:5,kind:'\\'},{x:4,y:2,kind:'/'},{x:1,y:2,kind:'/'}],walls:[[5,5],[2,5]]}
+ {name:'第三關・回折',source:[0,5,'E'],target:[1,0],mirrors:[{x:4,y:5,kind:'\\'},{x:4,y:2,kind:'/'},{x:1,y:2,kind:'/'}],walls:[[5,5]]}
 ];
 export function makeLevel(index=0){
  if(!Number.isSafeInteger(index)||index<0||index>=LEVELS.length)throw Error('invalid_level');
