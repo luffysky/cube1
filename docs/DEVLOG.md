@@ -20,6 +20,26 @@
 - **追蹤**：Claude 專案的既有日誌由 Claude 自己更新；GPT 未修改 cube2。
 - **下一步**：各自後續提交需記原因、檔案/API/DB、commit、測試、正式/預覽部署、未完成事項。以前的提交歷史可逐步補記，但未經核實不可捏造。
 
+## 2026-11-20｜管理後台七日營運報表與 API 測試上線前準備
+
+- **專案／執行者**：GPT／cube1。
+- **對應 Owner 指令**：GitHub Issue #2，「你繼續做管理後台」，以及 D-007 非刪除操作授權、D-008 強制留 Log。
+- **原因**：原有管理原型僅有總覽、玩家、錢包、對局列表，缺少真正的趨勢與可稽核的數據分析；過往網頁 CI 只跑遊戲測試，沒有執行後端權限測試。
+- **實際新增／修改**：
+  - `server/api/admin.mjs` 新增 `GET /v1/admin/trends`：固定近 7 個 UTC 日期，伺服器查詢玩家新增、排位對局、帳本正負金幣異動；無資料日補零，來源僅 `cube1`，API 仍經簽章 JWT、管理員白名單與限流，非 GET 回 405。
+  - `internal/admin-console/index.html` 增加「營運趨勢」頁、四張彙總數據卡、每日新增／排位柱狀圖與金幣明細表。
+  - `internal/admin-console/admin.mjs` 使用純 DOM textContent 繪圖、格式化日期與 BigInt 金幣加總，避免把 API 輸入當 HTML 插入。
+  - `internal/admin-console/admin.css` 增加響應式趨勢圖與降低動態效果設定。
+  - `tests/api/admin.test.mjs` 增加驗證未授權 403、唯讀 GET、寫入 405、UTC 日期補零、來源查詢不碰帳密欄位。
+  - `.github/workflows/pages.yml` 補上 API 測試依賴安裝、`npm run test:api` 與管理 UI JS 語法檢查；不會將內部管理 HTML 複製到公開靜態網站。
+  - `docs/SNOWREALM_GAMES_ADMIN_API_BRICKDUEL_HANDOFF.md` 更新查詢欄位契約。
+- **資料庫**：僅讀取既有 `sr_profiles`、`sr_ranked_matches`、`sr_wallet_ledger`；**無資料庫 Schema 修改、無 Migration、無玩家資料寫入、無刪除**。
+- **提交證據**：API `0af1d064`；管理頁 `2b980e43`；瀏覽器渲染 `577f97d3`；CSS `6306f504`；API 測試 `da229ae3`；CI 強化 `d2485d59`；API 文件 `6835f28a`。
+- **CI 驗證**：`d2485d59` 的 GitHub Actions [Web tests](https://github.com/luffysky/cube1/actions/runs/44715102827) 已完成且 success，這輪才開始實際跑 `npm run test:api`。其他提交以各次 Actions 為準。
+- **部署狀態**：此輪**未獨立部署正式管理站**、也**未驗證正式 API 新版本已發佈**。正式站仍需 Cloudflare Access／MFA、獨立資產打包、允許來源與已授權管理員的端到端驗收。不得把本機/CI 綠燈說成已經能登入正式後台。
+- **安全與未完成**：`cube2` 只透過未來的 server-to-server 機器 JWT 介面接入，尚無真實資料；不會把未接通寫成 0。管理前端目前有跨站登入/靜態資產打包問題，需於獨立部署前修正並驗收。管理操作目前仍限只讀，避免在缺 MFA／稽核時開放玩家資產寫入。
+- **回滾**：此輪純程式與文件修改，必要時可由 GitHub 回復對應提交；無資料搬遷需回滾。
+
 ## 後續紀錄格式
 
 ```markdown
