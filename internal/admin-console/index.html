@@ -13,6 +13,7 @@
   <div class="sidebar-caption">營運管理</div>
   <nav class="nav" aria-label="管理控制台功能">
    <button data-panel="overview" aria-current="page">◈ <span>總覽</span></button>
+   <button data-panel="trends">▥ <span>營運趨勢</span></button>
    <button data-panel="players">♙ <span>玩家管理</span></button>
    <button data-panel="ledger">◉ <span>金幣帳本</span></button>
    <button data-panel="matches">♜ <span>對局紀錄</span></button>
@@ -46,6 +47,20 @@
         <article class="card"><h3>SPINREALM 旋界</h3><p>玩家、金幣帳本、真人排位使用 SnowRealm Games 後端 API。</p><span class="chip">資料來源：cube1</span></article>
         <article class="card"><h3>BRICKDUEL 轉磚</h3><p>等待 Claude 提供後端整合 API，不能在未連線前顯示虛構營運數字。</p><span class="chip muted">尚未接入</span></article>
       </div>
+    </section>
+    <section id="trendsPanel" class="panel-view" hidden>
+      <div class="section-head"><h2>七日營運趨勢</h2><span>UTC 日曆日 · 僅 cube1 真實資料 · 後端唯讀</span></div>
+      <div class="grid-two trend-summary">
+        <article class="card"><span>七日新增玩家</span><strong id="trendsPlayers">—</strong><small>僅已建立平台玩家資料</small></article>
+        <article class="card"><span>七日排位對局</span><strong id="trendsMatches">—</strong><small>伺服器排位對局紀錄</small></article>
+        <article class="card"><span>七日獲得金幣</span><strong id="trendsEarned">—</strong><small>伺服器帳本正向異動</small></article>
+        <article class="card"><span>七日花費金幣</span><strong id="trendsSpent">—</strong><small>伺服器帳本負向異動絕對值</small></article>
+      </div>
+      <article class="card"><h3>每日新增玩家與排位對局</h3><p class="chart-note">以同一組相對刻度比較七天數值；不同統計單位不代表相同業務意義。</p>
+        <div id="trendChart" class="trend-chart" role="img" aria-label="每日新增玩家與排位對局趨勢圖"></div>
+        <div class="chart-legend"><span><i class="legend-new"></i>新增玩家</span><span><i class="legend-matches"></i>排位對局</span></div>
+      </article>
+      <article class="card"><h3>每日帳本異動</h3><div class="table-wrap"><table><thead><tr><th>日期（UTC）</th><th>新增玩家</th><th>排位對局</th><th>獲得金幣</th><th>花費金幣</th></tr></thead><tbody id="trendsBody"></tbody></table></div></article>
     </section>
     <section id="playersPanel" class="panel-view" hidden><div class="section-head"><h2>玩家管理</h2><span>僅列出最新 25 筆 · 不顯示電子郵件</span></div><div class="table-wrap"><table><thead><tr><th>暱稱</th><th>好友代碼</th><th>金幣</th><th>排位</th><th>場次</th><th>建立日期</th></tr></thead><tbody id="playersBody"></tbody></table></div></section>
     <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>只讀稽核，未開放手動調整</span></div><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
