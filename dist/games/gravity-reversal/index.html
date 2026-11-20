@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>重力逆轉｜SnowRealm Games</title><style>
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#33265f,#090d1f 78%);font-family:system-ui,sans-serif;color:#eff6ff}
+header,main{max-width:1000px;margin:auto;padding:14px}header{display:flex;justify-content:space-between}a{color:#c9b5ff}
+h1{font-size:clamp(29px,5vw,43px)}p{color:#c3bee2;line-height:1.6}
+.layout{display:grid;grid-template-columns:minmax(300px,700px) 240px;gap:17px}
+#board{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));width:100%;aspect-ratio:12/8;background:#171532;border:2px solid #6553a5;border-radius:15px;overflow:hidden}
+.cell{border:1px solid #34355d;display:grid;place-items:center;font-size:clamp(9px,2vw,28px)}
+.wall{background:linear-gradient(135deg,#7666b9,#403c83)}.goal{background:#496737;color:#f9e798}.player{background:#6febed;color:#101e3b;border-radius:30%}
+section{background:#181b3a;border:1px solid #4b4d7b;border-radius:14px;padding:15px}
+button{cursor:pointer;padding:13px 16px;border:0;border-radius:10px;background:#aaa0fa;color:#161137;font-size:16px;font-weight:700;margin:3px}
+button.secondary{background:#33365c;color:white}
+@media(max-width:750px){.layout{grid-template-columns:1fr}section{order:-1}}
+</style></head><body><header><a href="/">← 雪域遊戲館</a><span>ARCADE / MVP 05</span></header>
+<main><h1>重力逆轉 <small style="font-size:.4em;color:#aa9ffd">GRAVITY REVERSAL</small></h1>
+<p>有時候不是前面的牆擋住你，是你一直忘了重力可以反過來。</p>
+<div class="layout"><div id="board" role="img" aria-label="十二乘八重力反轉解謎平台"></div>
+<section><h2 id="levelName">第一關</h2><p>重力方向：<strong id="gravity">↓</strong></p>
+<p>步數：<strong id="moves">0</strong></p><p id="status" role="status">避開紫色牆壁，走到金色終點。</p>
+<button id="left">← 左</button><button id="flip">↕ 翻轉</button><button id="right">右 →</button>
+<button class="secondary" id="pause">暫停</button><button class="secondary" id="reset">重試</button><button id="next" disabled>下一關</button>
+<p>按 ← → 移動；空白鍵切換重力；R 重試。每一步都遵守格子碰撞，關卡不受網路延遲影響。</p>
+<p>單人 MVP，尚未串接伺服器成就、金幣或會員資料。</p></section></div></main>
+<script type="module" src="./game.mjs"></script></body></html>
