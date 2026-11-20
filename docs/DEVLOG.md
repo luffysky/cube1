@@ -4,6 +4,15 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜P0 正式 004 遷移、Snapshot 與可信 Identity 服務核心
+- **Owner 指令**：正式 Identity、BFF、004、金鑰／撤銷、雙帳號 E2E 立即優先；僅核實後才開跨遊戲綁定。
+- **資料庫**：正式 SnowRealmGames-Cube1／production br-winter-thunder-b3ozovl2（DB cube1）。已先建立 Snapshot `snap-curly-resonance-b3xxwfup`／`pre-identity-004-20261121`，再於單一 transaction 套用 `server/migrations/004_identity_authorization.sql`（11 條不破壞 SQL）。
+- **Schema 實測**：新表 sr_identity_authorization_codes、sr_identity_account_status、sr_identity_revoked_jti、sr_identity_revoked_kids 均存在且 RLS=true；PUBLIC SELECT=false；平台映射表 0 筆、原 wallets=1、wallet ledger=2 未動。未執行 DELETE/DROP/TRUNCATE 或玩家資產更新。
+- **GitHub**：[PR #9](https://github.com/luffysky/cube1/pull/9) JWKS 公開唯讀 handler / 測試併入 `a7113762`；[PR #10](https://github.com/luffysky/cube1/pull/10) 可信 Neon JWT → PKCE 授權碼／BFF 專用憑證／撤銷狀態 API Adapter 與 Node24 esbuild 併入 `c5fa90a6`；整合 main CI [44780171358](https://github.com/luffysky/cube1/actions/runs/44780171358) success。
+- **真實部署狀態**：Neon deploy_function 在上傳公鑰／私鑰環境的工具呼叫遭安全檢查阻擋，未取得 deployment ID 或正式 URL；沒有完成 DNS／TLS、真實 JWKS 可用性，也沒有公開 OAuth 授權端點。未嘗試繞過安全檢查。
+- **安全尚缺**：Identity 專用最小權限資料庫角色、可信秘密儲存、BFF HttpOnly 工作階段與真正的 cube2 callback、實際 Snap restore 演練、雙帳號 E2E、限流及監控仍待完成。絕不將這些項目打勾。
+- **勾選與分工**：正式總表 v1.3 依可證據新增 3 個子項，合計 49/138；Claude repo 未修改，cube2 IDENTITY_LINK_ENABLED 保持關閉。
+
 ## 2026-11-21｜核對 cube2 C-022 正式 OAuth callback 與 30 天刪除工程狀態
 - **讀取範圍**：只讀 `luffysky/cube2` 的身份 Adapter 文件、DEVLOG、server/core.js、server/app.js，沒有變更 Claude Repo。
 - **正式回呼路徑**：cube2 C-022 定案 `https://brickduel.snowrealm.pet/api/auth/callback`；此前 cube1 OAuth 離線測試以 `/api/auth/callback/snowrealm` 當測試樣例，現在已同步測試使用 C-022 的正確正式 path。此路徑**目前仍沒有完成 BFF Handler**，只是合約定案，不可宣稱已可登入。

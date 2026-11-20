@@ -1,6 +1,6 @@
 # SnowRealm Games｜全專案待辦總表（唯一勾選基準）
 
-**版本**：v1.2 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
+**版本**：v1.3 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
 
 > 本文件永久保存 Owner 已確認需求、已交付功能與尚待驗收事項。**[x] 只代表該行描述的「程式／CI／規格」等明確成果已找到證據，不表示其所在系統正式上線。** 例如六款 Arcade 已通過單元測試，不等於 iOS/Android 實機驗收通過；Identity 金鑰模組已測試，不等於 SSO 服務已部署。
 
@@ -22,7 +22,7 @@
 - 六款完整原始碼在 `dist/games/`；另有 `tests/arcade/`；遊戲館、PWA、API、桌面工程分別列於下方。
 - 受控跨專案工作：[Issue #4](https://github.com/luffysky/cube1/issues/4)（Identity）、[Issue #3](https://github.com/luffysky/cube1/issues/3)（Arcade）、[Issue #2](https://github.com/luffysky/cube1/issues/2)（後台）。
 
-**統計**：46 / 135 條已完成；89 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
+**統計**：49 / 138 條已完成；89 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
 
 ## A｜專案治理、交接與開發流程
 
@@ -76,7 +76,7 @@
 
 ## D｜SnowRealm Identity（P0 上線阻塞）
 
-狀態：7/17 項已完成（僅限勾選文字描述的明確範圍）。
+狀態：10/20 項已完成（僅限勾選文字描述的明確範圍）。
 
 - [x] [P0] 定義獨立 SnowRealm 平台玩家 UUID；Neon subject 不直接冒充跨遊戲 UUID <!-- SRG-036 -->
 - [x] [P0] sr_platform_identities SQL Migration 檔、映射 Store、已驗證會員註冊／查詢 API（程式／CI） <!-- SRG-037 -->
@@ -95,6 +95,9 @@
 - [ ] [P1] Steam-only 玩家與 Neon Auth 來源的多身分綁定、遷移與去重策略 <!-- SRG-050 -->
 - [x] [P0] 正式 Cube1 Neon 已非破壞性建立 003 身分 UUID 映射表；證明 RLS 與 PUBLIC 權限，玩家錢包未動（獨立備份/最小角色另列未完成） <!-- SRG-134 -->
 - [x] [P0] Identity 已完成只在受信任後端使用的一次性授權碼／PKCE 核心、持久化撤銷 Store 與測試程式（未部署/未接 BFF） <!-- SRG-135 -->
+- [x] [P0] 已建立正式 Cube1 Neon 手動 Snapshot pre-identity-004-20261121（尚未實測還原） <!-- SRG-136 -->
+- [x] [P0] 已依正式 Neon 004 Identity Migration 新增授權碼、停權與 jti/kid 撤銷四張表；四表 RLS=true、PUBLIC SELECT=false，舊錢包帳本筆數未改 <!-- SRG-137 -->
+- [x] [P0] 已合併可打包 Node24 的可信 Neon JWT + PKCE/BFF client-secret + 即時撤銷後端 Adapter（原始碼/CI，未正式部署） <!-- SRG-138 -->
 
 ## E｜六款原創 Arcade（Issue #3）
 
@@ -224,6 +227,14 @@
 - OAuth 核心與 004 SQL 草案已提交專用分支，正式 Identity endpoint、Neon session 驗證、BFF、撤銷服務與真實跨遊戲登入仍未部署。
 - 正式 Neon 沒有可見獨立 Snapshot，且原有 owner role 可繞過 RLS；SRG-040 與 SRG-116 因此仍保持未完成。
 - 參考：docs/IDENTITY_P0_OAUTH_REVOCATION_SECURITY_GATE_zh-TW.md。
+
+## 2026-11-21 P0 現場更新
+
+- Neon Snapshot `snap-curly-resonance-b3xxwfup` 建立成功，尚未做 Restore 演練。
+- 004 Identity Migration 的 11 條新增結構／REVOKE／RLS SQL 已在 Cube1 production 成功執行；確認 4 張新表均有 RLS，PUBLIC 無 SELECT，wallets=1、ledger_rows=2 未變。
+- [PR #9](https://github.com/luffysky/cube1/pull/9) / [PR #10](https://github.com/luffysky/cube1/pull/10) 已併入 main；後者合併後 Actions [44780171358](https://github.com/luffysky/cube1/actions/runs/44780171358) success。
+- **Neon 身分服務實際部署未成功**：Neon deploy function 呼叫被工具安全檢查阻止，且缺受控簽名私鑰及專用最小 DB 角色。此狀態不算網域、JWKS、BFF 或跨裝置驗收完成。
+- cube2 BFF 仍待 Claude 實作；繼續保持 IDENTITY_LINK_ENABLED=OFF。
 
 ## 推理等級分流
 
