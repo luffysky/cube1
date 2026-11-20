@@ -262,4 +262,4 @@ Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成�
 - [獎勵廣告、任務與 Plus](REWARDED_ADS_AND_QUESTS_CUBE1_CUBE2_SPEC.md)
 - [Steam 上架說明](steam/SnowRealmGames_Steam_Guide_zh-CN.md)
 
-Identity 續辦（2026-11-21）：已提出正式 DB 連線目標檢查與撤銷 API 的 BFF 身分驗證。正式秘密配置、Function、網域與 E2E 仍須取得實際驗收證據，總勾選維持 51/139。
+Identity 續辦（2026-11-21）：[PR #15](https://github.com/luffysky/cube1/pull/15) 已合併 `b64abb9c2c2a5fbc4b4772cba6811ac09491711c`，主分支 [CI #44815611765](https://github.com/luffysky/cube1/actions/runs/44815611765) 成功。正式 DB 連線目標/TLS 與撤銷 API 的 BFF 身分驗證已有程式。正式秘密配置、Function、網域與 E2E 仍須取得實際驗收證據，總勾選維持 51/139。
