@@ -7,7 +7,7 @@ import {OAuthStore} from '../../identity/oauth-store.mjs';
 const uuid='7c033f11-b127-4822-bebe-ef31e7e1645c';
 const verifier='abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG';
 const params={verifiedSubject:'neon-sub-verified-12345',consentGranted:true,
- clientId:'brickduel-bff',redirectUri:'https://brickduel.snowrealm.pet/api/auth/callback/snowrealm',
+ clientId:'brickduel-bff',redirectUri:'https://brickduel.snowrealm.pet/api/auth/callback',
  state:'state-0123456789abcdefghijklmnopqrstuvwxyz',nonce:'nonce-0123456789abcdefghijklmnopqrstuvwxyz',
  codeChallenge:pkceS256(verifier)};
 function makeHarness(){

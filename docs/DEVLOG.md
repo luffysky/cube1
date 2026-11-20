@@ -4,6 +4,13 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜核對 cube2 C-022 正式 OAuth callback 與 30 天刪除工程狀態
+- **讀取範圍**：只讀 `luffysky/cube2` 的身份 Adapter 文件、DEVLOG、server/core.js、server/app.js，沒有變更 Claude Repo。
+- **正式回呼路徑**：cube2 C-022 定案 `https://brickduel.snowrealm.pet/api/auth/callback`；此前 cube1 OAuth 離線測試以 `/api/auth/callback/snowrealm` 當測試樣例，現在已同步測試使用 C-022 的正確正式 path。此路徑**目前仍沒有完成 BFF Handler**，只是合約定案，不可宣稱已可登入。
+- **30 天刪除**：cube2 `core.wipe`、`restore`、`idRecover(back:true)`、`gone` 保留和期滿 `PURGE` 交易的程式已存在；但目前 PURGE 依其他請求順帶觸發，沒有獨立定時器，因此不保證到期準時刪除。SRG-129 與跨裝置驗收保留未完成。
+- **文件／勾選**：更新 Identity Gate、兩份測試的 callback 約定與主待辦 SRG-047。完成的只是正式 redirect URI 規格，總表更新為 46/135。
+- **權限／部署**：未更動 cube2、正式玩家資料、付費權限或身份綁定旗標；尚無實際 OAuth/BFF 正式部署證據。
+
 ## 2026-11-21｜P0 Identity 正式映射表及一次性 OAuth 核心
 - **Owner 指令**：優先 P0，高風險工程採高度推理；對應 Issue #4、SRG-040～049。
 - **正式 Neon 實際查核**：SnowRealmGames-Cube1 專案 raspy-king-43847627／production br-winter-thunder-b3ozovl2／cube1。原正式庫缺少 sr_platform_identities；此次執行 003 對應的 CREATE TABLE IF NOT EXISTS、REVOKE ALL FROM PUBLIC、ENABLE ROW LEVEL SECURITY。重新讀取 Schema/SQL：新表 0 筆、唯一 platform_player_id 存在、RLS=true、PUBLIC SELECT=false；既有 wallets=1、ledger_rows=2。沒有更動 cube2 或其他同名 Neon 專案。

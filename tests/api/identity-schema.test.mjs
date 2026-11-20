@@ -8,7 +8,7 @@ const {PGlite}=require('@electric-sql/pglite');
 const uuid='7c033f11-b127-4822-bebe-ef31e7e1645c';
 const jti='f37193eb-e9f1-4524-bb74-e4df9ba3a521';
 const code={codeHash:'a'.repeat(64),clientId:'brickduel-bff',
- redirectUri:'https://brickduel.snowrealm.pet/api/auth/callback/snowrealm',
+ redirectUri:'https://brickduel.snowrealm.pet/api/auth/callback',
  codeChallenge:'b'.repeat(43),playerId:uuid,stateHash:'c'.repeat(64),
  nonceHash:'d'.repeat(64),expiresAt:new Date(Date.now()+60000)};
 test('004: actual Postgres schema supports one-time PKCE code and fail-closed revocation',async()=>{

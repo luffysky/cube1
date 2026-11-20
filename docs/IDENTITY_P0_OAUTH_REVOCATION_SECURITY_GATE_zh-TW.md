@@ -13,7 +13,7 @@
 - 本模組不是完整 OAuth 2.0 / OIDC 伺服器。沒有 /authorize、/token 正式端點、Neon Session BFF、CSRF/同意 UI、session refresh 或機器身分驗證。
 - verifiedSubject 只能由受信任的 Neon JWT 驗簽器提供，不得來自前端的自報 user ID／Email。
 - consentGranted 必須由後端新近核實使用者操作，不得相信客戶端傳 true。
-- 真正的回呼路徑必須由 Claude/cube2 BFF 交付並審核。本階段測試中的 callback path 只是測試範例，不得直接登記生產 redirect。
+- 真正的回呼路徑必須由 Claude/cube2 BFF 交付並審核。cube2 已在 C-022 定案 https://brickduel.snowrealm.pet/api/auth/callback ，但 BFF 路由尚未實作、Token 交換尚未上線；不得將規格定案誤判成真正已註冊或已可回呼。
 - Code 只存 SHA-256 hash，消耗採原子 UPDATE WHERE consumed_at IS NULL；不可用於反覆交換。驗證器還需要 live revocation check 和 cube2 的交易型 jti 單次使用。
 - 簽發私鑰不可進 GitHub、前端、log、聊天室；尚未有 Secret Manager 生產私鑰和 JWKS 正式服務。
 - 正式停權／撤銷的寫入須有後端 RBAC/MFA/審計；本階段沒有公開管理寫入端點。
