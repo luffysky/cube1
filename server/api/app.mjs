@@ -4,7 +4,7 @@ import { Ranked, validateInputs } from './ranked.mjs';
 import { assertAdmin, adminAllowlist, adminRead } from './admin.mjs';
 import { adsEnabled, checkAdapterSignature, validateAdapterEvent, rewardedAdsConfig } from './rewarded-ads.mjs';
 
-export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
+export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, platformIdentity = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
   const origins = new Set(allowedOrigins.filter(Boolean).map(origin => new URL(origin).origin));
   const ranked = new Ranked(store);
   const admins = adminAllowlist(adminSubjects);
@@ -57,6 +57,21 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
         }
         const userId = await authenticate(request);
         if (typeof userId !== 'string' || !userId.length || userId.length > 128 || ['__proto__', 'constructor', 'prototype'].includes(userId)) fail('unauthorized', 401);
+        if(path==='/v1/identity/me' && method==='GET'){
+          if(!platformIdentity)fail('identity_unavailable',503);
+          // Unlike a Neon auth ID, this UUID is portable across SnowRealm games.
+          // Querying identity must not create a profile, wallet or UUID mapping.
+          const platformPlayerId=await platformIdentity.find(userId);
+          return respond({platformPlayerId,linked:Boolean(platformPlayerId),source:'snowrealm-identity-mapping',readyForBrickduel:false});
+        }
+        if(path==='/v1/identity/register' && method==='POST'){
+          if(!platformIdentity)fail('identity_unavailable',503);
+          exactKeys((await readBody(request)).data,[]);
+          await store.limit(userId,'identity_register',10);
+          const platformPlayerId=await platformIdentity.ensure(userId);
+          // This endpoint does NOT issue link tokens. Brickduel's flag remains OFF.
+          return respond({platformPlayerId,linked:true,source:'snowrealm-identity-mapping',readyForBrickduel:false});
+        }
         if(path.startsWith('/v1/admin/')){
           assertAdmin(userId,admins);
           if(!adminStore)fail('admin_unavailable',503);
