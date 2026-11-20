@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>環域逃脫｜SnowRealm Games</title><style>
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#14335a,#080d1b 75%);color:#f0faff;font-family:system-ui,sans-serif}
+header,main{max-width:1000px;margin:auto;padding:16px}header{display:flex;justify-content:space-between}
+a{color:#9ffde7}h1{font-size:clamp(29px,5vw,44px)}p{line-height:1.6;color:#b5cbe4}
+.layout{display:grid;grid-template-columns:minmax(250px,650px) minmax(220px,1fr);gap:20px}
+svg{width:100%;height:auto;max-height:75vh;background:#0c1a31;border:1px solid #3b6385;border-radius:18px}
+section{background:#10243d;border:1px solid #395c78;border-radius:18px;padding:16px}
+button{border:0;border-radius:10px;padding:13px;background:#7ceee0;color:#082330;font-weight:750;margin:4px;cursor:pointer}
+button.secondary{background:#294761;color:#fff}#status{min-height:3em}
+@media(max-width:750px){.layout{grid-template-columns:1fr}section{order:-1}}
+</style></head><body><header><a href="/">← 雪域遊戲館</a><span>ARCADE / MVP 04</span></header><main>
+<h1>環域逃脫 <small style="font-size:.4em;color:#89f9db">ORBIT ESCAPE</small></h1><p>旋轉三層環形迷宮，把出口缺口對準你的方向。逐圈逃離，才能穿過最外層。</p>
+<div class="layout"><svg id="rings" viewBox="0 0 640 640" role="img" aria-label="三層同心圓迷宮，每層一個出口"></svg>
+<section><h2 id="stage">第一關</h2><p id="status" role="status">把當前環形出口對準方位，再選擇穿越。</p>
+<p>當前層：<strong id="ring">1</strong> / 3　操作：<strong id="turns">0</strong></p>
+<p>移動所在方向：</p><button data-avatar="-1">◀ 逆時鐘</button><button data-avatar="1">順時鐘 ▶</button>
+<p>旋轉迷宮：</p><button data-gate="-1">↶ 轉左</button><button data-gate="1">轉右 ↷</button>
+<p><button id="escape">穿過當前缺口 ↗</button></p>
+<button id="reset" class="secondary">重新挑戰</button><button id="next" disabled>下一關</button>
+<p>鍵盤：← → 轉向，Q/E 旋轉當前環，空白鍵嘗試逃脫。手機直接點擊按鈕。</p><p>目前三關，單人模式；沒有假冒網路匹配或雲端排行。</p></section></div></main><script type="module" src="./game.mjs"></script></body></html>
