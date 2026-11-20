@@ -12,7 +12,7 @@ export default {
   const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff',
    'X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, noarchive'};
   const deny=(status,extra={})=>new Response(null,{status,headers:{...headers,...extra}});
-  if(url.origin!=='https://admin.snowrealm.pet'||!audience||
+  if(url.origin!=='https://games.snowrealm.pet'||!audience||
      !/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(issuer??'')||
      !/^\/srg-console-[A-Za-z0-9_-]{24,80}\/$/.test(entry??''))return deny(403);
   const token=request.headers.get('cf-access-jwt-assertion');

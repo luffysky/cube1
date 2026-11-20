@@ -4,6 +4,22 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜Owner D-012 修正 Games 專屬後台網址與權限範圍
+- **Owner 新指令**：「這只是 games 的 admin，不是整個 SnowRealm；admin.snowrealm.pet 不給過」。此決策取代此前在聊天中建議的 `admin.snowrealm.pet` 方案，與 Identity P0 不混用。
+- **路由正式方案**：Games 管理後台入口應在 `games.snowrealm.pet/<RANDOM_GAMES_CONSOLE_PATH>/`，使用受保護的獨立管理部署與同網域路徑代理。舊 `/admin/` 保持退役。隨機路徑不等於安全控制。
+- **安全與權限**：Cloudflare Access 在路徑與全部靜態資產要求 MFA，並限制直接 origin URL 繞過；後端 `/v1/admin/*` 繼續驗簽 JWT + `SNOWREALM_ADMIN_SUBJECTS`，不開放其他 SnowRealm 業務與金幣寫入。正式 route、DNS、MFA、HTTP 及雙授權仍待實測。
+- **實際變更**：`docs/ADMIN_SECURITY_DEPLOYMENT.md`、`docs/SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md` 增加 D-012、`docs/SNOWREALM_GAMES_ADMIN_API_BRICKDUEL_HANDOFF.md` 更新 Games 範圍、`internal/admin-console/index.html` 修正控制台標示，並更新本檔與主待辦。
+- **總待辦**：新增 SRG-140，只勾選「新路由與權限邊界已決策」，總計 52/140；正式後台部署/Access/MFA/API/E2E（SRG-089 至 094）維持未完成。
+- **證據與部署**：此輪文件與現有 HTML 文案的 GitHub commit 可由 main history 核對；沒有部署任何正式管理站、沒有新增 DNS、沒有動 cube2 或正式 DB，也沒有變更 Identity 綁定旗標。
+
+## 2026-11-21｜PR #15 正式 DB 目標與撤銷 API 安全修補已合併
+- **使用者交付／核對**：Work 提交 [PR #15](https://github.com/luffysky/cube1/pull/15)，提交 `795e327d76457cffdce4786c2ce0c8d08e08448a`，已審查實際 patch 和 [PR CI #44815136421](https://github.com/luffysky/cube1/actions/runs/44815136421) success；合併至 main `b64abb9c2c2a5fbc4b4772cba6811ac09491711c`，[main CI #44815611765](https://github.com/luffysky/cube1/actions/runs/44815611765) success。
+- **獨立 Neon 核對**：production `raspy-king-43847627` / `br-winter-thunder-b3ozovl2` 的 compute 主機 `ep-crimson-truth-b3j5tyvk.c-4.ap-southeast-1.aws.neon.tech` 與 PR 的 allowlist 相符；該 compute pooler_enabled=false，正式服務應採直接連線、不得假稱 pooler 已開啟。
+- **實際修改**：`identity/neon/index.mjs` 限定 Neon DB host、database=`cube1`、user=`sr_identity_service`、TLS 憑證 `rejectUnauthorized=true`，且使用獨立 DB 角色確認 session/current user；`identity/neon/trusted-app.mjs` 的 `/v1/token/status` 增加 BFF client-secret 檢查、禁止 Origin、回應只含 `{active}`；`/oauth/authorize`、`/oauth/token` 仍為 503。
+- **正式環境限制**：Neon Function 查核仍只有 `cube1api` active deployment 4，custom domains 空；沒有 `identity` deployment ID。`IDENTITY_DATABASE_URL`、Ed25519 private key 和 BFF secret 仍未安全注入部署，不能把網域 503 當成 Identity 的正式回應。
+- **紀錄與進度**：本次只合併 fail-closed 防護，不代表安全登入上線。總待辦維持 51/139，Issue #4 保持 OPEN；不更動 `cube2` 或 `IDENTITY_LINK_ENABLED`。
+- **下一輪**：Work 以安全憑證管道注入正式 Function Secrets，Node24 使用已合併 main 打包並部署獨立 `identity`；優先核對 Neon 原生 Function URL、HTTP/JWKS/DB readiness，然後配置 DNS/TLS；可信同意與 BFF 安全鏈接仍未完成。
+
 ## 2026-11-21｜PR #14 Identity HTTP 授權安全閘門合併與正式部署查核
 - **交接來源**：Work 完成 PR #14，修正客戶端 `consent:true` 可直接觸發授權的安全漏洞；使用者回報後，本對話以 GitHub 實際差異與 Neon 正式部署清單獨立核對。
 - **程式**：[PR #14](https://github.com/luffysky/cube1/pull/14) 已 squash 合併至 main，commit `db8aba8215a0dde1c9757b6ae09aa7360ea9d824`。Identity HTTP `/oauth/authorize`、`/oauth/token` 在缺乏受信任伺服器端同意時統一回應 503；`/health/ready` 即使 DB ready 也回 503 並單獨提供 `databaseReady`；既有 OAuth core、撤銷及離線驗證仍保留。
@@ -214,3 +230,7 @@
 
 - 獨立 Worker 先驗證 Access JWT 的簽名、issuer 與 audience，再允許後台 HTML、JS、CSS、圖示及固定的五個唯讀管理 API。對應測試納入 API suite。
 - 正式玩家站舊後台 HTML 與 JS 實測 404。Neon API 未登入讀取為 401。候選主機目前回 503，正式 Access/MFA、Cloudflare DNS/TLS 與部署尚待驗收。
+
+## 2026-11-21｜D-012 管理 Worker 路由修正
+
+- PR #16 的主機檢查及測試改為 Games 網域。Workers Route 與 Access 只覆蓋受保護 prefix。獨立資產建置及後端唯讀判權沿用。未設定正式路由、Access、DNS 或管理白名單。

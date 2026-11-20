@@ -1,6 +1,6 @@
 # SnowRealm Games｜全專案待辦總表（唯一勾選基準）
 
-**版本**：v1.5 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
+**版本**：v1.6 ｜**盤點日期**：2026-11-21（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
 
 > 本文件永久保存 Owner 已確認需求、已交付功能與尚待驗收事項。**[x] 只代表該行描述的「程式／CI／規格」等明確成果已找到證據，不表示其所在系統正式上線。** 例如六款 Arcade 已通過單元測試，不等於 iOS/Android 實機驗收通過；Identity 金鑰模組已測試，不等於 SSO 服務已部署。
 
@@ -22,7 +22,7 @@
 - 六款完整原始碼在 `dist/games/`；另有 `tests/arcade/`；遊戲館、PWA、API、桌面工程分別列於下方。
 - 受控跨專案工作：[Issue #4](https://github.com/luffysky/cube1/issues/4)（Identity）、[Issue #3](https://github.com/luffysky/cube1/issues/3)（Arcade）、[Issue #2](https://github.com/luffysky/cube1/issues/2)（後台）。
 
-**統計**：51 / 139 條已完成；88 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
+**統計**：52 / 140 條已完成；88 條尚待實作、部署或驗收。統計僅作任務盤點，不代表軟體整體完工率；不同項目的工期與風險不同。
 
 ## A｜專案治理、交接與開發流程
 
@@ -155,10 +155,11 @@ Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成�
 
 ## H｜管理後台與跨遊戲統一管理
 
-狀態：2/10 項已完成（僅限勾選文字描述的明確範圍）。
+狀態：3/11 項已完成（僅限勾選文字描述的明確範圍）。
 
 - [x] [P1] cube1 只讀管理 API（玩家、錢包流水、比賽、近七日趨勢）與權限測試 <!-- SRG-087 -->
 - [x] [P1] 管理站 HTML/JS/CSS 原型已移出公開 dist，存 internal/admin-console <!-- SRG-088 -->
+- [x] [P0] Owner D-012 確認 Games 後台不使用 admin.snowrealm.pet，而採 games.snowrealm.pet 下隨機受保護路徑（已決策，未部署） <!-- SRG-140 -->
 - [ ] [P0] 正式站 /admin 舊頁、舊 JS/CSS、CDN 快取全部 HTTP 404/403 驗證 <!-- SRG-089 -->
 - [ ] [P0] 建立獨立私人管理 Repo／部署，Cloudflare Access（或同級）與 MFA 限制完整靜態資產 <!-- SRG-090 -->
 - [ ] [P0] 後台角色 Owner、Operator、Support、Auditor 逐項 RBAC 與伺服器驗簽 <!-- SRG-091 -->
@@ -262,6 +263,6 @@ Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成�
 - [獎勵廣告、任務與 Plus](REWARDED_ADS_AND_QUESTS_CUBE1_CUBE2_SPEC.md)
 - [Steam 上架說明](steam/SnowRealmGames_Steam_Guide_zh-CN.md)
 
-Identity 續辦（2026-11-21）：已提出正式 DB 連線目標檢查與撤銷 API 的 BFF 身分驗證。正式秘密配置、Function、網域與 E2E 仍須取得實際驗收證據，總勾選維持 51/139。
+Identity 續辦（2026-11-21）：[PR #15](https://github.com/luffysky/cube1/pull/15) 已合併 `b64abb9c2c2a5fbc4b4772cba6811ac09491711c`，主分支 [CI #44815611765](https://github.com/luffysky/cube1/actions/runs/44815611765) 成功。正式 DB 連線目標/TLS 與撤銷 API 的 BFF 身分驗證已有程式。正式秘密配置、Function、網域與 E2E 仍須取得實際驗收證據，總勾選維持 51/139。
 
-管理後台續辦（2026-11-21）：獨立 Worker 建置和本機無憑證拒絕測試已提出。舊玩家站後台 URL 已實測，正式 Access/MFA 和管理員 E2E 仍待完成。
+D-012 實作追蹤：PR #16 已調整 Worker 主機與路徑級發行規格，部署與 Access/MFA 驗收項目保持待辦。

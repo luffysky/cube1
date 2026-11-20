@@ -11,6 +11,7 @@
 ## 2. 現在已提交的管理後台
 
 - 控制台原型存放在 `internal/admin-console/`。公開站 `/admin/` 已退役。正式管理站須依[管理部署規格](ADMIN_SECURITY_DEPLOYMENT.md)完成獨立部署、入口驗證與 MFA。
+- **Owner D-012 網址決議**：這是 SnowRealm Games 專用後台，不是 SnowRealm 企業級總後台；否決 `admin.snowrealm.pet`。預定入口在 `games.snowrealm.pet/<RANDOM_GAMES_CONSOLE_PATH>/`，須由路徑級 Access／MFA 與獨立部署代理保護；不得把後台打包進遊戲館公開 `dist/`，也不能以亂數 URL 代替權限檢查。
 - API 程式：`server/api/admin.mjs`，由 `server/api/app.mjs` 驗 JWT 並查 `SNOWREALM_ADMIN_SUBJECTS` 明確白名單。
 - 管理員以個人登入身分通過驗證，伺服器只授權列在 `SNOWREALM_ADMIN_SUBJECTS` 的個人 `sub`。空白名單拒絕所有人。
 - 後台只讀，沒有「加金幣」「改段位」「停權」「看玩家密碼」「刪帳號」之類動作。
