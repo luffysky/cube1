@@ -5,10 +5,11 @@ const { PGlite } = require('@electric-sql/pglite');
 
 // Real Postgres/WASM schema/transaction tests. PGlite exposes one backend, so this
 // adapter serializes connections; live multi-backend advisory locks need staging QA.
-export async function testPool({ownerOperations=false}={}) {
+export async function testPool({ownerOperations=false,platformIdentity=false}={}) {
   const db = new PGlite();
   await db.exec(await readFile(new URL('../../server/migrations/001_accounts_ranked.sql', import.meta.url), 'utf8'));
   await db.exec(await readFile(new URL('../../server/migrations/002_rewarded_ads.sql', import.meta.url), 'utf8'));
+  if(platformIdentity)await db.exec(await readFile(new URL('../../server/migrations/003_platform_identity.sql',import.meta.url),'utf8'));
   if(ownerOperations)await db.exec(await readFile(new URL('../../server/migrations/005_games_owner_operations.sql',import.meta.url),'utf8'));
   let pending = Promise.resolve();
   const pool = {

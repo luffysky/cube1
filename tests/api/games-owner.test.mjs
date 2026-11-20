@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {testPool} from './pglite-helper.mjs';
 import {createApp} from '../../server/api/app.mjs';
 import {GamesOwnerStore} from '../../server/api/games-owner.mjs';
+import {AdminStore} from '../../server/api/admin.mjs';
 
 const owner='owner-test-id', operator='operator-test-id', player='player-test-id';
 const secret='t'.repeat(48);
@@ -89,4 +90,28 @@ test('homepage entry returns the configured path only to verified Games managers
  assert.equal((await request(app,player)).status,403);
  assert.equal((await request(app,null)).status,401);
  assert.equal((await request(makeApp('//other.example/'),owner)).status,503);
+});
+
+test('player details require manager authorization and preserve unlinked and zero values',async()=>{
+ const pool=await testPool({platformIdentity:true});
+ try{
+  await pool.query('INSERT INTO sr_profiles(user_id,nickname,friend_code) VALUES ($1,$2,$3)',[player,'Test Player','ABCD23456789']);
+  await pool.query('INSERT INTO sr_wallets(user_id,balance) VALUES ($1,0)',[player]);
+  const app=createApp({store:{limit:async()=>{}},adminStore:new AdminStore(pool),
+   authenticate:async request=>request.headers.get('x-test-actor'),ownerSubject:owner,adminSubjects:operator});
+  const fetchPlayer=(actor,id=player)=>app.fetch(new Request('https://api.example/v1/admin/players/'+id,{
+   headers:actor?{'x-test-actor':actor}:{}
+  }));
+  assert.equal((await fetchPlayer(null)).status,401);
+  assert.equal((await fetchPlayer(player)).status,403);
+  assert.equal((await fetchPlayer(owner,'unknown-player')).status,404);
+  const response=await fetchPlayer(operator);
+  assert.equal(response.status,200);
+  const {profile,ledger,matches}=await response.json();
+  assert.equal(profile.platformPlayerId,null);
+  assert.equal(profile.coins,'0');
+  assert.equal(profile.nickname,'Test Player');
+  assert.deepEqual(ledger,[]);
+  assert.deepEqual(matches,[]);
+ }finally{await pool.end();}
 });

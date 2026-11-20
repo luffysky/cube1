@@ -1,5 +1,5 @@
 import {createRemoteJWKSet,jwtVerify} from 'jose';
-import {pageRoutes} from './routes.mjs';
+import {pageRoutes,playerPage} from './routes.mjs';
 
 const apiOrigin='https://br-winter-thunder-b3ozovl2-cube1api.compute.c-4.ap-southeast-1.aws.neon.tech';
 const adminReads=new Set(['overview','trends','players','ledger','matches']
@@ -31,7 +31,7 @@ export default {
   }catch{return deny(403);}
   if(!url.pathname.startsWith(entry))return deny(404);
   const asset=url.pathname.slice(entry.length)||'index.html';
-  if(adminReads.has(asset)||ownerPaths.has(asset)){
+  if(adminReads.has(asset)||(asset.startsWith('v1/admin/')&&playerPage.test(asset.slice(9)))||ownerPaths.has(asset)){
    const method=ownerPaths.get(asset)??'GET';
    if(request.method!==method)return deny(405,{Allow:method});
    const authorization=request.headers.get('authorization');
@@ -78,7 +78,7 @@ export default {
     return deny(502,{'X-SnowRealm-Admin-Error':'upstream_request_failed'});
    }
   }
-  const isPage=asset==='index.html'||pageRoutes.has(asset);
+  const isPage=asset==='index.html'||pageRoutes.has(asset)||playerPage.test(asset);
   if(!isPage&&!['admin.mjs','admin.css','realm-mark.svg'].includes(asset))return deny(404);
   if(!['GET','HEAD'].includes(request.method))return deny(405,{Allow:'GET, HEAD'});
   const response=await env.ASSETS.fetch(new Request(new URL(isPage?'/index.html':'/'+asset,url),{method:request.method}));

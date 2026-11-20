@@ -76,6 +76,26 @@ export class AdminStore {
       createdAt:x.created_at,coins:x.coins,rating:x.rating,games:x.games
     })),limit:n};
   }
+  async player(id){
+    const {rows:[profile]}=await this.pool.query(`SELECT p.user_id AS "playerId",
+      p.nickname,p.friend_code AS "friendCode",p.created_at AS "createdAt",
+      i.platform_player_id AS "platformPlayerId",w.balance::text AS coins,
+      r.rating,r.games,e.plan,e.status AS "planStatus",e.expires_at AS "planExpiresAt"
+      FROM sr_profiles p
+      LEFT JOIN sr_platform_identities i ON i.neon_subject=p.user_id
+      LEFT JOIN sr_wallets w ON w.user_id=p.user_id
+      LEFT JOIN sr_ratings r ON r.user_id=p.user_id
+      LEFT JOIN sr_entitlements e ON e.user_id=p.user_id
+      WHERE p.user_id=$1`,[id]);
+    if(!profile)fail('player_not_found',404);
+    const [ledger,matches]=await Promise.all([
+      this.pool.query(`SELECT delta::text,reason,created_at AS "createdAt"
+        FROM sr_wallet_ledger WHERE user_id=$1 ORDER BY created_at DESC,id DESC LIMIT 10`,[id]),
+      this.pool.query(`SELECT id,status,created_at AS "createdAt" FROM sr_ranked_matches
+        WHERE player_one=$1 OR player_two=$1 ORDER BY created_at DESC,id DESC LIMIT 10`,[id])
+    ]);
+    return {scope:'cube1',profile,ledger:ledger.rows,matches:matches.rows};
+  }
   async ledger(limit=25){
     const n=Math.min(MAX_LIST,Math.max(1,Number(limit)||25));
     const rows=(await this.pool.query(`SELECT l.id,l.user_id,l.delta,l.balance_after,l.reason,l.created_at
@@ -101,6 +121,8 @@ export async function adminRead(path,method,adminStore){
   if(path==='/v1/admin/overview')return adminStore.overview();
   if(path==='/v1/admin/trends')return adminStore.trends();
   if(path==='/v1/admin/players')return adminStore.players();
+  const playerPath=/^\/v1\/admin\/players\/([A-Za-z0-9_-]{8,128})$/.exec(path);
+  if(playerPath)return adminStore.player(playerPath[1]);
   if(path==='/v1/admin/ledger')return adminStore.ledger();
   if(path==='/v1/admin/matches')return adminStore.matches();
   // Games from Claude must have their own scoped service-to-service integration.

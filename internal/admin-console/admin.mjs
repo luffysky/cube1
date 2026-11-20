@@ -3,17 +3,18 @@
 import { CONFIG } from '../../dist/games/spinrealm/config.mjs';
 import { createAuthClient } from '../../dist/games/spinrealm/vendor/neon-auth.mjs';
 
-import { panelRoutes } from './routes.mjs';
+import { panelRoutes, playerPage } from './routes.mjs';
 
 const mount=new URL('.',document.baseURI);
 function panelFromLocation(){
  const route=location.pathname.slice(mount.pathname.length);
+ if(playerPage.test(route))return 'player';
  return Object.keys(panelRoutes).find(panel=>panelRoutes[panel]===route)??'overview';
 }
 
 const auth=createAuthClient(CONFIG.authUrl),$=id=>document.getElementById(id);
-const panels=['overview','trends','players','ledger','matches','operations','integrations','compliance'];
-const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',ledger:'金幣帳本',matches:'排位對局',operations:'營運操作',integrations:'跨遊戲整合',compliance:'隱私與法規'};
+const panels=['overview','trends','players','player','ledger','matches','operations','integrations','compliance'];
+const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',player:'玩家詳情',ledger:'金幣帳本',matches:'排位對局',operations:'營運操作',integrations:'跨遊戲整合',compliance:'隱私與法規'};
 let subject=null,token=null,expiry=0,authorized=false,active='overview',busy=false,ownerRetry=null,operationsEnabled=false;
 const fmt=n=>Number(n||0).toLocaleString('zh-TW');
 const date=value=>{if(!value)return'—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('zh-TW');};
@@ -33,7 +34,7 @@ function showPanel(name,{navigate=true}={}){
   $(panel+'Panel').hidden=panel!==name;
   document.querySelector('[data-panel="'+panel+'"]')?.setAttribute('aria-current',panel===name?'page':'false');
  }
- if(authorized&&['overview','trends','players','ledger','matches'].includes(name))void fetchPanel(name);
+ if(authorized&&['overview','trends','players','player','ledger','matches'].includes(name))void fetchPanel(name);
 }
 function toRows(body,rows){
  body.replaceChildren();
@@ -46,7 +47,7 @@ function toRows(body,rows){
   body.append(tr);
  }
 }
-const dataPanels=['overview','trends','players','ledger','matches'];
+const dataPanels=['overview','trends','players','player','ledger','matches'];
 const tableRows={players:[],ledger:[],matches:[]};
 function operationButton(label,operation,target){
  const button=document.createElement('button');
@@ -73,6 +74,18 @@ function renderTable(which){
  const actions=which!=='ledger'&&operationsEnabled;
  if(which!=='ledger')$(which+'Operations').hidden=!actions;
  toRows($(which+'Body'),filtered.map(row=>{
+  if(which==='players'&&playerPage.test('players/'+row[0])){
+   const link=document.createElement('a');
+   link.href=new URL('players/'+row[0],mount);
+   link.textContent=row[1]??row[0];
+   link.addEventListener('click',event=>{
+    if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+    event.preventDefault();
+    history.pushState(null,'',link.href);
+    showPanel('player',{navigate:false});
+   });
+   row=[row[0],link,...row.slice(2)];
+  }
   if(!actions)return row;
   const group=document.createElement('div');
   group.className='row-actions';
@@ -144,11 +157,39 @@ async function api(path,refresh=false){
  if(!response.ok){const err=new Error(payload?.error?.code||'HTTP_'+response.status);err.status=response.status;throw err;}
  return payload;
 }
+function renderPlayer({profile,ledger,matches}){
+ const fields=$('playerFields');
+ fields.replaceChildren();
+ $('playerName').textContent=profile.nickname;
+ for(const [key,value] of [
+  ['玩家 ID',profile.playerId],['好友代碼',profile.friendCode],['建立時間',date(profile.createdAt)],
+  ['平台玩家 ID',profile.platformPlayerId??'尚未取得平台 ID'],['金幣',profile.coins==null?'尚無錢包':BigInt(profile.coins).toLocaleString('zh-TW')],
+  ['排位分數',profile.rating],['排位場次',profile.games],['訂閱方案',profile.plan??'尚無方案'],
+  ['訂閱狀態',profile.planStatus],['訂閱到期',date(profile.planExpiresAt)]
+ ]){
+  const label=document.createElement('dt'),data=document.createElement('dd');
+  label.textContent=key;data.textContent=value??'—';fields.append(label,data);
+ }
+ toRows($('playerLedger'),ledger.map(row=>[date(row.createdAt),row.delta,row.reason]));
+ toRows($('playerMatches'),matches.map(row=>[date(row.createdAt),row.id,row.status]));
+ const actions=$('playerActions');actions.replaceChildren();
+ if(operationsEnabled)actions.append(operationButton('停權','suspend',profile.playerId),
+  operationButton('解封','restore',profile.playerId),operationButton('金幣加扣','coins',profile.playerId));
+ $('playerStatus').textContent='資料來源：旋界（cube1）';
+ $('playerData').hidden=false;
+}
 async function fetchPanel(which=active){
- if(busy||!authorized||!['overview','trends','players','ledger','matches'].includes(which))return;
+ if(busy||!authorized||!['overview','trends','players','player','ledger','matches'].includes(which))return;
  busy=true;$('refresh').disabled=true;status('更新中');
+ const playerRoute=which==='player'?location.pathname.slice(mount.pathname.length):null;
  try{
-  const info=await api('/v1/admin/'+which);
+  if(playerRoute){
+   $('playerData').hidden=true;
+   $('playerStatus').textContent='正在載入玩家資料…';
+  }
+  const info=await api('/v1/admin/'+(playerRoute??which));
+  if(playerRoute&&playerRoute!==location.pathname.slice(mount.pathname.length))return;
+  if(playerRoute)renderPlayer(info);
   if(which==='overview'){
    for(const key of ['players','wallets','outstandingCoins','rankedMatches','runningMatches','queuedPlayers'])document.querySelector('[data-metric="'+key+'"]').textContent=fmt(info[key]);
   }else if(which==='trends'){
@@ -165,12 +206,14 @@ async function fetchPanel(which=active){
   }
   status('管理權限已驗證','ready');message('管理身分已驗證。');
  }catch(error){
+  if(playerRoute)$('playerStatus').textContent='無法載入玩家資料。';
   if(error.status===403){authorized=false;$('dashboard').hidden=true;status('沒有管理權限','error');message('目前帳號不在後端管理員白名單內。');}
+  else if(playerRoute&&error.message==='player_not_found'){$('playerStatus').textContent='找不到此玩家。';status('管理權限已驗證','ready');}
   else if(error.status===404||error.status===503){status('API 尚未部署','error');message('管理介面已建立，但後端管理 API 尚未啟用或部署。');}
   else if(error.status===401){authorized=false;$('dashboard').hidden=true;status('登入憑證失效','error');message('請重新在 SnowRealm Games 登入再試。');}
   else{status('讀取失敗','error');message('無法讀取管理資料。請檢查後端部署與網路，不要在聊天分享 JWT。');}
  }finally{busy=false;$('refresh').disabled=!authorized||!dataPanels.includes(active);
-  if(authorized&&active!==which&&dataPanels.includes(active))void fetchPanel(active);
+  if(authorized&&dataPanels.includes(active)&&(active!==which||(playerRoute&&panelFromLocation()==='player'&&playerRoute!==location.pathname.slice(mount.pathname.length))))void fetchPanel(active);
  }
 }
 async function verify(){
