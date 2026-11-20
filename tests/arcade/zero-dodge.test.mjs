@@ -22,6 +22,7 @@ test('paused game does not spawn or advance and can resume',()=>{
 });
 test('spawn pacing accelerates as time elapses',()=>{
  const g=start(makeGame(()=>.5));
+ g.player.x=13;g.player.y=90;
  for(let i=0;i<200;i++)tick(g,.05);
  const initial=g.spawned;
  for(let i=0;i<200;i++)tick(g,.05);
