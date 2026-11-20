@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>節奏超載｜SnowRealm Games</title><style>
+*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:radial-gradient(circle at top,#2a1951,#090e22 75%);color:white;margin:0}
+header,main{max-width:840px;margin:auto;padding:16px}header{display:flex;justify-content:space-between}a{color:#dba6ff}
+h1{font-size:clamp(27px,6vw,43px)}p{color:#bdb3da;line-height:1.6}
+#stage{position:relative;width:min(100%,520px);height:min(64vh,560px);min-height:360px;margin:auto;background:linear-gradient(#150c2f,#1b1541);border:2px solid #58448e;border-radius:18px;overflow:hidden;touch-action:manipulation}
+.lane{position:absolute;height:100%;width:25%;border-right:1px solid #49397c}.judge{position:absolute;top:82%;width:100%;border-top:4px solid #f6c56f;box-shadow:0 0 16px #ff9f35}
+.note{position:absolute;width:21%;height:18px;background:#cf8bff;border-radius:8px;box-shadow:0 0 15px #b766ff}
+#hitButtons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(100%,520px);margin:12px auto}
+button{padding:14px;border:0;border-radius:12px;background:#b084f5;color:#160e29;font-weight:900;font-size:18px;cursor:pointer}
+button.secondary{background:#302952;color:#fff}#hud{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+#hud strong{font-size:24px;color:#f6cd89}label{display:block;margin:15px auto;max-width:520px}
+#status{text-align:center;min-height:2em;color:#d5d0ff}
+</style></head><body><header><a href="/">← 雪域遊戲館</a><span>ARCADE / MVP 03</span></header><main>
+<h1>節奏超載 <small style="font-size:.4em;color:#dba6ff">BEAT OVERDRIVE</small></h1><p>用自己的節拍，衝進判定線。原創電子節奏由瀏覽器即時合成，無外部歌曲。</p>
+<div id="hud"><span>時間 <strong id="time">32.0</strong></span><span>分數 <strong id="score">0</strong></span><span>連擊 <strong id="combo">0</strong></span></div>
+<div id="stage" aria-label="四軌音符滑落遊戲"><div class="lane" style="left:0%"></div><div class="lane" style="left:25%"></div><div class="lane" style="left:50%"></div><div class="lane" style="left:75%"></div><div class="judge"></div></div>
+<div id="hitButtons"><button data-lane="0">D</button><button data-lane="1">F</button><button data-lane="2">J</button><button data-lane="3">K</button></div>
+<p id="status" role="status">點擊開始挑戰，裝置會在你操作後才啟動聲音。</p>
+<div style="text-align:center"><button id="start">開始挑戰</button> <button class="secondary" id="mute">聲音：開</button></div>
+<label>音訊／輸入延遲校準（毫秒） <output id="offset">0</output>
+<input type="range" id="calibrate" min="-150" max="150" value="0" step="10" style="width:100%"></label>
+<p>電腦按 D / F / J / K，手機按四個軌道按鈕。判定：Perfect ±75ms，Good ±150ms。分數保留在本局，不連結金幣或排位。</p>
+</main><script type="module" src="./game.mjs"></script></body></html>

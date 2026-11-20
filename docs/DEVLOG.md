@@ -4,6 +4,30 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-20｜Arcade 其餘四款原創 MVP（開發分支）
+- **Owner 決策**：D-003 / Issue #3 六款全做。
+- **實際新增**：節奏超載（原創合成節奏、四鍵譜面判定/連擊/延遲校準）；環域逃脫（八方位三層旋轉環形迷宮與出口判定）；重力逆轉（固定網格碰撞、上下重力、三關與重開）；領域爭奪（九節點佔領、能量成本、回合制本機 AI、勝負判定）。每款均有獨立純邏輯引擎、Web 遊戲頁與單元測試。
+- **共用平台**：更新遊戲館與收藏 ID 白名單、PWA 快取完整性與對應測試夾具。
+- **程式碼／測試**：dist/games/{beat-overdrive,orbit-escape,gravity-reversal,territory-conquest}/、tests/arcade/；以 PR 最新 Actions 運行結果為準。
+- **環境與資料**：無正式 DB 變更、沒有刪除或碰 cube2；沒有付費方案、雲端排行或真人對戰。
+- **部署與限制**：源碼提交開發分支；正式佈署、iOS/Android 真機、美術/音效品質、跨裝置存檔與伺服器防作弊未驗收，不能把 MVP 當成正式商業版。
+
+## 2026-11-20｜Arcade《折光迷陣》原創光學解謎 MVP（開發分支）
+- **Owner 決策**：D-003 / Issue #3 六款原創遊戲。
+- **新增**：dist/games/refract-maze/ 中的光束反射引擎、三關旋轉鏡面、提示、重置、過關與 SVG 桌機/觸控/鍵盤操作頁；tests/arcade/refract-maze.test.mjs 的可解關卡、重置與邊界測試。
+- **整合**：遊戲館新增可玩卡、收藏、PWA 明確資源白名單和測試用模擬頁。
+- **資料與刪除**：未改動正式玩家資料庫、旋界資料、cube2；無刪除或金流變更。
+- **驗證**：GitHub Actions 依 PR 實際結果；實機與正式站部署尚待驗收，雲端排名和會員存檔未啟用。
+
+## 2026-11-20｜Arcade《零界閃避》原創單人 MVP（開發分支）
+- **Owner 決策**：D-003 六款原創遊戲全部開發；Issue #3。
+- **實際內容**：新增 `dist/games/zero-dodge/` 三個檔案（可玩頁、純邏輯引擎、Canvas 操作），支援 60 秒計時、隨時間增加彈幕、三命碰撞、受傷無敵時間、勝負、重開、暫停、鍵盤與指標拖曳、背景暫停、本機最佳分數。
+- **平台整合**：`dist/index.html` 新增可玩遊戲卡與實際計數；`dist/app.mjs` 收藏支援 Zero Dodge；`dist/sw.js` 加入安全白名單快取；`tests/arcade/zero-dodge.test.mjs` 新增純引擎測試；CI 增加 Arcade 測試。
+- **程式與玩家資料**：只新增遊戲頁與本機記錄；無正式資料庫新增／更新／刪除，無變動 cube2。
+- **提交**：分支 `feat/arcade-zero-dodge-mvp-20261120`，PR 內查看所有 commits 與 CI。
+- **測試與部署**：已新增自動化測試並交 GitHub Actions 驗證；尚未做手機真人操作驗收或正式部署，不宣稱 Steam/雲端排行已開通。
+- **後續**：六款 MVP 源碼均已提交，但各遊戲正式發行、實機互動、多語和正式排行榜仍需後續驗收；跨裝置進度還需 Identity 服務。
+
 ## 2026-11-20｜Identity Ed25519／JWKS 基礎（開發分支）
 - **Owner 決策**：D-005、D-007、D-008、D-010；Issue #4。
 - **實際變更**：建立 identity/authority.mjs（私鑰僅受信任端、平台 UUID、限縮 Brickduel audience/scope、JWT 有效期與嚴格驗簽、即時撤銷狀態失敗拒絕）；identity/app.mjs（公開 JWKS、health，ready=503；無公開簽發路由）；identity/README.md；tests/identity/authority.test.mjs。增加 package.json 測試命令及 Web tests CI。

@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#081426"><title>折光迷陣 | SnowRealm Games</title>
+<style>
+:root{font-family:system-ui,"Noto Sans TC",sans-serif;color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% -10%,#123a4b,#090e22 75%);color:#f1f7ff}
+header,main{max-width:970px;margin:auto;padding:18px}header{display:flex;justify-content:space-between}
+a{color:#94f3eb;text-decoration:none}h1{font-size:clamp(29px,5vw,43px);margin-bottom:4px}
+p{color:#bfcde8;line-height:1.6}.layout{display:grid;grid-template-columns:minmax(280px,650px) 250px;gap:18px;align-items:start}
+svg{width:100%;height:auto;background:#0b1831;border:1px solid #305674;border-radius:18px;touch-action:manipulation;box-shadow:0 12px 45px #030916}
+button{cursor:pointer;background:#63e7dc;color:#041e26;border:0;padding:12px 16px;border-radius:10px;font-weight:700;font-size:15px}
+button.secondary{background:#253955;color:#e7f7ff}.panel{background:#0f2139;border:1px solid #36546f;border-radius:16px;padding:17px}.controls{display:flex;gap:8px;flex-wrap:wrap}
+#levels{display:flex;gap:7px;flex-wrap:wrap}#levels button[aria-current="true"]{outline:2px solid #ffce66}#status{min-height:4em}
+@media(max-width:740px){.layout{grid-template-columns:1fr}.panel{order:-1}}
+</style></head><body><header><a href="/">← 雪域遊戲館</a><span>ARCADE / MVP 02</span></header>
+<main><h1>折光迷陣 <small style="color:#72eedd;font-size:.38em">REFRACT MAZE</small></h1>
+<p>點擊鏡面旋轉 90°，把光束送到金色接收器。別讓光撞牆，也別讓它從棋盤溜走。</p>
+<div class="layout"><svg id="board" viewBox="0 0 700 700" role="img" aria-label="七乘七的旋轉鏡面光學謎題"></svg>
+<section class="panel"><h2 id="levelName">第一關</h2><p id="status" role="status">旋轉鏡子，改變光的走向。</p>
+<p>操作次數：<strong id="moves">0</strong></p><div class="controls"><button id="hint">提示</button><button class="secondary" id="reset">重置</button><button id="next" disabled>下一關</button></div>
+<h3>挑戰關卡</h3><div id="levels"></div>
+<p>青色箭頭是光源；金色圓點是終點；紅色方塊是障礙。鍵盤 Tab 選鏡面，Enter 旋轉。</p>
+<p>單機益智 MVP。關卡進度目前不連接帳號、雲端排行榜或商城。</p></section></div></main>
+<script type="module" src="./game.mjs"></script></body></html>

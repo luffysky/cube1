@@ -29,6 +29,8 @@ jobs:
         run: npm test
       - name: Verify Identity signer, JWKS and fail-closed policies
         run: npm run test:identity
+      - name: Test original arcade MVP rules
+        run: node --test tests/arcade/*.test.mjs
       - name: Install API test dependencies
         run: npm --prefix server/api ci --ignore-scripts --no-audit --no-fund
       - name: Test protected management and game API
