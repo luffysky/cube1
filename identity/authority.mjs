@@ -86,7 +86,7 @@ export async function verifyBrickduelLinkToken(token,{jwks,checkStatus,clock=Dat
       payload.exp-payload.iat > 600) error('invalid_time');
   if (typeof checkStatus !== 'function') error('status_unavailable');
   let active = false;
-  try { active = (await checkStatus({playerId:payload.sub,jti:payload.jti,kid:header.kid}))===true; }
+  try { active = (await checkStatus({playerId:payload.sub,jti:payload.jti,kid:header.kid,issuedAt:payload.iat}))===true; }
   catch { error('status_unavailable'); }
   if (!active) error('revoked_or_suspended');
   return {playerId:payload.sub,jti:payload.jti,kid:header.kid,expiresAt:payload.exp};
