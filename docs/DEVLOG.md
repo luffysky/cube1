@@ -4,6 +4,16 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-20｜建立 133 項 SnowRealm Games 全專案總待辦
+- **Owner 指令**：「你所有項目列待辦 做好的打勾 全部 每次做完就更新」，並要求依工作難度選擇中／高推理。
+- **新增文件**：`docs/SNOWREALM_GAMES_MASTER_CHECKLIST_zh-TW.md`，涵蓋平台/PWA、SPINREALM、六款 Arcade、Identity、52 HUNT、NEXT FLOOR、會員商城／廣告／任務、後台、Steam 桌面發行、原創音效、安全隱私及 Claude cube2 對接依賴。
+- **盤點結果**：建立時 133 條；43 條勾選「已找到程式／規格／CI 等該行所寫的證據」，90 條尚未實作、部署或驗收。勾選不等於整套系統可商用，進度不是按工期加權。
+- **GitHub 證據**：總表建立 commit `40cd779d7f2d011774308631c902f703ff10ec60`；已驗證最新一次 Web CI success（#44766914423）。
+- **工作流程**：從現在起每次實際開發提交，連同本表勾選、`docs/DEVLOG.md`、相關 Issue 一起更新。無法或未進行的真機、線上驗收不能擅自勾選；新的 Owner 決策只能追加並保留歷史。
+- **權限與安全**：只修改 GPT 專案 `cube1` 的文件，沒有碰 Claude 的 `cube2`、正式 DB、Secret、玩家資產或付費機制；未刪除。
+- **推理分流**：UI／小型功能適用中度；身分安全、跨遊戲整合、正式資料庫、多人同步和支付採高度。對外宣稱的完成仍以測試和部署證據為準。
+- **部署**：僅 GitHub 文件更新；未從本次任務重新部署遊戲或 Identity。
+
 ## 2026-11-20｜Arcade 六款 MVP 正式合併與 CI 驗收
 - **Owner 決策**：D-003；GitHub Issue #3。
 - **結果**：六款原創單人遊戲的引擎、介面、測試、遊戲館搜尋／收藏入口與 PWA 資源白名單已合併至 cube1 `main`。
