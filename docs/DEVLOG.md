@@ -51,6 +51,17 @@
 - **測試**：已比對原始碼與對接文件；**無正式跨站整合測試成功證據**。
 - **下一步**：在 `cube1` 開發並部署可驗證的統一身分服務，取得授權網域與安全金鑰部署、進行兩帳號綁定驗收，最後讓 `cube2` 設定正式旗標。未完成前不冒險開關。
 
+## 2026-11-20｜平台 UUID 程式與《轉磚》刪除/回跳決策
+
+- **Owner 指令**：「快點開」，以及「玩家按刪除那刻保留30天 30天後刪除 然後用snowrealm網址沒錯」。
+- **程式新增**：`server/migrations/003_platform_identity.sql`（新 `sr_platform_identities`、平台 UUID 唯一映射、RLS；未直接執行正式 Migration）、`server/api/platform-identity.mjs`（既有 Neon Auth subject 綁固定 SnowRealm UUID，並發/重試不重複建立）、`server/api/app.mjs`（需已驗證 Neon JWT 的 `GET /v1/identity/me` 與 `POST /v1/identity/register`；回應明確 `readyForBrickduel:false`）、`server/api/index.mjs`（映射服務 DI）、`tests/api/platform-identity.test.mjs`（認證、唯一性/競態、禁假登入）。
+- **程式提交**：`9362e211`、`cbc8238c`、`83d5ab2c`、`02fa2605`、`f359ddcd`。
+- **CI**：[GitHub Web tests 44730234056](https://github.com/luffysky/cube1/actions/runs/44730234056) completed / success，含 API 測試；這**不等於正式登入部署成功**。
+- **Owner 新決策文件**：`docs/BRICKDUEL_ACCOUNT_LINK_AND_DELETION_POLICY_zh-TW.md`（`effca495`）確認 `https://brickduel.snowrealm.pet` 與 30 天可復原刪除機制；`docs/SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md`（`93176137`）新增 D-010、D-011。
+- **資料庫及刪除**：本輪未執行正式 SQL Migration，未讀寫或刪除真實玩家資料；Owner 已**特別核准**「玩家本人經驗證申請 + 30 天期滿」的 `cube2` 資料與綁定刪除，實際執行須等 Claude 按規格完成保留期/恢復/到期清理後才啟用。
+- **部署／阻塞**：正式 `identity.snowrealm.pet` 授權碼/PKCE/BFF、簽章與 JWKS、撤銷服務及雙玩家端到端驗收**仍未完成**，`cube2` 的綁定開關不得直接開啟；既有 `cube1` Neon Function 尚未確認部署了此次 API 新版。
+- **跨專案交接**：Claude 需修改現有「按刪除即刪除」流程為 30 天待刪狀態，正式回跳改 SnowRealm 子網域（具體 callback path 需 BFF 雙方確認），並自行更新 `cube2/docs/DEVLOG.md`。本輪沒有修改 cube2。
+
 ## 後續紀錄格式
 
 ```markdown
