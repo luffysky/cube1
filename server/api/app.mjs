@@ -74,6 +74,11 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
           const cfg=rewardedAdsConfig({publisherReady:rewardedAdsReady&&Boolean(rewardedAdUnit),secret:rewardedAdSecret});
           return respond({...cfg,...await store.rewardedAdStatus(userId,{enabled:cfg.enabled})});
         }
+        if (path === '/v1/ads/rewarded/plus-claim' && method === 'POST') {
+          await store.limit(userId, 'wallet_write', 30);
+          exactKeys((await readBody(request)).data, []);
+          return respond(await store.claimPlusReward(userId, requestKey(request)));
+        }
         if (path === '/v1/ads/rewarded/start' && method === 'POST') {
           if(!adsEnabled({secret:rewardedAdSecret,publisherReady:rewardedAdsReady})||!rewardedAdUnit)fail('ads_unavailable',503);
           await store.limit(userId,'reward_ad_start',8,60000);

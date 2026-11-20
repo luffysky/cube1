@@ -10,7 +10,7 @@ const button=(key,action,extra='')=>`<button type="button" class="srg-button" da
 const field=(key,name,type='text',extra='')=>`<label class="srg-field"><span>${label(key)}</span><input name="${name}" type="${type}" required ${extra}></label>`;
 
 export function initMemberUI({mount=document.querySelector('.topbar')||document.querySelector('.site-header'),beforeOpen=()=>{},afterClose=()=>{},onRanked=null}={}){
-  let page='account',authMode='login',email='',busy=false,previewBase=null,friends=null,leaderboard=null,history=null,walletHistory=null,quests=null;
+  let page='account',authMode='login',email='',busy=false,previewBase=null,friends=null,leaderboard=null,history=null,walletHistory=null,quests=null,rewardStatus=null;
   const toolbar=document.createElement('div');toolbar.className='srg-toolbar';
   toolbar.innerHTML=`<button class="srg-coin" type="button" data-member-open="wallet"><span aria-hidden="true">◈</span><b data-wallet-number>—</b><span class="srg-coin-name" data-i18n="wallet.coins">${label('wallet.coins')}</span></button><button type="button" class="srg-icon-button" data-member-open="shop" aria-label="${label('shop.title')}" title="${label('shop.title')}">◐ <span data-i18n="shop.title">${label('shop.title')}</span></button><button type="button" class="srg-icon-button" data-member-open="friends" aria-label="${label('friends.title')}">♧ <span data-i18n="friends.title">${label('friends.title')}</span></button><label class="srg-language"><span class="srg-sr" data-i18n="settings.language">${label('settings.language')}</span><select data-locale aria-label="${label('settings.language')}">${LOCALES.map(([value,name])=>`<option value="${value}">${name}</option>`).join('')}</select></label><button type="button" class="srg-account-button" data-member-open="account"><span aria-hidden="true">◎</span><span data-member-name translate="no">${label('account.login')}</span></button>`;
   mount?.insertAdjacentElement('afterend',toolbar);
@@ -40,9 +40,20 @@ export function initMemberUI({mount=document.querySelector('.topbar')||document.
     const signup=authMode==='register',verify=authMode==='verify',reset=authMode==='reset';
     return `<p class="srg-kicker">ONE ACCOUNT. MORE WORLDS.</p><h3 class="srg-section-title">${label(verify?'account.verify':reset?'account.reset':signup?'account.register':'account.welcome')}</h3><p class="srg-muted">${label('account.benefits')}</p><form data-form="auth">${field('account.email','email','email',`autocomplete="email" value="${esc(email)}"`)}${signup?field('account.nickname','nickname','text','minlength="2" maxlength="24" autocomplete="nickname"'):''}${verify||reset?field('account.otp','otp','text','inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6"'):''}${!verify?field('account.password','password','password',`minlength="10" maxlength="128" autocomplete="${signup||reset?'new-password':'current-password'}"`):''}<button class="srg-button srg-primary" type="submit">${label(verify?'account.verify':reset?'account.reset':signup?'account.register':'account.login')}</button></form><div class="srg-auth-links">${verify?button('account.resend','resend'):reset?button('account.sendReset','send-reset'):button(signup?'account.haveAccount':'account.createAccount',signup?'login':'register')}${!verify&&!reset?button('account.forgot','forgot'):button('account.backToLogin','login')}</div><p class="srg-muted srg-small">${label('account.privacyNote')}</p>`;
   }
+  function renderCoinReward() {
+    const plus = profile()?.entitlement?.plus === true;
+    const reward = rewardStatus?.userId === memberState().user?.id ? rewardStatus : null;
+    const available = plus && reward?.canClaimPlus && reward.remaining > 0;
+    return `<section class="srg-reward-ad">
+      <h3>${label(plus?'ads.plusTitle':'ads.rewardTitle')}</h3>
+      <p>${label(plus?'ads.plusDesc':'ads.rewardDesc')}</p>
+      ${button(plus?'ads.plusClaim':'ads.rewardButton',plus?'plus-reward':'watch-ad',available?'':'disabled')}
+      <p class="srg-muted" role="status">${plus && reward && reward.canClaimPlus ? label('ads.claimedToday')+' '+reward.claimedToday+' / '+reward.limit : label(plus?'ads.plusUnavailable':'ads.rewardPending')} ${label('ads.rewardLimit')}</p>
+    </section>`;
+  }
   function renderWallet(){
     const p=profile();
-    return `<div class="srg-wallet-hero"><span>◈</span><strong>${p?.wallet?.balance?.toLocaleString()??'—'}</strong><p>${label('wallet.balance')}</p></div>${signedIn()?button(p?.daily?.claimed?'wallet.claimed':'wallet.daily','daily',p?.daily?.claimed?'disabled':''):requireAccount()}<section class="srg-reward-ad" aria-label="${label('ads.rewardTitle')}"><h3>${label('ads.rewardTitle')}</h3><p>${label('ads.rewardDesc')}</p><button type="button" class="srg-button" disabled aria-disabled="true">${label('ads.rewardButton')}</button><p class="srg-muted" role="status">${label('ads.rewardPending')} ${label('ads.rewardLimit')}</p></section><section class="srg-quest-card"><h3>${label('quests.title')}</h3><p>${label('quests.desc')}</p>${!signedIn()?requireAccount():!quests?'<p class="srg-muted">'+label('quests.unavailable')+'</p>':quests.quests.map(q=>`<div class="srg-quest-row"><div><strong>${label('quests.'+q.id)}</strong><small>${q.progress} / ${q.target} · +${q.coins} ◈</small></div><button class="srg-button" type="button" data-quest-claim="${esc(q.id)}" ${(!q.completed||q.claimed)?'disabled':''}>${label(q.claimed?'quests.claimed':q.completed?'quests.claim':'quests.incomplete')}</button></div>`).join('')}</section><div class="srg-info-grid"><article><h3>${label('wallet.earn')}</h3><p>${label('wallet.rules')}</p></article><article><h3>${label('wallet.spend')}</h3><p>${label('wallet.spendRules')}</p></article></div><p class="srg-notice">${label('wallet.localScoreNote')}</p><h3>${label('wallet.history')}</h3>${walletHistory?.entries?.length?`<div class="srg-history">${walletHistory.entries.slice(0,15).map(row=>`<div><span>${label('ledger.'+row.reason)}<small>${esc(new Date(row.createdAt).toLocaleString(getLocale()))}</small></span><strong class="${row.delta>0?'srg-positive':''}">${row.delta>0?'+':''}${row.delta}</strong></div>`).join('')}</div>`:`<p class="srg-muted">${label('common.empty')}</p>`}<details class="srg-details"><summary>${label('score.rulesTitle')}</summary><table><tbody>${[['score.single',100],['score.double',300],['score.triple',500],['score.quad',800],['score.tspinSingle',800],['score.tspinDouble',1200],['score.tspinTriple',1600]].map(([key,num])=>`<tr><th>${label(key)}</th><td>${num}</td></tr>`).join('')}</tbody></table><p>${label('score.bonuses')}</p></details>`;
+    return `<div class="srg-wallet-hero"><span>◈</span><strong>${p?.wallet?.balance?.toLocaleString()??'—'}</strong><p>${label('wallet.balance')}</p></div>${signedIn()?button(p?.daily?.claimed?'wallet.claimed':'wallet.daily','daily',p?.daily?.claimed?'disabled':''):requireAccount()}${renderCoinReward()}<section class="srg-quest-card"><h3>${label('quests.title')}</h3><p>${label('quests.desc')}</p>${!signedIn()?requireAccount():!quests?'<p class="srg-muted">'+label('quests.unavailable')+'</p>':quests.quests.map(q=>`<div class="srg-quest-row"><div><strong>${label('quests.'+q.id)}</strong><small>${q.progress} / ${q.target} · +${q.coins} ◈</small></div><button class="srg-button" type="button" data-quest-claim="${esc(q.id)}" ${(!q.completed||q.claimed)?'disabled':''}>${label(q.claimed?'quests.claimed':q.completed?'quests.claim':'quests.incomplete')}</button></div>`).join('')}</section><div class="srg-info-grid"><article><h3>${label('wallet.earn')}</h3><p>${label('wallet.rules')}</p></article><article><h3>${label('wallet.spend')}</h3><p>${label('wallet.spendRules')}</p></article></div><p class="srg-notice">${label('wallet.localScoreNote')}</p><h3>${label('wallet.history')}</h3>${walletHistory?.entries?.length?`<div class="srg-history">${walletHistory.entries.slice(0,15).map(row=>`<div><span>${label('ledger.'+row.reason)}<small>${esc(new Date(row.createdAt).toLocaleString(getLocale()))}</small></span><strong class="${row.delta>0?'srg-positive':''}">${row.delta>0?'+':''}${row.delta}</strong></div>`).join('')}</div>`:`<p class="srg-muted">${label('common.empty')}</p>`}<details class="srg-details"><summary>${label('score.rulesTitle')}</summary><table><tbody>${[['score.single',100],['score.double',300],['score.triple',500],['score.quad',800],['score.tspinSingle',800],['score.tspinDouble',1200],['score.tspinTriple',1600]].map(([key,num])=>`<tr><th>${label(key)}</th><td>${num}</td></tr>`).join('')}</tbody></table><p>${label('score.bonuses')}</p></details>`;
   }
   function itemName(item){return t(item.kind==='consumable'?`item.${item.id}`:`${item.category==='theme'?'theme':item.category}.${item.value}`);}
   function renderShop(){
@@ -76,7 +87,12 @@ export function initMemberUI({mount=document.querySelector('.topbar')||document.
   async function loadPage(){
     if(!signedIn())return;
     const p=page;
-    try{if(p==='friends')friends=await api('/v1/friends');if(p==='wallet'){walletHistory=await api('/v1/wallet/history');quests=await api('/v1/quests/daily').catch(()=>null);}if(p==='ranked'){leaderboard=await api('/v1/leaderboard');if(signedIn())history=await api('/v1/matches/history');}if(page===p)render();}
+    try{if(p==='friends')friends=await api('/v1/friends');if(p==='wallet'){
+      const userId=memberState().user.id;
+      const [wallet,missions,reward]=await Promise.all([api('/v1/wallet/history'),api('/v1/quests/daily').catch(()=>null),api('/v1/ads/rewarded/status').catch(()=>null)]);
+      if(memberState().user?.id!==userId)return;
+      walletHistory=wallet;quests=missions;rewardStatus=reward?{...reward,userId}:null;
+    }if(p==='ranked'){leaderboard=await api('/v1/leaderboard');if(signedIn())history=await api('/v1/matches/history');}if(page===p)render();}
     catch(error){if(page===p)errorMessage(error);}
   }
   function open(next='account'){beforeOpen();page=next;if(!dialog.open)dialog.showModal();message('');render();void loadPage();}
@@ -101,8 +117,12 @@ export function initMemberUI({mount=document.querySelector('.topbar')||document.
     if(action==='end-preview'){finishPreview();render();message('shop.previewEnded');return;}
     if(action==='play-ranked'){close();if(onRanked)onRanked();else location.href=new URL('./index.html?mode=ranked',import.meta.url).href;return;}
     if(action==='copy-code'){void run(async()=>{await navigator.clipboard.writeText(profile()?.profile?.friendCode||'');message('common.copied');});return;}
-    if(action==='logout')void run(async()=>{await signOut();friends=history=walletHistory=null;render();message('account.loggedOut');});
+    if(action==='logout')void run(async()=>{await signOut();friends=history=walletHistory=quests=rewardStatus=null;render();message('account.loggedOut');});
     if(action==='refresh')void run(async()=>{await refreshProfile();render();message('common.saved');});
+    if(action==='plus-reward')void run(async()=>{
+      await economyAction('/v1/ads/rewarded/plus-claim',{});
+      await loadPage();message('ads.plusReceived');
+    });
     if(action==='daily')void run(async()=>{await economyAction('/v1/wallet/daily',{});await loadPage();render();message('wallet.dailyReceived');});
     if(action==='resend'||action==='send-reset')void run(async()=>{const input=content.querySelector('[name="email"]');if(!input.reportValidity())return;email=input.value.trim();if(action==='resend')await sendVerification(email);else await requestPasswordReset(email);message('account.codeSent');});
     if(action==='remove-image')void run(async()=>{await clearCustomImage();if(signedIn())await patchProfile({appearance:{customBackgroundEnabled:false}});render();message('common.saved');});

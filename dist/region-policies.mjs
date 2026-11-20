@@ -2,6 +2,8 @@
 // Keep source links current before entering a new jurisdiction or adding monetization/chat.
 export const REGION_POLICIES=Object.freeze({
 tw:{name:'臺灣 Taiwan',headline:'臺灣：個人資料與消費者保護',summary:'依《個人資料保護法》履行蒐集告知與資料安全義務；遊戲正式營運／付費時，須另核對遊戲軟體分級與消費者保護事項。',gap:'尚缺營運者法定名稱、申訴／刪除資料管道、資料保留期限及正式分級／付款政策驗收。',sources:[['個人資料保護法','https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=I0050021']]},
+hk:{name:'香港 Hong Kong',headline:'香港：個人資料私隱',summary:'《個人資料（私隱）條例》的保障資料原則涵蓋收集目的、保安、查閱及更正。',gap:'正式營運前須核對收集資料時的告知內容，並測試查閱及更正請求流程。',sources:[['香港政府：個人資料（私隱）條例概要','https://www.nd.gov.hk/en/HSP_privacy_brief.html']]},
+mo:{name:'澳門 Macau',headline:'澳門：個人資料保護',summary:'第 8/2005 號法律《個人資料保護法》要求收集目的明確，資料範圍與目的相稱。',gap:'正式營運前須核對各項資料的收集目的，以及處理和保存這些資料的方式。',sources:[['澳門立法會：第 8/2005 號法律','https://al.gov.mo/uploads/attachment/2017-07/37081596986c807f5b.pdf']]},
 cn:{name:'中國大陸 Mainland China',headline:'中國大陸：遊戲實名與防沉迷',summary:'網路遊戲正式提供涉及實名核驗、防沉迷接入、未成年人時段限制及出版／遊戲發行資格。自填年齡、地區或 Cookie 同意不能取代法定核驗。',gap:'未接官方實名／防沉迷、未核實遊戲出版發行資格，不能宣稱符合中國大陸正式營運要求；對自選中國大陸的使用者應避免開放正式線上遊戲服務。',sources:[['國家新聞出版署 2021 通知','https://www.nppa.gov.cn/xxfb/tzgs/202108/t20210830_666285.html']]},
 jp:{name:'日本 Japan',headline:'日本：APPI 與未成年人同意',summary:'日本個人情報保護法及主管機關指引適用；未成年人是否可自行同意應依資料性質、服務情境與理解能力評估，並非一律同一歲數。',gap:'尚未建立必要時的法定代理人同意流程、日文正式告知審查與資料跨境評估。',sources:[['個人情報保護委員会 FAQ','https://www.ppc.go.jp/personalinfo/faq/APPI_QA/']]},
 kr:{name:'韓國 South Korea',headline:'韓國：PIPA 與遊戲分級',summary:'韓國處理未滿 14 歲兒童個資，依法需確認法定代理人同意的適用情形；公開發行遊戲亦須檢視 GRAC／GCRB 分級與適用例外。',gap:'尚無監護人同意與核實程序、韓文法律正式文本審核及當地遊戲分級驗收。',sources:[['PIPA 第 22-2 條','https://elaw.klri.re.kr/eng_service/lawViewContent.do?hseq=62389'],['Game Content Rating Board','https://www.gcrb.or.kr/english/enforcement/Enforcement.aspx']]},

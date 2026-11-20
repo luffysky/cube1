@@ -53,3 +53,56 @@ test('even configured provider ignores client grant flags without signed adapter
  const res=await app.fetch(new Request('https://api.example/v1/webhooks/rewarded-ad',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({eventId:'event:0001',verified:true})}));
  assert.equal(res.status,401);assert.equal(grants,0);
 });
+
+test('member grants verify entitlement and share the UTC ledger quota with ad events', async () => {
+  const {Store} = await import('../../server/api/store.mjs');
+  const {testPool} = await import('./pglite-helper.mjs');
+  const pool = await testPool();
+  let now = Date.parse('2026-11-20T23:58:00Z');
+  const store = new Store(pool, {clock: () => now});
+  const user = 'plus-player';
+  try {
+    await store.ensureUser(user);
+    const app = createApp({store, authenticate: async () => user});
+    const request = (key, data = {}) => app.fetch(new Request('https://api.example/v1/ads/rewarded/plus-claim', {
+      method: 'POST', headers: {'Content-Type':'application/json', 'Idempotency-Key':key}, body: JSON.stringify(data)
+    }));
+    assert.equal((await request('test-free-claim')).status,403);
+    assert.equal((await request('test-forged-claim',{plus:true,coins:450})).status,400);
+
+    async function ad() {
+      const {attemptId} = await store.startRewardedAd(user,'/test/spinrealm');
+      return {attemptId, provider:'google-ad-manager-web', adUnit:'/test/spinrealm', eventId:'test:'+attemptId, verified:true};
+    }
+    const first = await ad();
+    assert.equal((await store.acceptRewardedAdEvent(first)).applied,true);
+    assert.equal((await store.acceptRewardedAdEvent(first)).applied,false);
+    const pending = await ad();
+    const expiration = new Date(now + 86400000);
+    await store.entitlementEvent({eventId:'test:membership',userId:user,occurredAt:new Date(now),plan:'snowrealm_plus',status:'active',expiresAt:expiration},'signed-event-hash');
+    const claim = await request('test-first-plus');
+    assert.equal(claim.status,200);
+    assert.equal((await claim.json()).granted,15);
+    assert.equal((await request('test-first-plus')).status,200);
+    assert.equal((await store.rewardedAdStatus(user)).claimedToday,2);
+    for(let i=0;i<27;i++) await store.claimPlusReward(user,'plus-tap-'+i);
+    const last = await Promise.allSettled([store.acceptRewardedAdEvent(pending), store.claimPlusReward(user,'plus-last-slot')]);
+    assert.equal(last.filter(r => r.status==='fulfilled').length,1);
+    assert.equal(last.find(r => r.status==='rejected').reason.code,'ad_daily_limit');
+    const status = await store.rewardedAdStatus(user);
+    assert.equal(status.canClaimPlus,true);
+    assert.equal(status.enabled,false);
+    assert.equal(status.claimedToday,30);
+    assert.equal(status.remaining,0);
+    await assert.rejects(store.startRewardedAd(user,'/test/spinrealm'), e => e.code==='ad_daily_limit');
+    const totals = await pool.query("SELECT sum(delta)::int AS coins FROM sr_wallet_ledger WHERE user_id=$1 AND reason IN ('rewarded_ad','plus_reward')",[user]);
+    assert.equal(totals.rows[0].coins,450);
+
+    now = Date.parse('2026-11-21T00:00:00Z');
+    assert.equal((await store.rewardedAdStatus(user)).remaining,30);
+    assert.equal((await store.claimPlusReward(user,'plus-next-day')).granted,15);
+    await store.entitlementEvent({eventId:'test:revocation',userId:user,occurredAt:new Date(now),plan:'snowrealm_plus',status:'revoked',expiresAt:null},'revoke-event-hash');
+    await assert.rejects(store.claimPlusReward(user,'plus-revoked'), e => e.code==='plus_required');
+    assert.equal((await store.rewardedAdStatus(user)).canClaimPlus,false);
+  } finally { await pool.end(); }
+});

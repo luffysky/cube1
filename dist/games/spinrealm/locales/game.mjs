@@ -2,7 +2,16 @@ export const gameRows = String.raw`ads.rewardTitle|自願觀看廣告獎勵|自�
 ads.rewardDesc|完成一則由廣告平台驗證的獎勵廣告，可獲得 15 金幣，每日最多 30 次。拒絕觀看不影響遊戲。|完成广告平台验证的激励广告可获 15 金币，每天最多 30 次。不看也不影响游戏。|Earn 15 coins per verified rewarded ad, up to 30 daily. Watching is always optional.|広告会社により視聴確認された広告で15コイン、1日30回まで。視聴は任意です。|검증된 보상형 광고 1회당 15코인, 하루 최대 30회. 시청은 선택 사항입니다.
 ads.rewardPending|廣告系統尚未啟用，無法觀看或領取獎勵。|广告系统尚未启用，无法观看或领取奖励。|Rewarded ads are not available yet. No coins can be claimed.|広告配信は未設定です。報酬はまだ受け取れません。|보상형 광고가 아직 제공되지 않습니다.
 ads.rewardButton|觀看廣告，領取 15 金幣|观看广告，领取 15 金币|Watch ad for 15 coins|広告を見て15コイン獲得|광고 보고 15코인 받기
-ads.rewardLimit|每日最多 30 次，必須由伺服器驗證。|每天最多 30 次，必须经过服务器验证。|Up to 30 per day; server verification required.|1日3回まで。サーバー認証が必要です。|하루 최대 3회, 서버 검증 필수
+ads.rewardLimit|廣告與 Plus 會員領取共用每日 30 次額度，每日上限 450 金幣，以 UTC 日期計算。|广告与 Plus 会员领取共用每天 30 次额度，每日上限 450 金币，按 UTC 日期计算。|Ad and Plus claims share 30 slots per UTC day, up to 450 coins.|広告とPlus会員報酬は合計でUTCの1日につき30回、最大450コインです。|광고와 Plus 회원 보상은 UTC 기준 하루 합산 30회, 최대 450코인입니다.
+ads.plusTitle|Plus 會員獎勵|Plus 会员奖励|Plus reward|Plus会員報酬|Plus 회원 보상
+ads.plusDesc|每次手動領取 15 金幣，免看廣告。|每次手动领取 15 金币，免看广告。|Claim 15 coins at a time without watching an ad.|広告を見ずに1回15コインを受け取れます。|광고 시청 없이 한 번에 15코인을 받을 수 있습니다.
+ads.plusClaim|領取 15 金幣|领取 15 金币|Claim 15 coins|15コインを受け取る|15코인 받기
+ads.claimedToday|今日已領|今日已领|Claimed today|本日の受取回数|오늘 받은 횟수
+ads.plusUnavailable|目前無法確認可領次數。|目前无法确认可领次数。|Your available claims could not be confirmed.|現在の受取可能回数を確認できません。|남은 보상 횟수를 확인할 수 없습니다.
+ads.plusReceived|15 金幣已入帳|15 金币已到账|15 coins credited|15コインを受け取りました|15코인이 지급되었습니다
+ledger.plus_reward|Plus 會員獎勵|Plus 会员奖励|Plus reward|Plus会員報酬|Plus 회원 보상
+errors.plus_required|需要有效的 Plus 會員資格才能領取。|需要有效的 Plus 会员资格才能领取。|An active Plus membership is required.|有効なPlus会員資格が必要です。|유효한 Plus 회원 자격이 필요합니다.
+errors.ad_daily_limit|今天已領滿 30 次。|今天已领满 30 次。|All 30 daily claims have been used.|本日の30回分は受取済みです。|오늘 보상 30회를 모두 받았습니다.
 ads.rewardWait|廣告服務暫未開放，請稍後再試。|广告服务暂未开放，请稍后重试。|Rewarded ads are not yet enabled.|リワード広告はまだ利用できません。|보상형 광고가 아직 활성화되지 않았습니다.
 ledger.rewarded_ad|廣告獎勵|广告奖励|Rewarded ad|広告報酬|광고 보상
 quests.title|每日挑戰任務|每日挑战任务|Daily challenges|デイリーチャレンジ|일일 도전 과제

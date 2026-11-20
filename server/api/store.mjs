@@ -22,7 +22,7 @@ export async function lockUser(client, userId) {
   const result = await client.query('SELECT user_id FROM sr_profiles WHERE user_id=$1 FOR UPDATE', [userId]);
   if (!result.rowCount) fail('profile_not_found', 404);
 }
-export async function ledger(client, userId, delta, reason, eventKey, metadata = {}) {
+export async function ledger(client, userId, delta, reason, eventKey, metadata = {}, createdAt = null) {
   const wallet = (await client.query('SELECT balance FROM sr_wallets WHERE user_id=$1 FOR UPDATE', [userId])).rows[0];
   if (!wallet) fail('profile_not_found', 404);
   const existing = await client.query('SELECT id FROM sr_wallet_ledger WHERE user_id=$1 AND event_key=$2', [userId, eventKey]);
@@ -30,7 +30,7 @@ export async function ledger(client, userId, delta, reason, eventKey, metadata =
   const next = wallet.balance + delta;
   if (!Number.isSafeInteger(delta) || !Number.isSafeInteger(next) || next < 0 || next > 2147483647) fail('insufficient_coins', 409);
   await client.query('UPDATE sr_wallets SET balance=$2,updated_at=now() WHERE user_id=$1', [userId, next]);
-  await client.query('INSERT INTO sr_wallet_ledger(id,user_id,event_key,delta,balance_after,reason,metadata) VALUES($1,$2,$3,$4,$5,$6,$7)', [randomUUID(), userId, eventKey, delta, next, reason, metadata]);
+  await client.query('INSERT INTO sr_wallet_ledger(id,user_id,event_key,delta,balance_after,reason,metadata,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,COALESCE($8::timestamptz,now()))', [randomUUID(), userId, eventKey, delta, next, reason, metadata, createdAt]);
   return { balance: next, applied: true };
 }
 export async function idempotent(client, userId, key, operation, payload, callback) {
@@ -44,6 +44,27 @@ export async function idempotent(client, userId, key, operation, payload, callba
   const result = await callback();
   await client.query('INSERT INTO sr_idempotency(user_id,request_key,operation,payload_hash,response) VALUES($1,$2,$3,$4,$5)', [userId, key, operation, payloadHash, result]);
   return result;
+}
+
+// Both reward sources write the wallet ledger under the same profile lock.
+// Counting ledger credits also includes ad grants issued before Plus claims existed.
+async function rewardSlots(client, userId, now) {
+  const start = new Date(now);
+  start.setUTCHours(0, 0, 0, 0);
+  const end = new Date(start.getTime() + 86400000);
+  const {rows} = await client.query(`SELECT count(*)::integer AS claimed FROM sr_wallet_ledger
+    WHERE user_id=$1 AND reason IN ('rewarded_ad','plus_reward')
+      AND created_at >= $2 AND created_at < $3`, [userId, start, end]);
+  const claimedToday = rows[0].claimed;
+  return {claimedToday, remaining: Math.max(0, AD_REWARD.limitPerUTCDate - claimedToday)};
+}
+async function requireRewardSlot(client, userId, now) {
+  const {remaining} = await rewardSlots(client, userId, now);
+  if (!remaining) fail('ad_daily_limit', 429);
+}
+async function activePlus(client, userId, now) {
+  const {rows} = await client.query('SELECT plan,status,expires_at FROM sr_entitlements WHERE user_id=$1', [userId]);
+  return entitlement(rows[0], now.getTime()).plus;
 }
 
 export class Store {
@@ -150,20 +171,29 @@ export class Store {
     });
   }
   async rewardedAdStatus(userId,{enabled=false}={}){
-    if(!enabled)return {enabled:false,coins:AD_REWARD.coins,limit:AD_REWARD.limitPerUTCDate,claimedToday:0,remaining:0};
-    const today=new Date(this.clock()).toISOString().slice(0,10);
-    const result=await this.pool.query(`SELECT count(*)::integer AS claimed FROM sr_reward_ad_attempts
-      WHERE user_id=$1 AND status='granted' AND granted_at >= $2::date AND granted_at < ($2::date + interval '1 day')`,[userId,today]);
-    const claimedToday=result.rows[0]?.claimed||0;
-    return {enabled:true,coins:AD_REWARD.coins,limit:AD_REWARD.limitPerUTCDate,claimedToday,remaining:Math.max(0,AD_REWARD.limitPerUTCDate-claimedToday)};
+    const now=new Date(this.clock());
+    const canClaimPlus=await activePlus(this.pool,userId,now);
+    const slots=await rewardSlots(this.pool,userId,now);
+    return {enabled,canClaimPlus,coins:AD_REWARD.coins,limit:AD_REWARD.limitPerUTCDate,
+      claimedToday:slots.claimedToday,remaining:enabled||canClaimPlus?slots.remaining:0};
+  }
+  async claimPlusReward(userId, key) {
+    return this.tx(async client => {
+      await lockUser(client, userId);
+      return idempotent(client, userId, key, 'plus_reward', {}, async () => {
+        const now = new Date(this.clock());
+        if (!await activePlus(client, userId, now)) fail('plus_required', 403);
+        await requireRewardSlot(client, userId, now);
+        const result = await ledger(client, userId, AD_REWARD.coins, 'plus_reward', 'plus_reward:'+key, {}, now);
+        return {granted: result.applied ? AD_REWARD.coins : 0, wallet: {balance: result.balance}};
+      });
+    });
   }
   async startRewardedAd(userId,adUnit){
     return this.tx(async client=>{
       await lockUser(client,userId);
-      const now=new Date(this.clock()),today=now.toISOString().slice(0,10);
-      const todayCount=(await client.query(`SELECT count(*)::integer AS claimed FROM sr_reward_ad_attempts WHERE user_id=$1
-        AND status='granted' AND granted_at >= $2::date AND granted_at < ($2::date + interval '1 day')`,[userId,today])).rows[0].claimed;
-      if(todayCount>=AD_REWARD.limitPerUTCDate)fail('ad_daily_limit',429);
+      const now=new Date(this.clock());
+      await requireRewardSlot(client,userId,now);
       const existing=(await client.query(`SELECT id FROM sr_reward_ad_attempts WHERE user_id=$1 AND status='pending'
         AND expires_at>$2 ORDER BY issued_at DESC LIMIT 1`,[userId,now])).rows[0];
       if(existing)fail('ad_attempt_in_progress',409);
@@ -185,13 +215,11 @@ export class Store {
       if(row.status==='granted')return {accepted:true,applied:false};
       if(row.status!=='pending'||new Date(row.expires_at).getTime()<this.clock())fail('ad_attempt_expired',409);
       if(row.ad_unit!==event.adUnit||row.provider!==event.provider)fail('invalid_ad_event',403);
-      const today=new Date(this.clock()).toISOString().slice(0,10);
-      const claimed=(await client.query(`SELECT count(*)::integer AS n FROM sr_reward_ad_attempts
-        WHERE user_id=$1 AND status='granted' AND granted_at >= $2::date AND granted_at < ($2::date + interval '1 day')`,[ref.user_id,today])).rows[0].n;
-      if(claimed>=AD_REWARD.limitPerUTCDate)fail('ad_daily_limit',429);
-      const credit=await ledger(client,ref.user_id,row.reward_coins,'rewarded_ad','rewarded_ad:'+event.attemptId,{provider:event.provider});
+      const now=new Date(this.clock());
+      await requireRewardSlot(client,ref.user_id,now);
+      const credit=await ledger(client,ref.user_id,row.reward_coins,'rewarded_ad','rewarded_ad:'+event.attemptId,{provider:event.provider},now);
       await client.query(`UPDATE sr_reward_ad_attempts SET status='granted',granted_at=$2,provider_event_id=$3
-        WHERE id=$1`,[event.attemptId,new Date(this.clock()),event.eventId]);
+        WHERE id=$1`,[event.attemptId,now,event.eventId]);
       return {accepted:true,applied:credit.applied};
     });
   }

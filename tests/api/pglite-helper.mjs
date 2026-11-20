@@ -8,6 +8,7 @@ const { PGlite } = require('@electric-sql/pglite');
 export async function testPool() {
   const db = new PGlite();
   await db.exec(await readFile(new URL('../../server/migrations/001_accounts_ranked.sql', import.meta.url), 'utf8'));
+  await db.exec(await readFile(new URL('../../server/migrations/002_rewarded_ads.sql', import.meta.url), 'utf8'));
   let pending = Promise.resolve();
   const pool = {
     async connect() {

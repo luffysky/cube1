@@ -5,7 +5,9 @@ import { localizedRegionSummary } from './region-policy-locales.mjs';
 const STORAGE='srg.consent.v2',VERSION='2026-11-20.2';
 const LANGS=['zh-TW','zh-CN','en','ja','ko'],LANG_NAMES=['繁體中文','简体中文','English','日本語','한국어'];
 const REGION_NAMES={
-tw:['臺灣','台湾','Taiwan','台湾','대만'],cn:['中國大陸','中国大陆','Mainland China','中国本土','중국 본토'],
+tw:['臺灣','台湾','Taiwan','台湾','대만'],
+hk:['香港','香港','Hong Kong','香港','홍콩'],mo:['澳門','澳门','Macau','マカオ','마카오'],
+cn:['中國大陸','中国大陆','Mainland China','中国本土','중국 본토'],
 jp:['日本','日本','Japan','日本','일본'],kr:['韓國','韩国','South Korea','韓国','대한민국'],
 my:['馬來西亞','马来西亚','Malaysia','マレーシア','말레이시아'],sg:['新加坡','新加坡','Singapore','シンガポール','싱가포르'],
 au:['澳洲','澳大利亚','Australia','オーストラリア','호주'],us:['美國','美国','United States','アメリカ','미국'],

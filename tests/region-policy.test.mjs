@@ -4,8 +4,8 @@ import {readFile} from 'node:fs/promises';
 import {REGION_POLICIES,REGIONS,AGE_GROUPS,legalWarning} from '../dist/region-policies.mjs';
 import {localizedRegionSummary} from '../dist/region-policy-locales.mjs';
 
-test('all nine named jurisdictions and fallback contain policy, gaps and official source links',()=>{
-  assert.deepEqual(REGIONS,['tw','cn','jp','kr','my','sg','au','us','uk','other']);
+test('all eleven named jurisdictions and fallback contain policy, gaps and official source links',()=>{
+  assert.deepEqual(REGIONS,['tw','hk','mo','cn','jp','kr','my','sg','au','us','uk','other']);
   for(const id of REGIONS){
     const value=REGION_POLICIES[id];
     assert.ok(value.summary.length>20,id);
