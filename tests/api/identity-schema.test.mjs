@@ -62,6 +62,7 @@ test('Identity runtime consumes codes under RLS and cannot modify revocations or
   assert.equal(await identityDatabaseReady(db, store, kid), false, 'rejects the table owner');
   await db.exec('SET ROLE sr_identity_runtime');
   assert.equal(await identityDatabaseReady(db, store, kid), true);
+  assert.equal(await identityDatabaseReady(db, store, kid, 'sr_identity_runtime'), false, 'SET ROLE does not prove the connection authenticated as that role');
   const playerId = await new PlatformIdentityStore(db).ensure('verified-neon-test-user');
   const issuedCode = {...code, playerId, expiresAt: new Date(Date.now() + 60000)};
   await store.saveCode(issuedCode);

@@ -6,10 +6,11 @@ import {createTrustedIdentityApp} from '../../identity/neon/trusted-app.mjs';
 const kp=generateKeyPairSync('ed25519');
 const authority=createIdentityAuthority({privateKeyPem:kp.privateKey.export({format:'pem',type:'pkcs8'}),kid:'test-entry-20261121'});
 const base='https://identity.snowrealm.pet';
+const secret='s'.repeat(48);
 const app=createTrustedIdentityApp({
   authority,
   verifyToken:async token=>{if(token!=='verified')throw Error();return {playerId:'test-player'};},
-  dbReady:async()=>true
+  dbReady:async()=>true,clientSecret:secret
 });
 const req=(p,body,headers={})=>new Request(base+p,{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)});
 test('JWKS never includes private key',async()=>{
@@ -27,10 +28,16 @@ test('client-supplied consent cannot enable authorization or token exchange',asy
   assert.equal(crossOrigin.status,403);
 });
 test('revocation status only accepts valid signed token',async()=>{
- let r=await app.fetch(new Request(base+'/v1/token/status',{method:'POST'}));assert.equal(r.status,401);
- r=await app.fetch(new Request(base+'/v1/token/status',{method:'POST',headers:{authorization:'Bearer verified'}}));
- assert.equal(r.status,200);assert.equal((await r.json()).active,true);
- r=await app.fetch(new Request(base+'/v1/token/status',{method:'POST',headers:{authorization:'Bearer invalid'}}));
+ const status=(token,headers={})=>app.fetch(req('/v1/token/status',{},{
+   authorization:'Bearer '+token,...headers
+ }));
+ const client={'x-snowrealm-client-secret':secret};
+ let r=await status('verified');assert.equal(r.status,401);
+ r=await status('verified',{'x-snowrealm-client-secret':'x'.repeat(48)});assert.equal(r.status,401);
+ r=await status('verified',{...client,origin:'https://games.snowrealm.pet'});assert.equal(r.status,401);
+ r=await status('verified',client);
+ assert.equal(r.status,200);assert.deepEqual(await r.json(),{active:true});
+ r=await status('invalid',client);
  assert.equal(r.status,401);
 });
 test('readiness is measured, never equated with Brickduel BFF integration',async()=>{

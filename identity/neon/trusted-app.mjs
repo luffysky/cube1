@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { ISSUER } from '../authority.mjs';
 
 const originAllowed = 'https://games.snowrealm.pet';
@@ -12,9 +13,12 @@ const common = {
 const json=(status,data,headers={})=>new Response(JSON.stringify(data),{status,headers:{...common,...headers}});
 /** Read-only Identity surface until the server owns the consent transaction.
  * Browser input cannot authorize a link or enable token issuance. */
-export function createTrustedIdentityApp({authority,verifyToken,dbReady,allowedOrigin=originAllowed}={}){
+export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret,allowedOrigin=originAllowed}={}){
   if(!authority||typeof verifyToken!=='function'||typeof dbReady!=='function')
     throw Error('identity_app_configuration_missing');
+  const hash=value=>createHash('sha256').update(value).digest();
+  const clientDigest=typeof clientSecret==='string'&&clientSecret.length>=32
+    ? hash(clientSecret) : null;
   const cors=req=>{
     const origin=req.headers.get('origin');
     return origin===allowedOrigin?{
@@ -45,12 +49,16 @@ export function createTrustedIdentityApp({authority,verifyToken,dbReady,allowedO
           return json(503,{error:'authorization_unavailable'},headers);
         }
         if(request.method==='POST'&&path==='/v1/token/status'){
+          if(!clientDigest)return json(503,{active:false});
+          const presented=request.headers.get('x-snowrealm-client-secret');
+          if(origin||!presented||presented.length>512||!timingSafeEqual(hash(presented),clientDigest))
+            return json(401,{active:false});
           const auth=request.headers.get('authorization');
-          if(typeof auth!=='string'||!/^Bearer [A-Za-z0-9._-]+$/.test(auth))
+          if(typeof auth!=='string'||auth.length>4096||!/^Bearer [A-Za-z0-9._-]+$/.test(auth))
             return json(401,{active:false});
           try {
-            const checked=await verifyToken(auth.slice(7));
-            return json(200,{active:true,playerId:checked.playerId});
+            await verifyToken(auth.slice(7));
+            return json(200,{active:true});
           }catch {return json(401,{active:false});}
         }
         return json(404,{error:'not_found'});
