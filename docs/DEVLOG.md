@@ -4,6 +4,16 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜P0 Identity 正式映射表及一次性 OAuth 核心
+- **Owner 指令**：優先 P0，高風險工程採高度推理；對應 Issue #4、SRG-040～049。
+- **正式 Neon 實際查核**：SnowRealmGames-Cube1 專案 raspy-king-43847627／production br-winter-thunder-b3ozovl2／cube1。原正式庫缺少 sr_platform_identities；此次執行 003 對應的 CREATE TABLE IF NOT EXISTS、REVOKE ALL FROM PUBLIC、ENABLE ROW LEVEL SECURITY。重新讀取 Schema/SQL：新表 0 筆、唯一 platform_player_id 存在、RLS=true、PUBLIC SELECT=false；既有 wallets=1、ledger_rows=2。沒有更動 cube2 或其他同名 Neon 專案。
+- **安全限制**：Neon 沒有列出可用 Snapshot；owner role 仍可 bypass RLS。未聲稱備份、最小權限或正式 OAuth 已完成。
+- **GitHub 實作**：identity/oauth-core.mjs（90 秒一次性授權碼、S256、精確 callback 白名單、300 秒玩家 JWT）、identity/oauth-store.mjs（Postgres 原子消耗與停權/jti/kid 狀態）、server/migrations/004_identity_authorization.sql（僅草案，**沒有**執行正式庫）、identity/authority.mjs（status callback 加入簽名 iat）及 tests/identity/oauth-core.test.mjs、tests/api/identity-schema.test.mjs。
+- **文件**：docs/IDENTITY_P0_OAUTH_REVOCATION_SECURITY_GATE_zh-TW.md；docs/SNOWREALM_GAMES_MASTER_CHECKLIST_zh-TW.md 將完成的結構與程式核心拆分勾選，總數更新為 45/135。
+- **測試**：單元測試及 PGlite/Postgres 模擬測試已納入 GitHub Actions；CI 必須以本分支/PR 的實際結果為準。測試不代表真實帳號登入。
+- **部署及權限**：OAuth API / BFF 未接入、003 表以外不做正式 DB Migration、沒有任何 Secret、Token 或持續登入設定公開；cube2 身分綁定保持 OFF。
+- **剩餘風險**：正式 004 Migration／備份與恢復、最小權限、Neon session → BFF、OAuth authorize/token 路由、真實 callback、DNS/TLS、機器驗證的撤銷服務、兩帳號 E2E。
+
 ## 2026-11-20｜建立 133 項 SnowRealm Games 全專案總待辦
 - **Owner 指令**：「你所有項目列待辦 做好的打勾 全部 每次做完就更新」，並要求依工作難度選擇中／高推理。
 - **新增文件**：`docs/SNOWREALM_GAMES_MASTER_CHECKLIST_zh-TW.md`，涵蓋平台/PWA、SPINREALM、六款 Arcade、Identity、52 HUNT、NEXT FLOOR、會員商城／廣告／任務、後台、Steam 桌面發行、原創音效、安全隱私及 Claude cube2 對接依賴。
