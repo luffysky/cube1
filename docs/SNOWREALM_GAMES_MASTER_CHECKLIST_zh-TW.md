@@ -1,6 +1,7 @@
 # SnowRealm Games｜全專案待辦總表（唯一勾選基準）
 
-**版本**：v1.0 ｜**盤點日期**：2026-11-20（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。\n
+**版本**：v1.0 ｜**盤點日期**：2026-11-20（Asia/Taipei）｜**責任範圍**：GPT／`luffysky/cube1`；Claude／`cube2` 僅列跨專案依賴。
+
 > 本文件永久保存 Owner 已確認需求、已交付功能與尚待驗收事項。**[x] 只代表該行描述的「程式／CI／規格」等明確成果已找到證據，不表示其所在系統正式上線。** 例如六款 Arcade 已通過單元測試，不等於 iOS/Android 實機驗收通過；Identity 金鑰模組已測試，不等於 SSO 服務已部署。
 
 ## 狀態及更新規則
