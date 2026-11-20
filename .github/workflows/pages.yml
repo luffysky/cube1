@@ -33,6 +33,10 @@ jobs:
         run: node --test tests/arcade/*.test.mjs
       - name: Install API test dependencies
         run: npm --prefix server/api ci --ignore-scripts --no-audit --no-fund
+      - name: Build trusted Identity Neon Function (never deploy on push)
+        run: node identity/neon/build.mjs
+      - name: Validate bundled Identity entry
+        run: node --check identity/neon/build/index.mjs
       - name: Test protected management and game API
         run: npm run test:api
       - name: Validate admin console syntax
