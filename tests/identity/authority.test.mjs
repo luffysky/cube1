@@ -60,7 +60,7 @@ test('signer refuses another audience, admin scope, Neon subject, and long lifet
 
 test('verifier rejects algorithm downgrade, untrusted kid, payload tampering',async()=>{
   const token=issue();
-  const [header,payload]=token.split('.').map(p=>JSON.parse(Buffer.from(p,'base64url')));
+  const [header,payload]=token.split('.').slice(0,2).map(p=>JSON.parse(Buffer.from(p,'base64url')));
   await assert.rejects(verify(mutate(token,0,{...header,alg:'none'})),/invalid_algorithm/);
   await assert.rejects(verify(mutate(token,0,{...header,kid:'untrusted-key-11'})),/unknown_kid/);
   await assert.rejects(verify(mutate(token,1,{...payload,aud:'other'})),/invalid_signature/);
