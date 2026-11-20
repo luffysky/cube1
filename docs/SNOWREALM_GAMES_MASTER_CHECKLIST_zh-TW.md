@@ -92,6 +92,8 @@
 - [x] [P0] 已依 cube2 C-022 文件定案 BFF 正式 callback 為 https://brickduel.snowrealm.pet/api/auth/callback（僅路徑規格，路由尚未實作） <!-- SRG-047 -->
 - [ ] [P0] 用兩名測試帳號驗證登入、跨裝置恢復、409 衝突、重試、撤銷及金鑰輪替 <!-- SRG-048 -->
 - [ ] [P0] 與 Claude 完成雙方驗收後才准由 cube2 啟用 IDENTITY_LINK_ENABLED（GPT 不擅改 cube2） <!-- SRG-049 -->
+
+Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成前回 503。readiness 會另報 DB 狀態。以上正式部署與 E2E 項目仍待驗收。
 - [ ] [P1] Steam-only 玩家與 Neon Auth 來源的多身分綁定、遷移與去重策略 <!-- SRG-050 -->
 - [x] [P0] 正式 Cube1 Neon 已非破壞性建立 003 身分 UUID 映射表；證明 RLS 與 PUBLIC 權限，玩家錢包未動（獨立備份/最小角色另列未完成） <!-- SRG-134 -->
 - [x] [P0] Identity 已完成只在受信任後端使用的一次性授權碼／PKCE 核心、持久化撤銷 Store 與測試程式（未部署/未接 BFF） <!-- SRG-135 -->
