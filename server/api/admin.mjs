@@ -32,6 +32,36 @@ export class AdminStore {
       fetchedAt:new Date().toISOString()
     };
   }
+  async trends(){
+    // UTC calendar days, including today. Sparse source days are filled without
+    // trusting browser dates or relying on mutable dashboard state.
+    const days=7;
+    const [newPlayers,matches,ledger]=await Promise.all([
+      this.pool.query(`SELECT (created_at AT TIME ZONE 'UTC')::date::text AS day,
+        count(*)::integer AS amount FROM sr_profiles
+        WHERE created_at >= date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC' - INTERVAL '6 days'
+        GROUP BY day ORDER BY day`),
+      this.pool.query(`SELECT (created_at AT TIME ZONE 'UTC')::date::text AS day,
+        count(*)::integer AS amount FROM sr_ranked_matches
+        WHERE created_at >= date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC' - INTERVAL '6 days'
+        GROUP BY day ORDER BY day`),
+      this.pool.query(`SELECT (created_at AT TIME ZONE 'UTC')::date::text AS day,
+        coalesce(sum(CASE WHEN delta > 0 THEN delta ELSE 0 END),0)::bigint::text AS earned,
+        coalesce(sum(CASE WHEN delta < 0 THEN -delta ELSE 0 END),0)::bigint::text AS spent
+        FROM sr_wallet_ledger
+        WHERE created_at >= date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC' - INTERVAL '6 days'
+        GROUP BY day ORDER BY day`)
+    ]);
+    const toMap=rows=>new Map(rows.map(row=>[String(row.day).slice(0,10),row]));
+    const a=toMap(newPlayers.rows),b=toMap(matches.rows),c=toMap(ledger.rows);
+    const now=new Date(),today=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate());
+    const items=Array.from({length:days},(_,i)=>{
+      const day=new Date(today-(days-1-i)*86400000).toISOString().slice(0,10);
+      return {day,newPlayers:Number(a.get(day)?.amount||0),rankedMatches:Number(b.get(day)?.amount||0),
+        coinsEarned:String(c.get(day)?.earned||'0'),coinsSpent:String(c.get(day)?.spent||'0')};
+    });
+    return {scope:'cube1',readOnly:true,timezone:'UTC',days,items,fetchedAt:new Date().toISOString()};
+  }
   async players(limit=25){
     const n=Math.min(MAX_LIST,Math.max(1,Number(limit)||25));
     const rows=(await this.pool.query(`SELECT p.user_id,p.nickname,p.friend_code,p.created_at,
@@ -69,6 +99,7 @@ export class AdminStore {
 export async function adminRead(path,method,adminStore){
   if(method!=='GET')fail('method_not_allowed',405);
   if(path==='/v1/admin/overview')return adminStore.overview();
+  if(path==='/v1/admin/trends')return adminStore.trends();
   if(path==='/v1/admin/players')return adminStore.players();
   if(path==='/v1/admin/ledger')return adminStore.ledger();
   if(path==='/v1/admin/matches')return adminStore.matches();
