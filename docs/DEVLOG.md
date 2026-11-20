@@ -12,9 +12,11 @@
 - **實際新增文件**：
   - `docs/SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md`：按時序整理 Owner 的明確決策、兩邊授權、禁刪限制、日誌範本與紀錄義務。
   - `docs/DEVLOG.md`：從本次開始，cube1 後續每次實際改動都在這裡追加。
+  - 更新 `docs/BRICKDUEL_ACCOUNT_INTEGRATION_APPROVAL_zh-TW.md`：新增 Claude 自行留 Log 的要求，修正舊版仍寫需 Owner 審批普通新增／更新的矛盾。
 - **程式與資料庫**：本次只新增 Markdown 文件，沒有遊戲功能、資料庫結構或玩家資料的變更，也沒有進行刪除。
 - **部署**：未由本次工作部署任何程式或資料庫。
-- **驗證**：GitHub 建檔回報 commit，尚無實機遊戲驗收；本次為文件工作，沒有宣稱測試已通過。
+- **GitHub 提交紀錄**：Owner 規範 `31ec854b`；本檔建立 `63d50f71`；整合核准書同步修訂 `3b3eb44c`（補 Log 義務與非刪除授權用詞）。
+- **驗證**：GitHub 已回報以上文件提交，尚無實機遊戲驗收；本次為文件工作，沒有宣稱測試已通過。
 - **追蹤**：Claude 專案的既有日誌由 Claude 自己更新；GPT 未修改 cube2。
 - **下一步**：各自後續提交需記原因、檔案/API/DB、commit、測試、正式/預覽部署、未完成事項。以前的提交歷史可逐步補記，但未經核實不可捏造。
 
