@@ -1,6 +1,6 @@
 /* Original SnowRealm Games offline shell. No libraries or runtime cache rules. */
 // Bump VERSION whenever a precached file changes. Install is all-or-nothing.
-const VERSION = '2026-11-20-v28';
+const VERSION = '2026-11-20-v29';
 const CACHE_PREFIX = 'snowrealm-games-shell-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 
@@ -14,6 +14,7 @@ const PAGE_MARKERS = new Map([
   ['/minor-protection.html', 'legal'],
   ['/games/52hunt/index.html', '52hunt'],
   ['/games/next-floor/index.html', 'next-floor'],
+  ['/games/zero-dodge/index.html', 'zero-dodge'],
 ]);
 const AUDIO_ASSETS = [
   'move.wav', 'rotate.wav', 'hold.wav', 'drop.wav', 'clear.wav', 'spin.wav',
@@ -27,6 +28,7 @@ const ASSETS = [
   '/assets/icon-192.png', '/assets/icon-512.png',
   '/assets/realm-mark.svg', '/assets/spinrealm-cover.svg', '/assets/brickduel-cover.svg',
   '/assets/hunt-cover.svg', '/assets/floor-cover.svg',
+  '/games/zero-dodge/engine.mjs', '/games/zero-dodge/game.mjs',
   '/games/spinrealm/styles.css', '/games/spinrealm/arena-layout.css', '/games/spinrealm/app.mjs',
   '/games/spinrealm/room.css', '/games/spinrealm/room-app.mjs', '/games/spinrealm/room-client.mjs',
   '/games/spinrealm/rtc-peers.mjs',
