@@ -4,8 +4,8 @@ import { CONFIG } from '../games/spinrealm/config.mjs';
 import { createAuthClient } from '../games/spinrealm/vendor/neon-auth.mjs';
 
 const auth=createAuthClient(CONFIG.authUrl),$=id=>document.getElementById(id);
-const panels=['overview','players','ledger','matches','integrations','compliance'];
-const titles={overview:'營運總覽',players:'玩家管理',ledger:'金幣帳本',matches:'排位對局',integrations:'跨遊戲整合',compliance:'隱私與法規'};
+const panels=['overview','trends','players','ledger','matches','integrations','compliance'];
+const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',ledger:'金幣帳本',matches:'排位對局',integrations:'跨遊戲整合',compliance:'隱私與法規'};
 let subject=null,token=null,expiry=0,authorized=false,active='overview',busy=false;
 const fmt=n=>Number(n||0).toLocaleString('zh-TW');
 const date=value=>{if(!value)return'—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('zh-TW');};
@@ -20,7 +20,7 @@ function showPanel(name){
   $(panel+'Panel').hidden=panel!==name;
   document.querySelector('[data-panel="'+panel+'"]')?.setAttribute('aria-current',panel===name?'page':'false');
  }
- if(authorized&&['overview','players','ledger','matches'].includes(name))void fetchPanel(name);
+ if(authorized&&['overview','trends','players','ledger','matches'].includes(name))void fetchPanel(name);
 }
 function toRows(body,rows){
  body.replaceChildren();
@@ -32,6 +32,35 @@ function toRows(body,rows){
   for(const raw of record){const td=document.createElement('td');td.textContent=String(raw??'—');tr.append(td);}
   body.append(tr);
  }
+}
+function renderTrends(info){
+ const records=Array.isArray(info?.items)?info.items:[];
+ if(info?.scope!=='cube1'||info?.timezone!=='UTC'||info?.days!==7||records.length!==7)throw Error('invalid_trends');
+ const totals=records.reduce((o,r)=>({
+  players:o.players+Number(r.newPlayers||0),matches:o.matches+Number(r.rankedMatches||0),
+  earned:o.earned+BigInt(r.coinsEarned||'0'),spent:o.spent+BigInt(r.coinsSpent||'0')
+ }),{players:0,matches:0,earned:0n,spent:0n});
+ $('trendsPlayers').textContent=fmt(totals.players);
+ $('trendsMatches').textContent=fmt(totals.matches);
+ $('trendsEarned').textContent=totals.earned.toLocaleString('zh-TW');
+ $('trendsSpent').textContent=totals.spent.toLocaleString('zh-TW');
+ const max=Math.max(1,...records.flatMap(r=>[Number(r.newPlayers||0),Number(r.rankedMatches||0)]));
+ const chart=$('trendChart');chart.replaceChildren();
+ const compact=new Intl.DateTimeFormat('zh-TW',{month:'numeric',day:'numeric',timeZone:'UTC'});
+ for(const r of records){
+  const cell=document.createElement('div');cell.className='trend-day';
+  const bars=document.createElement('div');bars.className='trend-bars';
+  for(const [kind,value] of [['new',Number(r.newPlayers||0)],['matches',Number(r.rankedMatches||0)]]){
+   const bar=document.createElement('div');bar.className='trend-bar '+kind;
+   bar.style.height=(value/max*100)+'%';bar.title=(kind==='new'?'新增玩家':'排位對局')+'：'+value;
+   bars.append(bar);
+  }
+  const label=document.createElement('small');
+  label.textContent=compact.format(new Date(r.day+'T00:00:00Z'));
+  cell.append(bars,label);chart.append(cell);
+ }
+ chart.setAttribute('aria-label',records.map(r=>r.day+'：新增玩家 '+r.newPlayers+'、排位對局 '+r.rankedMatches).join('；'));
+ toRows($('trendsBody'),records.map(r=>[r.day,fmt(r.newPlayers),fmt(r.rankedMatches),BigInt(r.coinsEarned||'0').toLocaleString('zh-TW'),BigInt(r.coinsSpent||'0').toLocaleString('zh-TW')]));
 }
 function decodeJWT(jwt){
  if(typeof jwt!=='string'||jwt.split('.').length!==3)return null;
@@ -66,12 +95,14 @@ async function api(path,refresh=false){
  return payload;
 }
 async function fetchPanel(which=active){
- if(busy||!authorized||!['overview','players','ledger','matches'].includes(which))return;
+ if(busy||!authorized||!['overview','trends','players','ledger','matches'].includes(which))return;
  busy=true;$('refresh').disabled=true;status('更新中');
  try{
   const info=await api('/v1/admin/'+which);
   if(which==='overview'){
    for(const key of ['players','wallets','outstandingCoins','rankedMatches','runningMatches','queuedPlayers'])document.querySelector('[data-metric="'+key+'"]').textContent=fmt(info[key]);
+  }else if(which==='trends'){
+   renderTrends(info);
   }else if(which==='players'){
    toRows($('playersBody'),info.items?.map(x=>[x.nickname,x.friendCode,fmt(x.coins),fmt(x.rating),fmt(x.games),date(x.createdAt)]));
   }else if(which==='ledger'){
