@@ -1,6 +1,6 @@
 /* Original SnowRealm Games offline shell. No libraries or runtime cache rules. */
 // Bump VERSION whenever a precached file changes. Install is all-or-nothing.
-const VERSION = '2026-11-20-v31';
+const VERSION = '2026-11-21-v32';
 const CACHE_PREFIX = 'snowrealm-games-shell-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 
@@ -27,7 +27,7 @@ const AUDIO_ASSETS = [
   'credits.json', 'LICENSES.txt',
 ].map(name => '/games/spinrealm/audio/' + name);
 const ASSETS = [
-  '/styles.css', '/app.mjs', '/pwa.mjs', '/member-platform.mjs', '/manifest.webmanifest',
+  '/styles.css', '/app.mjs', '/pwa.mjs', '/member-platform.mjs', '/sso-flow.mjs', '/sso-bridge.mjs', '/manifest.webmanifest',
   '/legal.css', '/legal.mjs',
   '/region-policies.mjs', '/region-policy-locales.mjs',
   '/assets/icon-192.png', '/assets/icon-512.png',

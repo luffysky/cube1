@@ -78,6 +78,10 @@ async function accessToken(force=false) {
   tokenRequest=pending;
   try{return await pending.promise;}finally{if(tokenRequest===pending)tokenRequest=null;}
 }
+// Platform SSO bridge obtains the existing verified Neon JWT in memory only.
+// Never persist it in query parameters, localStorage or application logs.
+export async function getMemberAccessToken(){return accessToken();}
+
 export async function initMember() {
   if(readyPromise)return readyPromise;
   const generation=sessionGeneration;
