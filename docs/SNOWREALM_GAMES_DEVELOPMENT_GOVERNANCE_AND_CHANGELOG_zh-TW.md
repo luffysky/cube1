@@ -19,6 +19,7 @@
 | D-009 | 「同視窗 後台幫我記開電腦的時候補」 | 管理後台暫列待辦；待電腦開啟後接續。不能聲稱自動偵測開機或已完成。 | [cube1 Issue #2](https://github.com/luffysky/cube1/issues/2) |
 | D-010 | 「快點開」與 Claude 的交接要求 | SnowRealm Identity 列為 P0，由 GPT 補齊正式平台 UUID、授權、JWKS 與撤銷服務；正式安全測試通過前，不可直接強制啟用 cube2 綁定。 | [Issue #4](https://github.com/luffysky/cube1/issues/4)；已開始平台 UUID 程式，正式服務未上線 |
 | D-011 | 「玩家按刪除那刻保留30天 30天後刪除 然後用snowrealm網址沒錯」 | 《轉磚》正式回跳域名使用 `brickduel.snowrealm.pet`。玩家本人經驗證要求刪雲端資料後，保留 30×24 小時可恢復期，到期才刪除《轉磚》雲端存檔與平台身分綁定；**Owner 已針對此特定到期刪除流程明確核准**。其他刪除仍需個別核准。 | [30 天資料刪除政策](./BRICKDUEL_ACCOUNT_LINK_AND_DELETION_POLICY_zh-TW.md)；待 cube2 實作 |
+| D-012 | 「這只是 games 的 admin，不是整個 SnowRealm；admin.snowrealm.pet 不給過」 | 正式否決將 SnowRealm Games 專用後台設於 `admin.snowrealm.pet`。使用 `games.snowrealm.pet` 下的隨機獨立路徑，前端可以獨立部署，但入口仍走 Games 既有網域的受保護反向代理；必須有 Access／MFA／後端 RBAC，不以隨機路徑當作認證。其他 SnowRealm 業務不屬於 Games 管理員權限。 | 已決策，路由／部署待實作與驗收 |
 
 > 本表僅列本輪可核對的相關 Owner 指令與承接決策，並非聲稱還原全部曾因 ChatGPT 卡住而消失的訊息。新指令要**追加**，不可偷偷改寫舊決策。若 Owner 明確推翻舊指令，新增一筆「取代 D-xxx」，保留原歷史。
 
