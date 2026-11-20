@@ -26,8 +26,9 @@ test('004: actual Postgres schema supports one-time PKCE code and fail-closed re
   assert.equal(await store.isActive(uuid),true);
   await store.saveCode(code);
   const values={codeHash:code.codeHash,clientId:code.clientId,redirectUri:code.redirectUri,
-   codeChallenge:code.codeChallenge};
+   codeChallenge:code.codeChallenge,stateHash:code.stateHash,nonceHash:code.nonceHash};
   assert.equal(await store.consumeCode({...values,codeChallenge:'x'.repeat(43)}),null);
+  assert.equal(await store.consumeCode({...values,nonceHash:'f'.repeat(64)}),null);
   assert.equal(await store.consumeCode(values),uuid);
   assert.equal(await store.consumeCode(values),null,'replay must fail');
   assert.equal(await store.canIssue('test-kid-000001'),true);

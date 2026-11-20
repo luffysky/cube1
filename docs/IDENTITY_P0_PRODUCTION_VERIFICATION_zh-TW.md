@@ -10,7 +10,7 @@
 | Neon 部署 | Production Function 清單只有 `cube1api` 部署 4（Node 24）。沒有 Identity Function 部署 ID；自訂網域清單為空。 |
 | 正式 HTTPS | Cloud Browser 開啟 `https://identity.snowrealm.pet/health/live` 回報 `ERR_HTTP2_PROTOCOL_ERROR`。尚無可核對的正式 HTTP 狀態碼、JWKS、TLS 或 readiness。 |
 | Secrets | 未驗證正式 Identity 環境的 `IDENTITY_ED25519_PRIVATE_PEM`、`IDENTITY_ACTIVE_KID`、`IDENTITY_BRICKDUEL_CLIENT_SECRET`、`IDENTITY_DATABASE_URL`、`NEON_AUTH_BASE_URL`、`NEON_AUTH_JWKS_URL`。 |
-| BFF／E2E | cube2 callback 只有規格。cube1 現行授權 API 接受瀏覽器表單的 consent 布林值，nonce 雜湊已儲存但交換端未核對。仍需可信後端同意與交易綁定、BFF Session、限流和稽核。兩組帳號均未開始正式環境測試。 |
+| BFF／E2E | cube2 callback 只有規格。cube1 現行授權 API 接受瀏覽器表單的 consent 布林值，本 PR 加上交換端原子比對 state 與 nonce 雜湊。仍需可信後端同意與登入意圖綁定、BFF Session、限流和稽核。兩組帳號均未開始正式環境測試。 |
 
 既有 CI：[PR #7](https://github.com/luffysky/cube1/actions/runs/44770816454)、
 [PR #9](https://github.com/luffysky/cube1/actions/runs/44779170413)、
@@ -29,8 +29,8 @@
 | Identity | Issuer `https://identity.snowrealm.pet`，JWKS `/.well-known/jwks.json`。 |
 | 授權 | 現行 Adapter 為 `POST /oauth/authorize`，由 Games 提供經驗證的 Neon 登入。輸入 `clientId`、`redirectUri`、`codeChallenge`、`state`、`nonce`。正式同意與登入意圖接口仍待完成。 |
 | Client | `brickduel-bff`，精確 callback `https://brickduel.snowrealm.pet/api/auth/callback`。 |
-| BFF 交易 | 伺服器產生 S256 verifier、state、nonce，短效綁定瀏覽器工作階段與明確同意。Callback 固定檢查 issuer、state、nonce、時效、會話及一次性使用。現行 token 回應尚無 nonce 證據，正式雙方介面需補齊後驗收。 |
-| Token | BFF 執行 `POST /oauth/token`，伺服端標頭 `x-snowrealm-client-secret`。JSON 欄位 `clientId`、`redirectUri`、`code`、`codeVerifier`。Code 最長 90 秒，token 最長 300 秒。 |
+| BFF 交易 | 伺服器產生 S256 verifier、state、nonce，短效綁定瀏覽器工作階段與明確同意。Callback 固定檢查 issuer、state、nonce、時效、會話及一次性使用。交換時必須傳入 BFF 伺服器工作階段儲存的原始 state 和 nonce。Identity 在同一筆 SQL 驗證兩者並消耗授權碼。 |
+| Token | BFF 執行 `POST /oauth/token`，伺服端標頭 `x-snowrealm-client-secret`。JSON 欄位 `clientId`、`redirectUri`、`code`、`codeVerifier`、`state`、`nonce`。Code 最長 90 秒，token 最長 300 秒。 |
 | JWT | Ed25519，`aud=snowrealm:brickduel:api`、`scope=brickduel:account:link`。驗證 `iss`、`aud`、`scope`、`sub`（平台 UUID）、`iat`、`nbf`、`exp`、`jti`、`kid`。 |
 | 即時撤銷 | `POST /v1/token/status` 使用 Bearer token。只有有效且明確為 active 才受理。其餘錯誤、逾時、停權或未知金鑰皆拒絕。Brickduel 在交易內防止 `jti` 重放。 |
 | Session／存檔 | 伺服器端保存 Session，cookie 使用 Secure／HttpOnly。Token 不出現在 URL。不同存檔回 409，保留原存檔。換裝置需重新登入並以同平台 UUID 讀回已連結進度。 |

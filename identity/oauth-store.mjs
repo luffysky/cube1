@@ -7,10 +7,10 @@ export class OAuthStore {
   await this.pool.query(sql,[rec.codeHash,rec.clientId,rec.redirectUri,rec.codeChallenge,
    rec.playerId,rec.stateHash,rec.nonceHash,rec.expiresAt]);
  }
- async consumeCode({codeHash,clientId,redirectUri,codeChallenge}){
+ async consumeCode({codeHash,clientId,redirectUri,codeChallenge,stateHash,nonceHash}){
   // This UPDATE is atomic: the first exchange wins; replay returns no rows.
-  const sql='UPDATE sr_identity_authorization_codes SET consumed_at=now() WHERE code_hash=$1 AND client_id=$2 AND redirect_uri=$3 AND code_challenge=$4 AND consumed_at IS NULL AND expires_at>now() RETURNING player_id';
-  const {rows}=await this.pool.query(sql,[codeHash,clientId,redirectUri,codeChallenge]);
+  const sql='UPDATE sr_identity_authorization_codes SET consumed_at=now() WHERE code_hash=$1 AND client_id=$2 AND redirect_uri=$3 AND code_challenge=$4 AND state_hash=$5 AND nonce_hash=$6 AND consumed_at IS NULL AND expires_at>now() RETURNING player_id';
+  const {rows}=await this.pool.query(sql,[codeHash,clientId,redirectUri,codeChallenge,stateHash,nonceHash]);
   return rows[0]?.player_id||null;
  }
  async isActive(playerId){

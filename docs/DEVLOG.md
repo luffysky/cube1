@@ -170,5 +170,6 @@
 
 - 基準 main 為 `b290fd9afec8c50880ceb4cb7e7f882f763646fc`。PR #7、#9、#10、#11、#12 已合併，相關 CI 結果與本次環境證據見 [P0 驗收紀錄](IDENTITY_P0_PRODUCTION_VERIFICATION_zh-TW.md)。
 - 正式庫唯讀核對 003／004、唯一鍵、外鍵、索引、RLS 及 PUBLIC ACL。快照獨立還原並在演練分支重跑 004，未執行正式分支切換。
-- 加入待審的最小權限角色 SQL、RLS/撤銷 readiness 檢查及 Postgres 測試。尚待正式角色核准與配發、可信同意及 nonce 串接、部署和雙帳號驗收。
+- 加入待審的最小權限角色 SQL、RLS/撤銷 readiness 檢查及 Postgres 測試。尚待正式角色核准與配發、可信同意及 BFF 串接、部署和雙帳號驗收。
 - 回復方式：本次未改正式資料庫或部署。演練分支不得提升為正式分支。綁定開關依 C-021 維持關閉。
+- 授權端要求精確 Origin，交換端將工作階段持有的 state／nonce 與 PKCE 一起原子核對。
