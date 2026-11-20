@@ -4,6 +4,13 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜P0 Revoked kid 禁簽與 SnowRealm Games 平台明確同意連結入口
+- **修補安全漏洞**：[PR #11](https://github.com/luffysky/cube1/pull/11) (`adb3b2d7`) 已對 OAuth 發行端增加持久化 revoked kid 查詢，撤銷後停發 JWT；PR CI [44780625206](https://github.com/luffysky/cube1/actions/runs/44780625206) success。
+- **平台登入橋接**：[PR #12](https://github.com/luffysky/cube1/pull/12) (`4f5944ba`) 已加入 `dist/sso-flow.mjs`、`dist/sso-bridge.mjs`、會員 in-memory Neon JWT accessor、遊戲館互動入口與 PWA 安全快取清單；只接受 C-022 的精確 `https://brickduel.snowrealm.pet/api/auth/callback`，玩家點擊確認後才發出授權請求。
+- **測試**：PR CI [44781233984](https://github.com/luffysky/cube1/actions/runs/44781233984) success；拒絕惡意 redirect／弱 PKCE／token URL，原會員 JWT 不寫入 URL、localStorage 或 Log。
+- **正式功能限制**：尚無 Identity HTTPS 服務正式部署證據，Neon deploy tool 拒絕了密鑰部署請求；遊戲館介面在 Identity 不可用時只顯示失敗、不修改或合併任何存檔。Claude/cube2 尚未實作真實 callback BFF，正式綁定保持 OFF。
+- **勾選**：主總表新增 SRG-139 只記平台橋接程式／CI 已完成。正式 DNS、BFF、2 帳號 E2E、備份還原與最小權限沒有勾選；總數 50/139。
+
 ## 2026-11-21｜P0 正式 004 遷移、Snapshot 與可信 Identity 服務核心
 - **Owner 指令**：正式 Identity、BFF、004、金鑰／撤銷、雙帳號 E2E 立即優先；僅核實後才開跨遊戲綁定。
 - **資料庫**：正式 SnowRealmGames-Cube1／production br-winter-thunder-b3ozovl2（DB cube1）。已先建立 Snapshot `snap-curly-resonance-b3xxwfup`／`pre-identity-004-20261121`，再於單一 transaction 套用 `server/migrations/004_identity_authorization.sql`（11 條不破壞 SQL）。
