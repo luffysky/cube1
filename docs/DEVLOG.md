@@ -10,6 +10,7 @@
 - **30 天刪除**：cube2 `core.wipe`、`restore`、`idRecover(back:true)`、`gone` 保留和期滿 `PURGE` 交易的程式已存在；但目前 PURGE 依其他請求順帶觸發，沒有獨立定時器，因此不保證到期準時刪除。SRG-129 與跨裝置驗收保留未完成。
 - **文件／勾選**：更新 Identity Gate、兩份測試的 callback 約定與主待辦 SRG-047。完成的只是正式 redirect URI 規格，總表更新為 46/135。
 - **權限／部署**：未更動 cube2、正式玩家資料、付費權限或身份綁定旗標；尚無實際 OAuth/BFF 正式部署證據。
+- **提交與驗證**：[PR #8](https://github.com/luffysky/cube1/pull/8) 已合併 `55e4b786acce5c7c0f4298c852b1721261266977`，GitHub Actions [44771740342](https://github.com/luffysky/cube1/actions/runs/44771740342) success；規格與測試已同步，正式 callback BFF 尚未實作。
 
 ## 2026-11-21｜P0 Identity 正式映射表及一次性 OAuth 核心
 - **Owner 指令**：優先 P0，高風險工程採高度推理；對應 Issue #4、SRG-040～049。
