@@ -48,3 +48,11 @@
 回滾時移除管理 Worker 的路徑綁定，保留 Access 對管理入口及子路徑的封鎖。任何版本不得直接發布 build/assets。
 
 在 Cloudflare Workers Routes 只配置 `games.snowrealm.pet/<RANDOM_GAMES_CONSOLE_PATH>/*`，與 Worker 的 `ADMIN_ENTRY_PATH`（含起迄斜線）對應。Cloudflare DNS 必須為 proxied，原 Games origin 保持原位。Access application 同時覆蓋入口及子路徑。完成正向與負向驗收前，不建立 wildcard 主站 route、公開部署別名或其他直接入口。
+
+## Games Owner 與管理員營運操作
+
+Owner 單獨以 `SNOWREALM_GAMES_OWNER_SUBJECT` 綁定經驗簽的 Games 帳號。其他管理員沿用 `SNOWREALM_ADMIN_SUBJECTS`，可停權或解封玩家、增減金幣，以及記錄已結束對局的更正結果。Owner 可填寫及查看內部備註。理由和備註都選填，玩家帳號頁顯示適用於自己的理由和營運通知。此授權限於 Games，無 ERP 或其他產品權限。
+
+正式啟用前，先在隔離分支驗證 005，再執行正式 migration。將高熵 `SNOWREALM_OWNER_GATEWAY_SECRET` 同步配置於管理 Worker 與 Games API 的受控環境。管理操作同時要求 Access、Games JWT 及 Gateway 憑證，保留每次異動的稽核。程式保留原始對局與結算，更正結果另存並通知雙方。若既有排位或獎勵也須補正，需有獨立結算策略。
+
+回滾先移除 API 的 Gateway 憑證來關閉新操作；保留稽核資料，現有停權仍有效。若要回退到 005 前的程式，現有停權規則需要獨立維持。

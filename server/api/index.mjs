@@ -3,6 +3,7 @@ import { attachDatabasePool } from '@neon/functions';
 import { createApp } from './app.mjs';
 import { jwtAuthenticator } from './auth.mjs';
 import { Store } from './store.mjs';
+import { GamesOwnerStore } from './games-owner.mjs';
 import { AdminStore } from './admin.mjs';
 import { PlatformIdentityStore } from './platform-identity.mjs';
 
@@ -16,6 +17,9 @@ pool.on('error', error => console.error('snowrealm_pool_error', { code: error.co
 export default createApp({
   store: new Store(pool),
   adminStore: new AdminStore(pool),
+  ownerStore: new GamesOwnerStore(pool),
+  ownerSubject: process.env.SNOWREALM_GAMES_OWNER_SUBJECT || '',
+  ownerGatewaySecret: process.env.SNOWREALM_OWNER_GATEWAY_SECRET || '',
   platformIdentity: new PlatformIdentityStore(pool),
   adminSubjects: process.env.SNOWREALM_ADMIN_SUBJECTS || '',
   rewardedAdSecret: process.env.REWARDED_AD_ADAPTER_SECRET || '',

@@ -3,6 +3,10 @@ import {createRemoteJWKSet,jwtVerify} from 'jose';
 const apiOrigin='https://br-winter-thunder-b3ozovl2-cube1api.compute.c-4.ap-southeast-1.aws.neon.tech';
 const adminReads=new Set(['overview','trends','players','ledger','matches']
  .map(name=>'v1/admin/'+name));
+const ownerPaths=new Map([
+ ['v1/admin/owner/suspension','POST'],['v1/admin/owner/coins','POST'],
+ ['v1/admin/owner/match-correction','POST'],['v1/admin/owner/audit','GET']
+]);
 const jwksByIssuer=new Map();
 
 export default {
@@ -24,23 +28,50 @@ export default {
     issuer,audience,algorithms:['RS256'],requiredClaims:['exp','sub','email']
    });
   }catch{return deny(403);}
-  if(!['GET','HEAD'].includes(request.method))return deny(405,{Allow:'GET, HEAD'});
   if(!url.pathname.startsWith(entry))return deny(404);
   const asset=url.pathname.slice(entry.length)||'index.html';
-  if(adminReads.has(asset)){
-   if(request.method!=='GET')return deny(405,{Allow:'GET'});
+  if(adminReads.has(asset)||ownerPaths.has(asset)){
+   const method=ownerPaths.get(asset)??'GET';
+   if(request.method!==method)return deny(405,{Allow:method});
    const authorization=request.headers.get('authorization');
    if(!authorization||authorization.length>16384||!/^Bearer [^\s]+$/.test(authorization))
     return deny(401);
    try{
+    const upstreamHeaders=new Headers({Authorization:authorization,Accept:'application/json'});
+    let body;
+    if(ownerPaths.has(asset)){
+     const proof=env.SNOWREALM_OWNER_GATEWAY_SECRET;
+     if(typeof proof!=='string'||proof.length<32)return deny(503);
+     upstreamHeaders.set('X-SnowRealm-Owner-Gateway',proof);
+     if(method==='POST'){
+      if(request.headers.get('origin')!==url.origin)return deny(403);
+      const key=request.headers.get('idempotency-key');
+      if(!key||!/^[-\w:.]{8,100}$/.test(key))return deny(400);
+      if(!request.headers.get('content-type')?.startsWith('application/json'))return deny(415);
+      const reader=request.body?.getReader();
+      if(!reader)return deny(400);
+      const parts=[];let size=0;
+      while(true){
+       const {done,value}=await reader.read();
+       if(done)break;
+       size+=value.byteLength;
+       if(size>4096){await reader.cancel();return deny(413);}
+       parts.push(value);
+      }
+      body=new Blob(parts,{type:'application/json'});
+      upstreamHeaders.set('Content-Type','application/json');
+      upstreamHeaders.set('Idempotency-Key',key);
+     }
+    }
     const upstream=await fetch(new URL('/'+asset,apiOrigin),{
-     headers:{Authorization:authorization,Accept:'application/json'},redirect:'error'
+     method,body,headers:upstreamHeaders,redirect:'error'
     });
     return new Response(upstream.body,{status:upstream.status,
      headers:{...headers,'Content-Type':'application/json; charset=utf-8'}});
    }catch{return deny(502);}
   }
   if(!['index.html','admin.mjs','admin.css','realm-mark.svg'].includes(asset))return deny(404);
+  if(!['GET','HEAD'].includes(request.method))return deny(405,{Allow:'GET, HEAD'});
   const response=await env.ASSETS.fetch(new Request(new URL('/'+asset,url),{method:request.method}));
   const result=new Headers(response.headers);
   for(const [key,value] of Object.entries(headers))result.set(key,value);

@@ -6,7 +6,7 @@ import { createAuthClient } from '../../dist/games/spinrealm/vendor/neon-auth.mj
 const auth=createAuthClient(CONFIG.authUrl),$=id=>document.getElementById(id);
 const panels=['overview','trends','players','ledger','matches','integrations','compliance'];
 const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',ledger:'金幣帳本',matches:'排位對局',integrations:'跨遊戲整合',compliance:'隱私與法規'};
-let subject=null,token=null,expiry=0,authorized=false,active='overview',busy=false;
+let subject=null,token=null,expiry=0,authorized=false,active='overview',busy=false,ownerRetry=null;
 const fmt=n=>Number(n||0).toLocaleString('zh-TW');
 const date=value=>{if(!value)return'—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('zh-TW');};
 function status(value,type=''){
@@ -104,13 +104,13 @@ async function fetchPanel(which=active){
   }else if(which==='trends'){
    renderTrends(info);
   }else if(which==='players'){
-   toRows($('playersBody'),info.items?.map(x=>[x.nickname,x.friendCode,fmt(x.coins),fmt(x.rating),fmt(x.games),date(x.createdAt)]));
+   toRows($('playersBody'),info.items?.map(x=>[x.playerId,x.nickname,x.friendCode,fmt(x.coins),fmt(x.rating),fmt(x.games),date(x.createdAt)]));
   }else if(which==='ledger'){
    toRows($('ledgerBody'),info.items?.map(x=>[x.eventId,x.playerId,(Number(x.delta)>0?'+':'')+x.delta,fmt(x.balanceAfter),x.reason,date(x.createdAt)]));
   }else if(which==='matches'){
    toRows($('matchesBody'),info.items?.map(x=>[x.matchId,x.players?.join(' / '),x.status,date(x.startedAt),date(x.settledAt)]));
   }
-  status('管理權限已驗證','ready');message('已授權管理員。資料只讀，不會修改遊戲帳本。');
+  status('管理權限已驗證','ready');message('管理身分已驗證。');
  }catch(error){
   if(error.status===403){authorized=false;$('dashboard').hidden=true;status('沒有管理權限','error');message('目前帳號不在後端管理員白名單內。');}
   else if(error.status===404||error.status===503){status('API 尚未部署','error');message('管理介面已建立，但後端管理 API 尚未啟用或部署。');}
@@ -131,8 +131,16 @@ async function verify(){
   // The query below is the definitive authorization check.
   const response=await api('/v1/admin/overview');
   authorized=true;$('dashboard').hidden=false;$('refresh').disabled=false;
+  $('ownerActions').hidden=!response.operationsEnabled;
+  $('ownerNote').hidden=!response.owner;
+  $('ownerForm').elements.note.disabled=!response.owner;
+  $('ownerAuditNote').hidden=!response.owner;
+  $('ownerAuditLog').hidden=true;
+  $('ownerAuditBody').replaceChildren();
+  if(!response.owner)$('ownerForm').elements.note.value='';
+  if(response.operationsEnabled)void fillOperationTargets();
   for(const key of ['players','wallets','outstandingCoins','rankedMatches','runningMatches','queuedPlayers'])document.querySelector('[data-metric="'+key+'"]').textContent=fmt(response[key]);
-  status('已授權管理員','ready');message('管理身分已驗證。此版本僅提供只讀功能。');
+  status('已授權管理員','ready');message('管理身分已驗證。');
  }catch(error){
   authorized=false;$('dashboard').hidden=true;
   status('尚未授權','error');
@@ -143,4 +151,76 @@ $('checkAuth').addEventListener('click',()=>void verify());
 $('refresh').addEventListener('click',()=>void fetchPanel(active));
 for(const button of document.querySelectorAll('[data-panel]'))button.addEventListener('click',()=>showPanel(button.dataset.panel));
 window.addEventListener('focus',()=>{if(!document.hidden&&authorized&&expiry<Date.now()){authorized=false;token=null;$('dashboard').hidden=true;status('需重新驗證');}});
+async function fillOperationTargets(){
+ const isMatch=$('ownerAction').value==='match-correction';
+ const options=$('ownerTargets');
+ options.replaceChildren();
+ try{
+  const data=await api('/v1/admin/'+(isMatch?'matches':'players'));
+  if(($('ownerAction').value==='match-correction')!==isMatch)return;
+  for(const item of data.items??[]){
+   const option=document.createElement('option');
+   option.value=isMatch?item.matchId:item.playerId;
+   option.label=isMatch?item.players.join(' / '):item.nickname;
+   options.append(option);
+  }
+ }catch{ /* The ID may still be entered directly. */ }
+}
+$('ownerAction').addEventListener('change',()=>{
+ const selected=$('ownerAction').value;
+ for(const [id,name,show] of [['ownerCoins','delta',selected==='coins'],['ownerMatch','outcome',selected==='match-correction']]){
+  $(id).hidden=!show;
+  $('ownerForm').elements[name].disabled=!show;
+ }
+ $('ownerTargetLabel').textContent=selected==='match-correction'?'對局 ID':'玩家 ID';
+ $('ownerForm').elements.targetId.value='';
+ if(authorized)void fillOperationTargets();
+});
+$('ownerForm').addEventListener('submit',async event=>{
+ event.preventDefault();
+ if(!authorized||$('ownerActions').hidden)return;
+ const form=event.currentTarget,button=form.querySelector('[type="submit"]');
+ if(button.disabled)return;
+ const values=new FormData(form);
+ const selected=values.get('operation');
+ const operation=['suspend','restore'].includes(selected)?'suspension':selected;
+ const body={targetId:String(values.get('targetId')).trim(),reason:values.get('reason')};
+ if(values.has('note'))body.note=values.get('note');
+ if(operation==='suspension')body.suspended=selected==='suspend';
+ if(operation==='coins'){
+  body.delta=Number(values.get('delta'));
+  if(!Number.isSafeInteger(body.delta)||body.delta===0){
+   $('ownerResult').textContent='請輸入非零整數。';
+   return;
+  }
+ }
+ if(operation==='match-correction')body.outcome=values.get('outcome');
+ if(!window.confirm('確認套用這項 Games 營運調整？'))return;
+ const payload=JSON.stringify(body);
+ if(ownerRetry?.payload!==payload||ownerRetry.operation!==operation)
+  ownerRetry={payload,operation,key:crypto.randomUUID()};
+ button.disabled=true;
+ try{
+  const bearer=await signedToken();
+  const response=await fetch('./v1/admin/owner/'+operation,{
+   method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+bearer,
+    'Content-Type':'application/json','Idempotency-Key':ownerRetry.key},body:payload
+  });
+  const result=await response.json().catch(()=>null);
+  if(!response.ok)throw Error(result?.error?.code??'HTTP '+response.status);
+  ownerRetry=null;
+  $('ownerResult').textContent='調整已儲存。';
+  await fetchPanel();
+ }catch(error){$('ownerResult').textContent='未確認儲存結果：'+error.message;}
+ finally{button.disabled=false;}
+});
+$('ownerAudit').addEventListener('click',async()=>{
+ if(!authorized)return;
+ try{
+  const result=await api('/v1/admin/owner/audit');
+  toRows($('ownerAuditBody'),result.items.map(row=>[row.operation,row.targetId,row.reason,
+   ...(!$('ownerAuditNote').hidden?[row.note]:[]),date(row.createdAt)]));
+  $('ownerAuditLog').hidden=false;
+ }catch{$('ownerResult').textContent='無法載入操作紀錄。';}
+});
 showPanel('overview');

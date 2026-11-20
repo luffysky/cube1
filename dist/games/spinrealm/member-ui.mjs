@@ -10,7 +10,7 @@ const button=(key,action,extra='')=>`<button type="button" class="srg-button" da
 const field=(key,name,type='text',extra='')=>`<label class="srg-field"><span>${label(key)}</span><input name="${name}" type="${type}" required ${extra}></label>`;
 
 export function initMemberUI({mount=document.querySelector('.topbar')||document.querySelector('.site-header'),beforeOpen=()=>{},afterClose=()=>{},onRanked=null}={}){
-  let page='account',authMode='login',email='',busy=false,previewBase=null,friends=null,leaderboard=null,history=null,walletHistory=null,quests=null,rewardStatus=null;
+  let page='account',authMode='login',email='',busy=false,previewBase=null,friends=null,leaderboard=null,history=null,walletHistory=null,quests=null,rewardStatus=null,accountNotices=null;
   const toolbar=document.createElement('div');toolbar.className='srg-toolbar';
   toolbar.innerHTML=`<button class="srg-coin" type="button" data-member-open="wallet"><span aria-hidden="true">◈</span><b data-wallet-number>—</b><span class="srg-coin-name" data-i18n="wallet.coins">${label('wallet.coins')}</span></button><button type="button" class="srg-icon-button" data-member-open="shop" aria-label="${label('shop.title')}" title="${label('shop.title')}">◐ <span data-i18n="shop.title">${label('shop.title')}</span></button><button type="button" class="srg-icon-button" data-member-open="friends" aria-label="${label('friends.title')}">♧ <span data-i18n="friends.title">${label('friends.title')}</span></button><label class="srg-language"><span class="srg-sr" data-i18n="settings.language">${label('settings.language')}</span><select data-locale aria-label="${label('settings.language')}">${LOCALES.map(([value,name])=>`<option value="${value}">${name}</option>`).join('')}</select></label><button type="button" class="srg-account-button" data-member-open="account"><span aria-hidden="true">◎</span><span data-member-name translate="no">${label('account.login')}</span></button>`;
   mount?.insertAdjacentElement('afterend',toolbar);
@@ -82,12 +82,26 @@ export function initMemberUI({mount=document.querySelector('.topbar')||document.
     renderToolbar();if(!dialog.open)return;
     dialog.querySelector('#memberTitle').textContent=t(navs.find(x=>x[0]===page)[1]);
     dialog.querySelector('.srg-member-nav').innerHTML=navs.map(([id,key,icon])=>`<button type="button" data-member-page="${id}" class="${page===id?'active':''}" aria-pressed="${page===id}"><span aria-hidden="true">${icon}</span>${label(key)}</button>`).join('');
-    content.innerHTML=({account:renderAccount,wallet:renderWallet,shop:renderShop,friends:renderFriends,ranked:renderRanked,plus:renderPlus}[page])();drawPreview();
+    const notices=page==='account'&&accountNotices&&accountNotices.userId===memberState().user?.id
+      ? accountNotices.items : [];
+    const noticeHtml=notices.length?'<section class="srg-notice"><h3>營運通知</h3>'+notices.map(row=>{
+      const kind={coins:'金幣調整',suspension:row.change?.suspended?'帳號停權':'解除停權','match-correction':'對局更正'}[row.operation];
+      const change=row.change??{};
+      const detail=row.operation==='coins'?(change.delta>0?'+':'')+String(change.delta)+' ◈':
+        row.operation==='match-correction'?String(change.matchId??'')+' · '+({ 'player-one':'第一位玩家勝','player-two':'第二位玩家勝',draw:'平手',void:'作廢'}[change.outcome]??''):'';
+      return '<p><strong>'+esc(kind)+'</strong> '+esc(detail)+' '+esc(row.reason??'')+'</p>';
+    }).join('')+'</section>':'';
+    content.innerHTML=noticeHtml+({account:renderAccount,wallet:renderWallet,shop:renderShop,friends:renderFriends,ranked:renderRanked,plus:renderPlus}[page])();drawPreview();
   }
   async function loadPage(){
     if(!signedIn())return;
     const p=page;
-    try{if(p==='friends')friends=await api('/v1/friends');if(p==='wallet'){
+    try{if(p==='account'){
+      const userId=memberState().user.id;
+      const result=await api('/v1/account/notices').catch(()=>null);
+      if(memberState().user?.id!==userId)return;
+      accountNotices={userId,items:result?.items??[]};
+    }if(p==='friends')friends=await api('/v1/friends');if(p==='wallet'){
       const userId=memberState().user.id;
       const [wallet,missions,reward]=await Promise.all([api('/v1/wallet/history'),api('/v1/quests/daily').catch(()=>null),api('/v1/ads/rewarded/status').catch(()=>null)]);
       if(memberState().user?.id!==userId)return;

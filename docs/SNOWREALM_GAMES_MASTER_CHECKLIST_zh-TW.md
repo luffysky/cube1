@@ -266,3 +266,5 @@ Identity Function 的 HTTP 授權與交換在可信伺服器同意流程完成�
 Identity 續辦（2026-11-21）：[PR #15](https://github.com/luffysky/cube1/pull/15) 已合併 `b64abb9c2c2a5fbc4b4772cba6811ac09491711c`，主分支 [CI #44815611765](https://github.com/luffysky/cube1/actions/runs/44815611765) 成功。正式 DB 連線目標/TLS 與撤銷 API 的 BFF 身分驗證已有程式。正式秘密配置、Function、網域與 E2E 仍須取得實際驗收證據，總勾選維持 51/139。
 
 D-012 實作追蹤：PR #16 已調整 Worker 主機與路徑級發行規格，部署與 Access/MFA 驗收項目保持待辦。
+
+Games 後台續辦：Owner 與管理員營運操作已提出，理由和內部備註分開且皆選填。正式 005、帳號授權、部署及端到端驗收尚待完成。

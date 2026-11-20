@@ -234,3 +234,9 @@
 ## 2026-11-21｜D-012 管理 Worker 路由修正
 
 - PR #16 的主機檢查及測試改為 Games 網域。Workers Route 與 Access 只覆蓋受保護 prefix。獨立資產建置及後端唯讀判權沿用。未設定正式路由、Access、DNS 或管理白名單。
+
+## 2026-11-21｜Games Owner 與管理員營運操作
+
+- 新增獨立 Owner subject，管理員可執行停權／解封、金幣加扣及已結束對局更正，排除 ERP 等其他產品。理由與 Owner 內部備註均選填。
+- 005 新增停權、操作稽核及更正紀錄；玩家通知不回傳內部備註。金幣透過既有帳本交易與請求冪等。對局保留原結算。
+- 測試在本機 PostgreSQL/WASM 執行，未執行正式 005。Access／MFA、正式 Owner/管理員 subject 及 Gateway Secret 仍待配置與驗收。

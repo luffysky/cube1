@@ -20,7 +20,7 @@
    <button data-panel="integrations">◇ <span>遊戲串接</span></button>
    <button data-panel="compliance">⚖ <span>隱私與地區</span></button>
   </nav>
-  <div class="sidebar-foot"><span>READ-ONLY v1</span><p>尚未開啟寫入會員、金幣或停權操作。</p><a href="https://games.snowrealm.pet/">← 返回遊戲館</a></div>
+  <div class="sidebar-foot"><span>Games 管理</span><a href="https://games.snowrealm.pet/">← 返回遊戲館</a></div>
  </aside>
  <main class="main">
   <header class="top">
@@ -33,6 +33,40 @@
     <p id="authMessage" role="status" aria-live="polite"></p>
   </section>
   <section id="dashboard" hidden>
+    <section id="ownerActions" class="card" hidden>
+      <h2>營運操作</h2>
+      <form id="ownerForm">
+        <label for="ownerAction">操作</label>
+        <select id="ownerAction" name="operation">
+          <option value="suspend">玩家停權</option>
+          <option value="restore">解除停權</option>
+          <option value="coins">金幣加扣</option>
+          <option value="match-correction">對局更正</option>
+        </select>
+        <label><span id="ownerTargetLabel">玩家 ID</span> <input name="targetId" list="ownerTargets" required maxlength="128"></label>
+        <datalist id="ownerTargets"></datalist>
+        <label id="ownerCoins" hidden>金幣異動（正數贈送，負數扣除）
+          <input name="delta" type="number" step="1" disabled>
+        </label>
+        <label id="ownerMatch" hidden>更正結果（保留原始結算）
+          <select name="outcome" disabled>
+            <option value="player-one">第一位玩家勝</option>
+            <option value="player-two">第二位玩家勝</option>
+            <option value="draw">平手</option>
+            <option value="void">作廢</option>
+          </select>
+        </label>
+        <label>理由（選填，玩家可見） <textarea name="reason" maxlength="500"></textarea></label>
+        <label id="ownerNote" hidden>內部備註（選填，僅 Owner 可見） <textarea name="note" maxlength="1000" disabled></textarea></label>
+        <button type="submit">送出調整</button>
+        <button type="button" id="ownerAudit">查看操作紀錄</button>
+        <p id="ownerResult" role="status"></p>
+      </form>
+      <div id="ownerAuditLog" hidden><table>
+        <thead><tr><th>操作</th><th>目標</th><th>理由</th><th id="ownerAuditNote">備註</th><th>時間</th></tr></thead>
+        <tbody id="ownerAuditBody"></tbody>
+      </table></div>
+    </section>
     <section id="overviewPanel" class="panel-view">
       <div class="section-head"><h2>平台營運數據</h2><span>SPINREALM · 即時讀取 Neon</span></div>
       <div class="metrics" id="metrics">
@@ -62,8 +96,8 @@
       </article>
       <article class="card"><h3>每日帳本異動</h3><div class="table-wrap"><table><thead><tr><th>日期（UTC）</th><th>新增玩家</th><th>排位對局</th><th>獲得金幣</th><th>花費金幣</th></tr></thead><tbody id="trendsBody"></tbody></table></div></article>
     </section>
-    <section id="playersPanel" class="panel-view" hidden><div class="section-head"><h2>玩家管理</h2><span>僅列出最新 25 筆 · 不顯示電子郵件</span></div><div class="table-wrap"><table><thead><tr><th>暱稱</th><th>好友代碼</th><th>金幣</th><th>排位</th><th>場次</th><th>建立日期</th></tr></thead><tbody id="playersBody"></tbody></table></div></section>
-    <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>只讀稽核，未開放手動調整</span></div><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
+    <section id="playersPanel" class="panel-view" hidden><div class="section-head"><h2>玩家管理</h2><span>僅列出最新 25 筆 · 不顯示電子郵件</span></div><div class="table-wrap"><table><thead><tr><th>玩家 ID</th><th>暱稱</th><th>好友代碼</th><th>金幣</th><th>排位</th><th>場次</th><th>建立日期</th></tr></thead><tbody id="playersBody"></tbody></table></div></section>
+    <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>帳本與營運調整紀錄</span></div><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
     <section id="matchesPanel" class="panel-view" hidden><div class="section-head"><h2>排位對局</h2><span>最多 25 筆 · 伺服器結果為準</span></div><div class="table-wrap"><table><thead><tr><th>對局 ID</th><th>雙方玩家 ID</th><th>狀態</th><th>開始時間</th><th>結算時間</th></tr></thead><tbody id="matchesBody"></tbody></table></div></section>
     <section id="integrationsPanel" class="panel-view" hidden><div class="section-head"><h2>跨遊戲接入</h2><span>後台不共享 cube1 的錢包與資料庫給 cube2</span></div>
       <div class="grid-two"><article class="card"><h3>cube1 · SPINREALM</h3><p>已建立唯讀管理 API：總覽、玩家、錢包帳本、對局。</p><span class="chip">程式已實作 · 後端部署待驗收</span></article><article class="card"><h3>cube2 · BRICKDUEL</h3><p>待 Claude 依照整合契約建立 server-to-server 的遊戲命名空間、專用 Audience、事件格式與權限。</p><span class="chip muted">尚未接入 · 無權限</span></article></div>
