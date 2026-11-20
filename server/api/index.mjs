@@ -4,6 +4,7 @@ import { createApp } from './app.mjs';
 import { jwtAuthenticator } from './auth.mjs';
 import { Store } from './store.mjs';
 import { AdminStore } from './admin.mjs';
+import { PlatformIdentityStore } from './platform-identity.mjs';
 
 const connectionString = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
 if (!connectionString) throw new Error('DATABASE_URL is required');
@@ -15,6 +16,7 @@ pool.on('error', error => console.error('snowrealm_pool_error', { code: error.co
 export default createApp({
   store: new Store(pool),
   adminStore: new AdminStore(pool),
+  platformIdentity: new PlatformIdentityStore(pool),
   adminSubjects: process.env.SNOWREALM_ADMIN_SUBJECTS || '',
   rewardedAdSecret: process.env.REWARDED_AD_ADAPTER_SECRET || '',
   rewardedAdUnit: process.env.REWARDED_AD_UNIT || '',
