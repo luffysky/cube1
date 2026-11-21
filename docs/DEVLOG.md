@@ -4,6 +4,14 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-21｜cube2 聯合驗收清單 27 案例與 staging 安全交辦
+- **cube2 最新證據**：main `07767a17f3e99afa543471c8988bd7a13b178ad4` 新增 [docs/JOINT_ACCEPTANCE.md](https://github.com/luffysky/cube2/blob/main/docs/JOINT_ACCEPTANCE.md)；Admin A1–A14、登入 B1–B13 共 27 項。b20f521 的 [CI #44840380067](https://github.com/luffysky/cube2/actions/runs/44840380067) 已完成，Chrome 與 server/sync 兩個 jobs 均 success。
+- **cube1 最新證據**：[PR #17](https://github.com/luffysky/cube1/pull/17) head `ef783e4b6799fbfb9f69c0f172e960821e393486` 保持 Draft；[PR CI #44841257885](https://github.com/luffysky/cube1/actions/runs/44841257885) success，補強有效 Ed25519 簽章缺 nonce 的拒絕、一次性授權碼／hash-only 儲存、獨立 Admin Signer 的故障拒簽。
+- **隔離 staging 缺口**：Neon 目前只有 production `br-winter-thunder-b3ozovl2` 與一次 Snapshot 還原演練 `br-gentle-shape-b39xjkts`，不存在獨立 staging Identity；cube1 `dist/sso-flow.mjs`、cube2 `server/bff.js` 都寫死 production callback，必須新增 staging 嚴格 allowlist／Preview 設定，不能短暫開放 production。
+- **新增交辦文件**：`docs/STAGING_JOINT_ACCEPTANCE_WORK_HANDOFF_20261121.md`。列出 staging 實際配置、獨立 Admin／Player Ed25519 JWKS、可信同意及 OAuth、Callback 建議、B4 安全測試 Harness、A1–A14/B1–B13 逐案留證格式。
+- **B4 安全規則**：不新增 production `SIGN_INVALID_TOKEN` 開關。使用隔離測試私鑰／非公開受控替身產生有效簽章但無 nonce 的 token，只在 staging Harness 驗收被 BFF 拒絕。
+- **安全及狀態**：本輪只有文件／驗收交接，未異動正式資料庫、Secrets、DNS、Player 權益或 cube2；管理與跨遊戲正式端均未完成雙端 E2E。總待辦維持 56/144，不為寫交辦檔額外打勾。
+
 ## 2026-11-21｜Claude cube2 唯讀營運 API、OAuth BFF 與必要 Cookie 交付複核
 - **cube2 實證**：只讀 `luffysky/cube2` main `853b5e97cc581b819c0bc29c3721a2000638952d`，主要功能 commit `0ff7364e8d862f035d5ad013c3106a711ed9ccc1`，CI [44835328522](https://github.com/luffysky/cube2/actions/runs/44835328522) success。已讀 [cube2 正式回覆](https://github.com/luffysky/cube2/blob/main/docs/CUBE1_REPLY_20261121.md)、`server/admin.js`、`server/bff.js`、`api/auth/*`、`src/consent.js` 與 `legal/src/privacy.zh-Hant.html`。
 - **cube2 管理 API**：已在原始碼實作 7 支 `/internal/admin/v1/*` 唯讀路由及 EdDSA/JWKS 身分驗證、稽核與分頁；Claude 回報 Vercel READY，但當前管理信任未設定，正式 `overview` 與 `metrics/daily` 回 503 `disabled`。本輪無已驗證的有效機器 JWT 正式 200/401/403 E2E，不能當已串通。
