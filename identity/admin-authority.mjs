@@ -4,7 +4,9 @@ import { ISSUER } from './authority.mjs';
 export function createAdminAuthority({ privateKeyPem, kid, canIssue, clock = Date.now }) {
   if (typeof kid !== 'string' || !/^[A-Za-z0-9_-]{8,80}$/.test(kid) || typeof canIssue !== 'function')
     throw new Error('admin_signing_unavailable');
-  const key = createPrivateKey(privateKeyPem);
+  let key;
+  try { key = createPrivateKey(privateKeyPem); }
+  catch { throw new Error('admin_signing_unavailable'); }
   if (key.asymmetricKeyType !== 'ed25519') throw new Error('admin_signing_unavailable');
   const { kty, crv, x } = createPublicKey(key).export({ format: 'jwk' });
   const jwk = { kty, crv, x, kid, use: 'sig', alg: 'EdDSA' };
@@ -12,8 +14,11 @@ export function createAdminAuthority({ privateKeyPem, kid, canIssue, clock = Dat
   return {
     publicJwks: () => ({ keys: [{ ...jwk }] }),
     async issueAdminToken() {
-      if (await canIssue(kid) !== true) throw new Error('admin_signing_unavailable');
+      try {
+        if (await canIssue(kid) !== true) throw new Error('admin_signing_unavailable');
+      } catch { throw new Error('admin_signing_unavailable'); }
       const iat = Math.floor(clock() / 1000);
+      if (!Number.isSafeInteger(iat) || iat < 0) throw new Error('admin_signing_unavailable');
       const jti = randomUUID();
       const claims = {
         iss: ISSUER, aud: 'snowrealm:brickduel:admin',
