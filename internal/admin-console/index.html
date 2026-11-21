@@ -16,6 +16,7 @@
    <button data-panel="trends">▥ <span>營運趨勢</span></button>
    <button data-panel="players">♙ <span>玩家管理</span></button>
    <button data-panel="ledger">◉ <span>金幣帳本</span></button>
+   <button data-panel="games">◇ <span>遊戲管理</span></button>
    <button data-panel="matches">♜ <span>對局紀錄</span></button>
    <button id="operationsNav" data-panel="operations" hidden>⚙ <span>營運操作</span></button>
    <button data-panel="audit">≡ <span>操作稽核</span></button>
@@ -119,6 +120,15 @@
       </div>
     </section>
     <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>帳本與營運調整紀錄</span></div><label class="table-filter" for="ledgerFilter">篩選已載入帳本<input id="ledgerFilter" type="search" placeholder="玩家 ID、事件 ID 或原因"></label><p id="ledgerCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
+    <section id="gamesPanel" class="panel-view" hidden>
+      <div class="section-head"><h2>遊戲列表</h2><span>來源：遊戲館目錄</span></div>
+      <div class="row-actions">
+        <label class="table-filter">來源<select id="gameSource"><option value="">全部來源</option><option value="cube1">cube1</option><option value="cube2">cube2</option></select></label>
+        <label class="table-filter">開發狀態<select id="gameStatus"><option value="">全部狀態</option><option value="playable">可遊玩</option><option value="development">開發中</option></select></label>
+      </div>
+      <p id="gameCount" role="status"></p>
+      <div class="table-wrap"><table><thead><tr><th>遊戲</th><th>來源</th><th>開發狀態</th><th>渠道</th><th>目錄版本</th><th>負責團隊</th><th>管理資料</th></tr></thead><tbody id="gamesBody"></tbody></table></div>
+    </section>
     <section id="matchesPanel" class="panel-view" hidden><div class="section-head"><h2>排位對局</h2><span>最多 25 筆 · 伺服器結果為準</span></div><label class="table-filter" for="matchesFilter">篩選已載入對局<input id="matchesFilter" type="search" placeholder="對局 ID、玩家 ID 或狀態"></label><p id="matchesCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>對局 ID</th><th>雙方玩家 ID</th><th>狀態</th><th>開始時間</th><th>結算時間</th><th id="matchesOperations" hidden>操作</th></tr></thead><tbody id="matchesBody"></tbody></table></div></section>
     <section id="integrationsPanel" class="panel-view" hidden><div class="section-head"><h2>跨遊戲接入</h2><span>後台不共享 cube1 的錢包與資料庫給 cube2</span></div>
       <div class="grid-two"><article class="card"><h3>cube1 · SPINREALM</h3><p>已建立唯讀管理 API：總覽、玩家、錢包帳本、對局。</p><span class="chip">程式已實作 · 後端部署待驗收</span></article><article class="card"><h3>cube2 · BRICKDUEL</h3><p>待 Claude 依照整合契約建立 server-to-server 的遊戲命名空間、專用 Audience、事件格式與權限。</p><span class="chip muted">尚未接入 · 無權限</span></article></div>

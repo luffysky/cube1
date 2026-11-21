@@ -3,6 +3,7 @@ export const panelRoutes = Object.freeze({
   overview: 'overview',
   trends: 'analytics/overview',
   players: 'players',
+  games: 'games',
   matches: 'games/matches',
   ledger: 'economy/ledger',
   integrations: 'system/integrations',

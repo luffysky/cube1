@@ -3,6 +3,7 @@
 import { CONFIG } from '../../dist/games/spinrealm/config.mjs';
 import { createAuthClient } from '../../dist/games/spinrealm/vendor/neon-auth.mjs';
 
+import { gameCatalog } from './game-catalog.mjs';
 import { panelRoutes, playerPage } from './routes.mjs';
 
 const mount=new URL('.',document.baseURI);
@@ -13,8 +14,8 @@ function panelFromLocation(){
 }
 
 const auth=createAuthClient(CONFIG.authUrl),$=id=>document.getElementById(id);
-const panels=['overview','trends','players','player','ledger','matches','operations','audit','integrations','compliance'];
-const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',player:'玩家詳情',ledger:'金幣帳本',matches:'排位對局',operations:'營運操作',audit:'操作稽核',integrations:'跨遊戲整合',compliance:'隱私與法規'};
+const panels=['overview','trends','players','player','ledger','games','matches','operations','audit','integrations','compliance'];
+const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',player:'玩家詳情',ledger:'金幣帳本',games:'遊戲管理',matches:'排位對局',operations:'營運操作',audit:'操作稽核',integrations:'跨遊戲整合',compliance:'隱私與法規'};
 let subject=null,token=null,expiry=0,authorized=false,active='overview',busy=false,ownerRetry=null,operationsEnabled=false;
 const fmt=n=>Number(n||0).toLocaleString('zh-TW');
 const date=value=>{if(!value)return'—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('zh-TW');};
@@ -34,6 +35,7 @@ function showPanel(name,{navigate=true}={}){
   $(panel+'Panel').hidden=panel!==name;
   document.querySelector('[data-panel="'+panel+'"]')?.setAttribute('aria-current',panel===name?'page':'false');
  }
+ if(authorized&&name==='games')renderGameCatalog();
  if(authorized&&['overview','trends','players','player','ledger','matches','audit'].includes(name))void fetchPanel(name);
 }
 function toRows(body,rows){
@@ -239,7 +241,9 @@ async function verify(){
   await signedToken(true);
   // The query below is the definitive authorization check.
   const response=await api('/v1/admin/overview');
-  authorized=true;$('dashboard').hidden=false;$('refresh').disabled=false;
+  authorized=true;
+  if(active==='games')renderGameCatalog();
+  $('dashboard').hidden=false;$('refresh').disabled=false;
   operationsEnabled=Boolean(response.operationsEnabled);
   $('operationsNav').hidden=!operationsEnabled;
   if(active==='operations'&&!operationsEnabled)showPanel('overview');
@@ -348,3 +352,21 @@ function renderAudit(){
 $('auditFilter').addEventListener('input',renderAudit);
 $('auditDate').addEventListener('input',renderAudit);
 $('ownerAudit').addEventListener('click',()=>showPanel('audit'));
+
+
+function renderGameCatalog(){
+ const source=$('gameSource').value;
+ const status=$('gameStatus').value;
+ const games=gameCatalog.filter(game=>(!source||game.source===source)&&(!status||game.status===status));
+ const rows=games.map(game=>{
+  const link=document.createElement('a');
+  link.href=new URL(game.href,'https://games.snowrealm.pet');
+  link.textContent=game.name;
+  const management={spinrealm:'旋界管理 API',brickduel:'跨遊戲管理資料未接通'};
+  return [link,game.source,game.status==='playable'?'可遊玩':'開發中',game.channel,game.version??'未登錄',game.team??'未登錄',management[game.id]??'未提供個別管理資料'];
+ });
+ toRows($('gamesBody'),rows);
+ $('gameCount').textContent=rows.length+' / '+gameCatalog.length+' 款遊戲';
+}
+$('gameSource').addEventListener('change',renderGameCatalog);
+$('gameStatus').addEventListener('change',renderGameCatalog);
