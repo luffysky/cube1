@@ -35,7 +35,9 @@ async function initialize(){
     checkStatus:async info=>store.isTokenActive(info)
   });
   const dbReady=()=>identityDatabaseReady(pool,store,kid,'sr_identity_service');
-  return createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET});
+  const adminPublicKeys=JSON.parse(process.env.IDENTITY_ADMIN_PUBLIC_JWKS || '{"keys":[]}').keys;
+  if(!Array.isArray(adminPublicKeys))throw Error('identity_admin_jwks_invalid');
+  return createTrustedIdentityApp({authority,verifyToken,dbReady,adminPublicKeys,clientSecret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET});
 }
 
 export default {

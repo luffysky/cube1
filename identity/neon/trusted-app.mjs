@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { ISSUER } from '../authority.mjs';
+import { ISSUER, validateJwk } from '../authority.mjs';
 
 const originAllowed = 'https://games.snowrealm.pet';
 const common = {
@@ -13,9 +13,15 @@ const common = {
 const json=(status,data,headers={})=>new Response(JSON.stringify(data),{status,headers:{...common,...headers}});
 /** Read-only Identity surface until the server owns the consent transaction.
  * Browser input cannot authorize a link or enable token issuance. */
-export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret,allowedOrigin=originAllowed}={}){
+export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret,adminPublicKeys=[],allowedOrigin=originAllowed}={}){
   if(!authority||typeof verifyToken!=='function'||typeof dbReady!=='function')
     throw Error('identity_app_configuration_missing');
+  const playerKeys=authority.publicJwks().keys;
+  const adminKeys=adminPublicKeys.map(validateJwk);
+  const allKeys=[...playerKeys,...adminKeys];
+  if(new Set(allKeys.map(key=>key.kid)).size!==allKeys.length||
+     new Set(allKeys.map(key=>key.x)).size!==allKeys.length)
+    throw Error('identity_jwks_overlap');
   const hash=value=>createHash('sha256').update(value).digest();
   const clientDigest=typeof clientSecret==='string'&&clientSecret.length>=32
     ? hash(clientSecret) : null;
@@ -35,6 +41,10 @@ export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSe
         if(origin&&origin!==allowedOrigin)return json(403,{error:'origin_denied'},headers);
         if(request.method==='GET'&&path==='/.well-known/jwks.json'){
           return json(200,authority.publicJwks(),{'Cache-Control':'public, max-age=60'});
+        }
+        if(request.method==='GET'&&path==='/.well-known/admin-jwks.json'){
+          if(!adminKeys.length)return json(503,{error:'admin_jwks_unavailable'});
+          return json(200,{keys:adminKeys},{'Cache-Control':'public, max-age=60'});
         }
         if(request.method==='GET'&&path==='/health/live'){
           return json(200,{service:'snowrealm-identity',issuer:ISSUER,

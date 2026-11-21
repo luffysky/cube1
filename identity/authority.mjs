@@ -4,6 +4,7 @@ export const ISSUER = 'https://identity.snowrealm.pet';
 export const PLAYER_AUDIENCE = 'snowrealm:brickduel:api';
 export const LINK_SCOPE = 'brickduel:account:link';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export const OAUTH_NONCE = /^[A-Za-z0-9._~-]{22,256}$/;
 const KID = /^[a-zA-Z0-9_-]{8,80}$/;
 const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
 const error = message => { throw new Error(message); };
@@ -17,7 +18,7 @@ function parse(part) {
   } catch { error('invalid_token'); }
 }
 
-function validateJwk(value) {
+export function validateJwk(value) {
   if (!value || value.kty !== 'OKP' || value.crv !== 'Ed25519' ||
       value.use !== 'sig' || value.alg !== 'EdDSA' || !KID.test(value.kid || '') ||
       typeof value.x !== 'string' || Object.hasOwn(value, 'd')) error('invalid_jwk');
@@ -44,14 +45,15 @@ export function createIdentityAuthority({ privateKeyPem, kid, previousPublicJwks
   if (new Set(keys.map(key=>key.kid)).size !== keys.length) error('duplicate_kid');
   return {
     publicJwks: () => ({keys:keys.map(key=>({...key}))}),
-    issuePlayerToken({playerId,audience,scope,lifetimeSeconds=300}) {
+    issuePlayerToken({playerId,audience,scope,nonce,lifetimeSeconds=300}) {
       if (!UUID.test(playerId || '')) error('invalid_platform_uuid');
       checkPurpose(audience,scope);
+      if (typeof nonce !== 'string' || !OAUTH_NONCE.test(nonce)) error('invalid_nonce');
       if (!Number.isSafeInteger(lifetimeSeconds) || lifetimeSeconds < 1 || lifetimeSeconds > 600)
         error('invalid_lifetime');
       const iat = Math.floor(clock()/1000);
       const payload = { iss:ISSUER, sub:playerId, aud:audience, scope,
-        iat, nbf:iat, exp:iat+lifetimeSeconds, jti:randomUUID() };
+        nonce, iat, nbf:iat, exp:iat+lifetimeSeconds, jti:randomUUID() };
       const input = encode({alg:'EdDSA',typ:'JWT',kid}) + '.' + encode(payload);
       return input + '.' + sign(null,Buffer.from(input),privateKey).toString('base64url');
     }
@@ -78,6 +80,7 @@ export async function verifyBrickduelLinkToken(token,{jwks,checkStatus,clock=Dat
   checkPurpose(payload.aud,payload.scope);
   if (payload.iss !== ISSUER || !UUID.test(payload.sub || '') || !UUID.test(payload.jti || ''))
     error('invalid_claims');
+  if (typeof payload.nonce !== 'string' || !OAUTH_NONCE.test(payload.nonce)) error('invalid_nonce');
   const now = Math.floor(clock()/1000);
   if (!Number.isSafeInteger(payload.iat) || !Number.isSafeInteger(payload.nbf) ||
       !Number.isSafeInteger(payload.exp) || payload.iat > now + 60 ||
