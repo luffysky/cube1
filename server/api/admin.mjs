@@ -96,6 +96,13 @@ export class AdminStore {
     ]);
     return {scope:'cube1',profile,ledger:ledger.rows,matches:matches.rows};
   }
+  async wallets(){
+    const {rows}=await this.pool.query(`SELECT w.user_id AS "playerId",p.nickname,
+      w.balance::text AS balance,w.updated_at AS "updatedAt"
+      FROM sr_wallets w JOIN sr_profiles p ON p.user_id=w.user_id
+      ORDER BY w.updated_at DESC,w.user_id LIMIT $1`,[MAX_LIST]);
+    return {scope:'cube1',items:rows,limit:MAX_LIST};
+  }
   async ledger(limit=25){
     const n=Math.min(MAX_LIST,Math.max(1,Number(limit)||25));
     const rows=(await this.pool.query(`SELECT l.id,l.user_id,l.delta,l.balance_after,l.reason,l.created_at
@@ -123,6 +130,7 @@ export async function adminRead(path,method,adminStore){
   if(path==='/v1/admin/players')return adminStore.players();
   const playerPath=/^\/v1\/admin\/players\/([A-Za-z0-9_-]{8,128})$/.exec(path);
   if(playerPath)return adminStore.player(playerPath[1]);
+  if(path==='/v1/admin/wallets')return adminStore.wallets();
   if(path==='/v1/admin/ledger')return adminStore.ledger();
   if(path==='/v1/admin/matches')return adminStore.matches();
   // Games from Claude must have their own scoped service-to-service integration.

@@ -14,8 +14,8 @@ function panelFromLocation(){
 }
 
 const auth=createAuthClient(CONFIG.authUrl),$=id=>document.getElementById(id);
-const panels=['overview','trends','players','player','ledger','games','matches','operations','audit','integrations','compliance'];
-const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',player:'玩家詳情',ledger:'金幣帳本',games:'遊戲管理',matches:'排位對局',operations:'營運操作',audit:'操作稽核',integrations:'跨遊戲整合',compliance:'隱私與法規'};
+const panels=['overview','trends','players','player','wallets','ledger','games','matches','operations','audit','integrations','compliance'];
+const titles={overview:'營運總覽',trends:'營運趨勢',players:'玩家管理',player:'玩家詳情',wallets:'玩家錢包',ledger:'金幣帳本',games:'遊戲管理',matches:'排位對局',operations:'營運操作',audit:'操作稽核',integrations:'跨遊戲整合',compliance:'隱私與法規'};
 let subject=null,token=null,expiry=0,authorized=false,active='overview',busy=false,ownerRetry=null,operationsEnabled=false;
 const fmt=n=>Number(n||0).toLocaleString('zh-TW');
 const date=value=>{if(!value)return'—';const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('zh-TW');};
@@ -36,7 +36,7 @@ function showPanel(name,{navigate=true}={}){
   document.querySelector('[data-panel="'+panel+'"]')?.setAttribute('aria-current',panel===name?'page':'false');
  }
  if(authorized&&name==='games')renderGameCatalog();
- if(authorized&&['overview','trends','players','player','ledger','matches','audit'].includes(name))void fetchPanel(name);
+ if(authorized&&['overview','trends','players','player','wallets','ledger','matches','audit'].includes(name))void fetchPanel(name);
 }
 function toRows(body,rows){
  body.replaceChildren();
@@ -49,8 +49,8 @@ function toRows(body,rows){
   body.append(tr);
  }
 }
-const dataPanels=['overview','trends','players','player','ledger','matches','audit'];
-const tableRows={players:[],ledger:[],matches:[]};
+const dataPanels=['overview','trends','players','player','wallets','ledger','matches','audit'];
+const tableRows={players:[],wallets:[],ledger:[],matches:[]};
 function operationButton(label,operation,target){
  const button=document.createElement('button');
  button.type='button';
@@ -73,10 +73,11 @@ function renderTable(which){
  const records=tableRows[which];
  const filtered=records.filter(row=>row.some(value=>String(value??'').toLowerCase().includes(query)));
  $(which+'Count').textContent=filtered.length+' / '+records.length+' 筆已載入資料';
- const actions=which!=='ledger'&&operationsEnabled;
- if(which!=='ledger')$(which+'Operations').hidden=!actions;
+ const hasOperations=which==='players'||which==='matches';
+ const actions=hasOperations&&operationsEnabled;
+ if(hasOperations)$(which+'Operations').hidden=!actions;
  toRows($(which+'Body'),filtered.map(row=>{
-  if(which==='players'&&playerPage.test('players/'+row[0])){
+  if(['players','wallets'].includes(which)&&playerPage.test('players/'+row[0])){
    const link=document.createElement('a');
    link.href=new URL('players/'+row[0],mount);
    link.textContent=row[1]??row[0];
@@ -181,7 +182,7 @@ function renderPlayer({profile,ledger,matches}){
  $('playerData').hidden=false;
 }
 async function fetchPanel(which=active){
- if(busy||!authorized||!['overview','trends','players','player','ledger','matches','audit'].includes(which))return;
+ if(busy||!authorized||!['overview','trends','players','player','wallets','ledger','matches','audit'].includes(which))return;
  busy=true;$('refresh').disabled=true;status('更新中');
  const playerRoute=which==='player'?location.pathname.slice(mount.pathname.length):null;
  try{
@@ -208,6 +209,9 @@ async function fetchPanel(which=active){
    renderTrends(info);
   }else if(which==='players'){
    tableRows.players=(info.items??[]).map(x=>[x.playerId,x.nickname,x.friendCode,fmt(x.coins),fmt(x.rating),fmt(x.games),date(x.createdAt)]);
+   renderTable(which);
+  }else if(which==='wallets'){
+   tableRows.wallets=info.items.map(x=>[x.playerId,x.nickname,BigInt(x.balance).toLocaleString('zh-TW'),date(x.updatedAt),'旋界（cube1）']);
    renderTable(which);
   }else if(which==='ledger'){
    tableRows.ledger=(info.items??[]).map(x=>[x.eventId,x.playerId,(Number(x.delta)>0?'+':'')+x.delta,fmt(x.balanceAfter),x.reason,date(x.createdAt)]);

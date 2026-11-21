@@ -2,7 +2,7 @@ import {createRemoteJWKSet,jwtVerify} from 'jose';
 import {pageRoutes,playerPage} from './routes.mjs';
 
 const apiOrigin='https://br-winter-thunder-b3ozovl2-cube1api.compute.c-4.ap-southeast-1.aws.neon.tech';
-const adminReads=new Set(['overview','trends','players','ledger','matches']
+const adminReads=new Set(['overview','trends','players','wallets','ledger','matches']
  .map(name=>'v1/admin/'+name));
 const ownerPaths=new Map([
  ['v1/admin/owner/suspension','POST'],['v1/admin/owner/coins','POST'],

@@ -100,6 +100,16 @@ test('player details require manager authorization and preserve unlinked and zer
   await pool.query('INSERT INTO sr_wallets(user_id,balance) VALUES ($1,0)',[player]);
   const app=createApp({store:{limit:async()=>{}},adminStore:new AdminStore(pool),
    authenticate:async request=>request.headers.get('x-test-actor'),ownerSubject:owner,adminSubjects:operator});
+  const fetchWallets=(actor,method='GET')=>app.fetch(new Request('https://api.example/v1/admin/wallets',{
+   method,headers:actor?{'x-test-actor':actor}:{}
+  }));
+  assert.equal((await fetchWallets(null)).status,401);
+  assert.equal((await fetchWallets(player)).status,403);
+  assert.equal((await fetchWallets(owner,'POST')).status,405);
+  const wallets=await (await fetchWallets(operator)).json();
+  assert.equal(wallets.scope,'cube1');
+  assert.equal(wallets.items[0].playerId,player);
+  assert.equal(wallets.items[0].balance,'0');
   const fetchPlayer=(actor,id=player)=>app.fetch(new Request('https://api.example/v1/admin/players/'+id,{
    headers:actor?{'x-test-actor':actor}:{}
   }));

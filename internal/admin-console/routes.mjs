@@ -5,6 +5,7 @@ export const panelRoutes = Object.freeze({
   players: 'players',
   games: 'games',
   matches: 'games/matches',
+  wallets: 'economy/wallets',
   ledger: 'economy/ledger',
   integrations: 'system/integrations',
   audit: 'system/audit',

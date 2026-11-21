@@ -15,6 +15,7 @@
    <button data-panel="overview" aria-current="page">◈ <span>總覽</span></button>
    <button data-panel="trends">▥ <span>營運趨勢</span></button>
    <button data-panel="players">♙ <span>玩家管理</span></button>
+   <button data-panel="wallets">◉ <span>玩家錢包</span></button>
    <button data-panel="ledger">◉ <span>金幣帳本</span></button>
    <button data-panel="games">◇ <span>遊戲管理</span></button>
    <button data-panel="matches">♜ <span>對局紀錄</span></button>
@@ -118,6 +119,12 @@
           <article class="card"><h3>近期排位對局</h3><div class="table-wrap"><table><thead><tr><th>時間</th><th>對局 ID</th><th>狀態</th></tr></thead><tbody id="playerMatches"></tbody></table></div></article>
         </div>
       </div>
+    </section>
+    <section id="walletsPanel" class="panel-view" hidden>
+      <div class="section-head"><h2>玩家錢包查詢</h2><span>旋界 · 最近更新的 50 個錢包</span></div>
+      <label class="table-filter">篩選已載入錢包<input id="walletsFilter" type="search" placeholder="暱稱或玩家 ID"></label>
+      <p id="walletsCount" class="table-count" role="status"></p>
+      <div class="table-wrap"><table><thead><tr><th>玩家 ID</th><th>暱稱</th><th>金幣餘額</th><th>更新時間</th><th>來源</th></tr></thead><tbody id="walletsBody"></tbody></table></div>
     </section>
     <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>帳本與營運調整紀錄</span></div><label class="table-filter" for="ledgerFilter">篩選已載入帳本<input id="ledgerFilter" type="search" placeholder="玩家 ID、事件 ID 或原因"></label><p id="ledgerCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
     <section id="gamesPanel" class="panel-view" hidden>
