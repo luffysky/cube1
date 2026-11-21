@@ -45,3 +45,19 @@ test('readiness is measured, never equated with Brickduel BFF integration',async
  assert.equal(r.status,503);
  assert.deepEqual(await r.json(),{ready:false,databaseReady:true,brickduelBffReady:false});
 });
+
+test('Admin JWKS publishes only independently configured public keys and fails closed when absent',async()=>{
+ const configure=adminPublicKeys=>createTrustedIdentityApp({authority,adminPublicKeys,verifyToken:async()=>false,dbReady:async()=>true});
+ const request=()=>new Request(base+'/.well-known/admin-jwks.json');
+ const player=authority.publicJwks().keys[0];
+ const admin={...player,kid:'admin-test-20261121',x:generateKeyPairSync('ed25519').publicKey.export({format:'jwk'}).x};
+ assert.equal((await app.fetch(request())).status,503);
+ const configured=configure([admin]);
+ const response=await configured.fetch(request());
+ assert.equal(response.status,200);
+ assert.deepEqual(await response.json(),{keys:[admin]});
+ assert.deepEqual(await (await configured.fetch(new Request(base+'/.well-known/jwks.json'))).json(),{keys:[player]});
+ for(const key of [{...admin,kid:player.kid},{...admin,x:player.x},{...admin,d:'private'}]){
+  assert.throws(()=>configure([key]));
+ }
+});

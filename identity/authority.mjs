@@ -18,7 +18,7 @@ function parse(part) {
   } catch { error('invalid_token'); }
 }
 
-function validateJwk(value) {
+export function validateJwk(value) {
   if (!value || value.kty !== 'OKP' || value.crv !== 'Ed25519' ||
       value.use !== 'sig' || value.alg !== 'EdDSA' || !KID.test(value.kid || '') ||
       typeof value.x !== 'string' || Object.hasOwn(value, 'd')) error('invalid_jwk');
