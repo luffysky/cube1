@@ -1,13 +1,16 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { ApiError, exactKeys, fail, hash, readBody, requestKey, verifyEntitlementSignature } from './domain.mjs';
 import { Ranked, validateInputs } from './ranked.mjs';
+import { ownerOperations } from './games-owner.mjs';
 import { assertAdmin, adminAllowlist, adminRead } from './admin.mjs';
 import { adsEnabled, checkAdapterSignature, validateAdapterEvent, rewardedAdsConfig } from './rewarded-ads.mjs';
 
-export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, platformIdentity = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
+export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, ownerStore = null, ownerSubject = '', adminEntryPath = '', ownerGatewaySecret = '', platformIdentity = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
   const origins = new Set(allowedOrigins.filter(Boolean).map(origin => new URL(origin).origin));
   const ranked = new Ranked(store);
   const admins = adminAllowlist(adminSubjects);
+  const configuredOwner = /^[A-Za-z0-9_-]{8,128}$/.test(ownerSubject) ? ownerSubject : null;
+  const ownerGatewayHash = ownerGatewaySecret.length >= 32 ? Buffer.from(hash(ownerGatewaySecret), 'hex') : null;
   let readinessCache = null, readinessPending = null;
   const readiness = async () => {
     if (readinessCache && readinessCache.until > store.clock()) return readinessCache.ready;
@@ -57,6 +60,29 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
         }
         const userId = await authenticate(request);
         if (typeof userId !== 'string' || !userId.length || userId.length > 128 || ['__proto__', 'constructor', 'prototype'].includes(userId)) fail('unauthorized', 401);
+        if(path.startsWith('/v1/admin/owner/')){
+          if(!configuredOwner||!ownerStore||!ownerGatewayHash)fail('owner_unavailable',503);
+          const isOwner=userId===configuredOwner;
+          if(!isOwner)assertAdmin(userId,admins);
+          const proof=request.headers.get('x-snowrealm-owner-gateway');
+          if(!proof||proof.length>512||!timingSafeEqual(Buffer.from(hash(proof),'hex'),ownerGatewayHash))fail('forbidden',403);
+          const operation=path.slice('/v1/admin/owner/'.length);
+          await store.limit(userId,'owner_operations',30);
+          if(operation==='audit'&&method==='GET')return respond(await ownerStore.audit(isOwner));
+          if(!ownerOperations.has(operation))fail('route_not_found',404);
+          if(method!=='POST')fail('method_not_allowed',405);
+          const {data}=await readBody(request,4096);
+          if(!isOwner&&(data?.note!=null||data?.targetId===configuredOwner))fail('forbidden',403);
+          return respond(await ownerStore.apply(userId,requestKey(request),operation,data,configuredOwner));
+        }
+        if(ownerStore&&configuredOwner&&!path.startsWith('/v1/admin/')){
+          if(path==='/v1/account/notices'&&method==='GET'){
+            await store.limit(userId,'owner_notices',60);
+            return respond(await ownerStore.playerNotices(userId));
+          }
+          const status=await ownerStore.suspendStatus(userId);
+          if(status.suspended)fail('account_suspended',403,{reason:status.reason});
+        }
         if(path==='/v1/identity/me' && method==='GET'){
           if(!platformIdentity)fail('identity_unavailable',503);
           // Unlike a Neon auth ID, this UUID is portable across SnowRealm games.
@@ -72,11 +98,19 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
           // This endpoint does NOT issue link tokens. Brickduel's flag remains OFF.
           return respond({platformPlayerId,linked:true,source:'snowrealm-identity-mapping',readyForBrickduel:false});
         }
+        if(path==='/v1/admin/entry'){
+          if(method!=='GET')fail('method_not_allowed',405);
+          if(userId!==configuredOwner)assertAdmin(userId,admins);
+          if(!/^\/srg-console-[A-Za-z0-9_-]{24,80}\/$/.test(adminEntryPath))fail('admin_unavailable',503);
+          await store.limit(userId,'admin_read',60);
+          return respond({path:adminEntryPath});
+        }
         if(path.startsWith('/v1/admin/')){
-          assertAdmin(userId,admins);
+          if(userId!==configuredOwner)assertAdmin(userId,admins);
           if(!adminStore)fail('admin_unavailable',503);
           await store.limit(userId,'admin_read',60);
-          return respond(await adminRead(path,method,adminStore));
+          const data=await adminRead(path,method,adminStore);
+          return respond(path==='/v1/admin/overview'?{...data,readOnly:!(configuredOwner&&ownerGatewayHash&&ownerStore),owner:userId===configuredOwner,operationsEnabled:Boolean(configuredOwner&&ownerGatewayHash&&ownerStore)}:data);
         }
         await store.limit(userId, 'all', 1800);
         await store.ensureUser(userId);

@@ -251,3 +251,30 @@
 - 正式連線限定已與 Neon production 核對的 compute（含 pooler）、cube1 與 sr_identity_service。pg 保持憑證驗證，URL query 不得覆蓋 TLS。DB readiness 檢查 session_user 與 current_user。
 - 撤銷 API 要求已配置的 BFF 伺服器憑證，拒絕帶 Origin 的請求，成功只回 active。OAuth 簽發與交換依 PR #14 持續回 503。
 - 正式尚無 Identity Function。此次未變動資料庫、DNS 或 cube2。若需回滾程式，回到 PR #14 基線並維持授權端點關閉。
+
+## 2026-11-21｜管理後台獨立發行準備
+
+- 獨立 Worker 先驗證 Access JWT 的簽名、issuer 與 audience，再允許後台 HTML、JS、CSS、圖示及固定的五個唯讀管理 API。對應測試納入 API suite。
+- 正式玩家站舊後台 HTML 與 JS 實測 404。Neon API 未登入讀取為 401。候選主機目前回 503，正式 Access/MFA、Cloudflare DNS/TLS 與部署尚待驗收。
+
+## 2026-11-21｜D-012 管理 Worker 路由修正
+
+- PR #16 的主機檢查及測試改為 Games 網域。Workers Route 與 Access 只覆蓋受保護 prefix。獨立資產建置及後端唯讀判權沿用。未設定正式路由、Access、DNS 或管理白名單。
+
+## 2026-11-21｜Games Owner 與管理員營運操作
+
+- 新增獨立 Owner subject，管理員可執行停權／解封、金幣加扣及已結束對局更正，排除 ERP 等其他產品。理由與 Owner 內部備註均選填。
+- 005 新增停權、操作稽核及更正紀錄；玩家通知不回傳內部備註。金幣透過既有帳本交易與請求冪等。對局保留原結算。
+- 測試在本機 PostgreSQL/WASM 執行，未執行正式 005。Access／MFA、正式 Owner/管理員 subject 及 Gateway Secret 仍待配置與驗收。
+
+- Games 後台從玩家與對局列表直接帶入營運操作目標，三份清單支援篩選已載入的資料。
+
+### 2026-11-21 — Games 後台 60 頁規格首批路由
+- 將 GA-01、05、16、26、47、56、60 的既有面板接上規格路由，保留 Cloudflare Access 與 API 身分驗證。深層路由共用受保護的 HTML，資產與 API 統一從管理入口解析。
+- 本機管理 Worker 與前端構建通過。頁面資料、權限與正式部署依原驗收項目追蹤。
+- GA-06 新增旋界玩家詳情、平台玩家 ID、錢包／訂閱、近期金幣流水及排位記錄。沿用管理員驗證與受保護頁面路由。跨遊戲玩家資料仍待接入。
+- GA-54 新增受保護的營運操作稽核頁，可依操作人、目標與日期篩選最近 50 筆。內部備註仍僅 Owner 可讀。登入、讀取、拒絕和設定變更事件仍待接入。
+
+- GA-14 新增受保護的遊戲管理列表，核對了遊戲館 10 款遊戲及開發狀態，支援來源與狀態篩選。正式部署版本仍待串接。
+
+- GA-25 新增旋界唯讀錢包查詢，可篩選最近更新的 50 個錢包並開啟玩家詳情。轉磚錢包來源與正式部署待驗收。

@@ -3,24 +3,28 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#080f23"><meta name="robots" content="noindex,nofollow,noarchive">
 <title>SnowRealm Games｜管理控制台</title>
-<link rel="icon" href="/assets/realm-mark.svg" type="image/svg+xml">
+<link rel="icon" href="./realm-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./admin.css">
 </head>
 <body data-srg-page="admin">
 <div class="admin-shell">
  <aside class="sidebar">
-  <a href="/" class="logo"><img src="/assets/realm-mark.svg" alt="" width="36" height="36"><span><strong>SNOWREALM</strong><small>GAMES · ADMIN</small></span></a>
+  <a href="./" class="logo"><img src="./realm-mark.svg" alt="" width="36" height="36"><span><strong>SNOWREALM</strong><small>GAMES · ADMIN</small></span></a>
   <div class="sidebar-caption">營運管理</div>
   <nav class="nav" aria-label="管理控制台功能">
    <button data-panel="overview" aria-current="page">◈ <span>總覽</span></button>
    <button data-panel="trends">▥ <span>營運趨勢</span></button>
    <button data-panel="players">♙ <span>玩家管理</span></button>
+   <button data-panel="wallets">◉ <span>玩家錢包</span></button>
    <button data-panel="ledger">◉ <span>金幣帳本</span></button>
+   <button data-panel="games">◇ <span>遊戲管理</span></button>
    <button data-panel="matches">♜ <span>對局紀錄</span></button>
+   <button id="operationsNav" data-panel="operations" hidden>⚙ <span>營運操作</span></button>
+   <button data-panel="audit">≡ <span>操作稽核</span></button>
    <button data-panel="integrations">◇ <span>遊戲串接</span></button>
    <button data-panel="compliance">⚖ <span>隱私與地區</span></button>
   </nav>
-  <div class="sidebar-foot"><span>READ-ONLY v1</span><p>尚未開啟寫入會員、金幣或停權操作。</p><a href="/">← 返回遊戲館</a></div>
+  <div class="sidebar-foot"><span>Games 管理</span><a href="https://games.snowrealm.pet/">← 返回遊戲館</a></div>
  </aside>
  <main class="main">
   <header class="top">
@@ -33,6 +37,48 @@
     <p id="authMessage" role="status" aria-live="polite"></p>
   </section>
   <section id="dashboard" hidden>
+    <section id="operationsPanel" class="panel-view card" hidden>
+      <h2 id="operationHeading">選擇操作與目標</h2>
+      <form id="ownerForm">
+        <label for="ownerAction">操作</label>
+        <select id="ownerAction" name="operation">
+          <option value="suspend">玩家停權</option>
+          <option value="restore">解除停權</option>
+          <option value="coins">金幣加扣</option>
+          <option value="match-correction">對局更正</option>
+        </select>
+        <label><span id="ownerTargetLabel">玩家 ID</span> <input name="targetId" list="ownerTargets" required maxlength="128"></label>
+        <datalist id="ownerTargets"></datalist>
+        <label id="ownerCoins" hidden>金幣異動（正數贈送，負數扣除）
+          <input name="delta" type="number" step="1" disabled>
+        </label>
+        <label id="ownerMatch" hidden>更正結果（保留原始結算）
+          <select name="outcome" disabled>
+            <option value="player-one">第一位玩家勝</option>
+            <option value="player-two">第二位玩家勝</option>
+            <option value="draw">平手</option>
+            <option value="void">作廢</option>
+          </select>
+        </label>
+        <label>理由（選填，玩家可見） <textarea name="reason" maxlength="500"></textarea></label>
+        <label id="ownerNote" hidden>內部備註（選填，僅 Owner 可見） <textarea name="note" maxlength="1000" disabled></textarea></label>
+        <button type="submit">送出調整</button>
+        <button type="button" id="ownerAudit">查看操作紀錄</button>
+        <p id="ownerResult" role="status"></p>
+      </form>
+    </section>
+    <section id="auditPanel" class="panel-view" hidden>
+      <div class="section-head"><h2>營運操作紀錄</h2><span>最近 50 筆已儲存操作 · 日期使用本機時區</span></div>
+      <div class="row-actions">
+        <label class="table-filter">操作人或目標 ID<input id="auditFilter" type="search"></label>
+        <label class="table-filter">操作日期<input id="auditDate" type="date"></label>
+      </div>
+      <p id="auditStatus" role="status"></p>
+      <div class="table-wrap" id="ownerAuditLog" hidden><table>
+        <thead><tr><th>操作人 ID</th><th>操作</th><th>目標 ID</th><th>理由</th><th id="ownerAuditNote" hidden>備註</th><th>時間</th></tr></thead>
+        <tbody id="ownerAuditBody"></tbody>
+      </table></div>
+    </section>
     <section id="overviewPanel" class="panel-view">
       <div class="section-head"><h2>平台營運數據</h2><span>SPINREALM · 即時讀取 Neon</span></div>
       <div class="metrics" id="metrics">
@@ -62,19 +108,45 @@
       </article>
       <article class="card"><h3>每日帳本異動</h3><div class="table-wrap"><table><thead><tr><th>日期（UTC）</th><th>新增玩家</th><th>排位對局</th><th>獲得金幣</th><th>花費金幣</th></tr></thead><tbody id="trendsBody"></tbody></table></div></article>
     </section>
-    <section id="playersPanel" class="panel-view" hidden><div class="section-head"><h2>玩家管理</h2><span>僅列出最新 25 筆 · 不顯示電子郵件</span></div><div class="table-wrap"><table><thead><tr><th>暱稱</th><th>好友代碼</th><th>金幣</th><th>排位</th><th>場次</th><th>建立日期</th></tr></thead><tbody id="playersBody"></tbody></table></div></section>
-    <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>只讀稽核，未開放手動調整</span></div><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
-    <section id="matchesPanel" class="panel-view" hidden><div class="section-head"><h2>排位對局</h2><span>最多 25 筆 · 伺服器結果為準</span></div><div class="table-wrap"><table><thead><tr><th>對局 ID</th><th>雙方玩家 ID</th><th>狀態</th><th>開始時間</th><th>結算時間</th></tr></thead><tbody id="matchesBody"></tbody></table></div></section>
+    <section id="playersPanel" class="panel-view" hidden><div class="section-head"><h2>玩家管理</h2><span>僅列出最新 25 筆 · 不顯示電子郵件</span></div><label class="table-filter" for="playersFilter">篩選已載入玩家<input id="playersFilter" type="search" placeholder="暱稱、好友代碼或玩家 ID"></label><p id="playersCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>玩家 ID</th><th>暱稱</th><th>好友代碼</th><th>金幣</th><th>排位</th><th>場次</th><th>建立日期</th><th id="playersOperations" hidden>操作</th></tr></thead><tbody id="playersBody"></tbody></table></div></section>
+    <section id="playerPanel" class="panel-view" hidden>
+      <a href="./players" id="playerBack">← 返回玩家列表</a>
+      <p id="playerStatus" role="status"></p>
+      <div id="playerData" hidden>
+        <div class="card"><h2 id="playerName"></h2><dl id="playerFields"></dl><div class="row-actions" id="playerActions"></div></div>
+        <div class="grid-two">
+          <article class="card"><h3>近期金幣異動</h3><div class="table-wrap"><table><thead><tr><th>時間</th><th>異動</th><th>原因</th></tr></thead><tbody id="playerLedger"></tbody></table></div></article>
+          <article class="card"><h3>近期排位對局</h3><div class="table-wrap"><table><thead><tr><th>時間</th><th>對局 ID</th><th>狀態</th></tr></thead><tbody id="playerMatches"></tbody></table></div></article>
+        </div>
+      </div>
+    </section>
+    <section id="walletsPanel" class="panel-view" hidden>
+      <div class="section-head"><h2>玩家錢包查詢</h2><span>旋界 · 最近更新的 50 個錢包</span></div>
+      <label class="table-filter">篩選已載入錢包<input id="walletsFilter" type="search" placeholder="暱稱或玩家 ID"></label>
+      <p id="walletsCount" class="table-count" role="status"></p>
+      <div class="table-wrap"><table><thead><tr><th>玩家 ID</th><th>暱稱</th><th>金幣餘額</th><th>更新時間</th><th>來源</th></tr></thead><tbody id="walletsBody"></tbody></table></div>
+    </section>
+    <section id="ledgerPanel" class="panel-view" hidden><div class="section-head"><h2>金幣帳本</h2><span>帳本與營運調整紀錄</span></div><label class="table-filter" for="ledgerFilter">篩選已載入帳本<input id="ledgerFilter" type="search" placeholder="玩家 ID、事件 ID 或原因"></label><p id="ledgerCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>事件 ID</th><th>玩家 ID</th><th>異動</th><th>餘額</th><th>原因</th><th>時間</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
+    <section id="gamesPanel" class="panel-view" hidden>
+      <div class="section-head"><h2>遊戲列表</h2><span>來源：遊戲館目錄</span></div>
+      <div class="row-actions">
+        <label class="table-filter">來源<select id="gameSource"><option value="">全部來源</option><option value="cube1">cube1</option><option value="cube2">cube2</option></select></label>
+        <label class="table-filter">開發狀態<select id="gameStatus"><option value="">全部狀態</option><option value="playable">可遊玩</option><option value="development">開發中</option></select></label>
+      </div>
+      <p id="gameCount" role="status"></p>
+      <div class="table-wrap"><table><thead><tr><th>遊戲</th><th>來源</th><th>開發狀態</th><th>渠道</th><th>目錄版本</th><th>負責團隊</th><th>管理資料</th></tr></thead><tbody id="gamesBody"></tbody></table></div>
+    </section>
+    <section id="matchesPanel" class="panel-view" hidden><div class="section-head"><h2>排位對局</h2><span>最多 25 筆 · 伺服器結果為準</span></div><label class="table-filter" for="matchesFilter">篩選已載入對局<input id="matchesFilter" type="search" placeholder="對局 ID、玩家 ID 或狀態"></label><p id="matchesCount" class="table-count" role="status"></p><div class="table-wrap"><table><thead><tr><th>對局 ID</th><th>雙方玩家 ID</th><th>狀態</th><th>開始時間</th><th>結算時間</th><th id="matchesOperations" hidden>操作</th></tr></thead><tbody id="matchesBody"></tbody></table></div></section>
     <section id="integrationsPanel" class="panel-view" hidden><div class="section-head"><h2>跨遊戲接入</h2><span>後台不共享 cube1 的錢包與資料庫給 cube2</span></div>
       <div class="grid-two"><article class="card"><h3>cube1 · SPINREALM</h3><p>已建立唯讀管理 API：總覽、玩家、錢包帳本、對局。</p><span class="chip">程式已實作 · 後端部署待驗收</span></article><article class="card"><h3>cube2 · BRICKDUEL</h3><p>待 Claude 依照整合契約建立 server-to-server 的遊戲命名空間、專用 Audience、事件格式與權限。</p><span class="chip muted">尚未接入 · 無權限</span></article></div>
       <article class="card"><h3>整合底線</h3><p>使用短效簽章憑證、固定來源、逐遊戲 scope、冪等事件、稽核與最小權限。禁止讓轉磚前端呼叫管理 API，也不可把資料庫密碼交給另一款遊戲。</p></article>
     </section>
     <section id="compliancePanel" class="panel-view" hidden><div class="section-head"><h2>全球隱私／法規檢查</h2><span>對照玩家地區政策提示，非已通過法律審核</span></div>
-      <div class="card"><h3>地區與年齡自我聲明</h3><p>已規劃十個地區選項及五種年齡區間。但前端偏好不能作為實名、監護人同意或正式合規證據。</p><a href="/minor-protection.html">未成年人保護政策 ↗</a>　<a href="/privacy.html">隱私政策 ↗</a></div>
+      <div class="card"><h3>地區與年齡自我聲明</h3><p>已規劃十個地區選項及五種年齡區間。但前端偏好不能作為實名、監護人同意或正式合規證據。</p><a href="/minor-protection.html">未成年人保護政策 ↗</a>　<a href="https://games.snowrealm.pet/privacy.html">隱私政策 ↗</a></div>
       <div class="card"><h3>上線前阻塞項</h3><p>營運者聯絡資訊、個資刪除與保留政策、各國兒少驗證、真實 Cookie 腳本管制、當地遊戲分級與正式商業發行資格尚需審核。</p></div>
     </section>
   </section>
-  <footer>SnowRealm Games · Management API v1 · 未授權時不提供任何玩家資料 · <a href="/privacy.html">隱私政策</a></footer>
+  <footer>SnowRealm Games · Management API v1 · 未授權時不提供任何玩家資料 · <a href="https://games.snowrealm.pet/privacy.html">隱私政策</a></footer>
  </main>
 </div>
 <script type="module" src="./admin.mjs"></script>

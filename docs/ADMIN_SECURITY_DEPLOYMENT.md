@@ -37,3 +37,22 @@
 - [ ] `admin.snowrealm.pet` 未建立此後台的 DNS／專案／路由，不以該網域宣稱 Games 管理站已部署。
 
 **完成以上驗收前不要向一般使用者提供後台 URL，也不要將後台視為已安全上線。**
+
+## 獨立 Cloudflare Worker 發行
+
+使用 Node 24 執行 `npm --prefix server/api ci` 及 `node internal/admin-console/build.mjs`。
+`internal/admin-console/wrangler.toml` 只發佈建置輸出。Worker 在 Assets 前執行，且關閉 workers.dev 及預覽網址。正式 route 由 Owner 選定並存入 `ADMIN_ENTRY_PATH`，公開玩家站輸出不含後台。
+
+部署前先在 Zero Trust 建立只涵蓋 Games 管理入口及其所有子路徑的 Access application。Allow 政策只包含核准管理員並要求 MFA。將驗證過的團隊 issuer 和 app audience 分別配置為 `ACCESS_ISSUER` 和 `ACCESS_AUDIENCE`。不得加入 Bypass。沿用 Games 現有的 Neon Auth Origin，並沿用 server 的 Neon JWT 與 `SNOWREALM_ADMIN_SUBJECTS`。Worker 只轉送五個同源 GET 管理路徑至既有 API。
+
+回滾時移除管理 Worker 的路徑綁定，保留 Access 對管理入口及子路徑的封鎖。任何版本不得直接發布 build/assets。
+
+在 Cloudflare Workers Routes 只配置 `games.snowrealm.pet/<RANDOM_GAMES_CONSOLE_PATH>/*`，與 Worker 的 `ADMIN_ENTRY_PATH`（含起迄斜線）對應。Cloudflare DNS 必須為 proxied，原 Games origin 保持原位。Access application 同時覆蓋入口及子路徑。完成正向與負向驗收前，不建立 wildcard 主站 route、公開部署別名或其他直接入口。
+
+## Games Owner 與管理員營運操作
+
+Owner 單獨以 `SNOWREALM_GAMES_OWNER_SUBJECT` 綁定經驗簽的 Games 帳號。其他管理員沿用 `SNOWREALM_ADMIN_SUBJECTS`，可停權或解封玩家、增減金幣，以及記錄已結束對局的更正結果。Owner 可填寫及查看內部備註。理由和備註都選填，玩家帳號頁顯示適用於自己的理由和營運通知。此授權限於 Games，無 ERP 或其他產品權限。
+
+正式啟用前，先在隔離分支驗證 005，再執行正式 migration。將高熵 `SNOWREALM_OWNER_GATEWAY_SECRET` 同步配置於管理 Worker 與 Games API 的受控環境。管理操作同時要求 Access、Games JWT 及 Gateway 憑證，保留每次異動的稽核。程式保留原始對局與結算，更正結果另存並通知雙方。若既有排位或獎勵也須補正，需有獨立結算策略。
+
+回滾先移除 API 的 Gateway 憑證來關閉新操作；保留稽核資料，現有停權仍有效。若要回退到 005 前的程式，現有停權規則需要獨立維持。
