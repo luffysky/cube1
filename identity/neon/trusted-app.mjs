@@ -13,7 +13,7 @@ const common = {
 const json=(status,data,headers={})=>new Response(JSON.stringify(data),{status,headers:{...common,...headers}});
 /** Read-only Identity surface until the server owns the consent transaction.
  * Browser input cannot authorize a link or enable token issuance. */
-export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret,issuer=ISSUER,issueAdminToken,exchangeCode,adminServiceSecret,adminPublicKeys=[],allowedOrigin=originAllowed}={}){
+export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret,browserAuthorization,issuer=ISSUER,issueAdminToken,exchangeCode,adminServiceSecret,adminPublicKeys=[],allowedOrigin=originAllowed}={}){
   if(!authority||typeof verifyToken!=='function'||typeof dbReady!=='function')
     throw Error('identity_app_configuration_missing');
   const playerKeys=authority.publicJwks().keys;
@@ -41,6 +41,7 @@ export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSe
       const origin=request.headers.get('origin');
       const headers=cors(request);
       try{
+        if(path==='/oauth/authorize'&&browserAuthorization)return await browserAuthorization(request);
         if(origin&&origin!==allowedOrigin)return json(403,{error:'origin_denied'},headers);
         if(request.method==='GET'&&path==='/.well-known/jwks.json'){
           return json(200,authority.publicJwks(),{'Cache-Control':'public, max-age=60'});

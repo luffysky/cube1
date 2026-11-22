@@ -8,6 +8,8 @@ import {PlatformIdentityStore} from '../../server/api/platform-identity.mjs';
 import {OAuthStore} from '../oauth-store.mjs';
 import {createTrustedIdentityApp} from './trusted-app.mjs';
 import {identityDatabaseTarget} from './database-target.mjs';
+import {createStagingLogin} from './staging-login.mjs';
+import {createBrowserAuthorization} from './browser-authorization.mjs';
 import {identityDatabaseReady} from './database-readiness.mjs';
 
 const keyPem=process.env.IDENTITY_ED25519_PRIVATE_PEM;
@@ -45,9 +47,16 @@ async function initialize(){
     store,signer:authority,identityMapping:new PlatformIdentityStore(pool),
     issuer:staging.issuer,clients:staging.clients
   }):null;
+  const browserAuthorization=staging&&process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET?.length>=32
+    ? createBrowserAuthorization({issuer:staging.issuer,clients:staging.clients,authorize:oauth.authorize,
+        secret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET,
+        ...createStagingLogin({issuer:staging.issuer,
+          base:'https://ep-green-pond-bici1klg.neonauth.c-5.ap-southeast-1.aws.neon.tech/cube1_identity_staging/auth',
+          accounts:["8a4f0adf-e990-4220-995c-d5b2a7bc5725","120d8f7e-f057-4b3b-9bd5-7cd8163d4da8"]})})
+    : undefined;
   return createTrustedIdentityApp({authority,verifyToken,dbReady,issuer:staging?.issuer,
     adminPublicKeys:[...(adminAuthority?.publicJwks().keys??[]),...adminPublicKeys],
-    exchangeCode:oauth?.exchange,
+    exchangeCode:oauth?.exchange,browserAuthorization,
     issueAdminToken:adminAuthority?.issueAdminToken,
     adminServiceSecret:staging?process.env.IDENTITY_STAGING_ADMIN_SERVICE_SECRET:undefined,
     clientSecret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET});
