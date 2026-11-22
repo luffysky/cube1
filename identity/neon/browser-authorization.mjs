@@ -9,7 +9,7 @@ const fields = {
   state: 'state', nonce: 'nonce',
 };
 const headers = {
-  'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
+  'Cache-Control': 'no-store', 'Referrer-Policy': 'same-origin',
   'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
   'Content-Security-Policy': "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
 };

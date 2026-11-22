@@ -23,6 +23,7 @@ test('browser consent requires the same verified account and a matching CSRF tra
   subject = 'staging-account-one';
   const consent = await handle(start);
   assert.equal(consent.status, 200);
+  assert.equal(consent.headers.get("referrer-policy"), "same-origin");
   const cookie = consent.headers.get('set-cookie').split(';')[0];
   const csrf = (await consent.text()).match(/name="csrf" value="([^"]+)"/)[1];
   const post = (origin, value) => new Request(path, {method: 'POST', headers: {origin, cookie},
