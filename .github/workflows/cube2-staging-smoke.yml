@@ -28,7 +28,7 @@ jobs:
             const j = await read('https://identity-staging.snowrealm.pet/.well-known/admin-jwks.json');
             const {keys} = await j.json();
             const keyOk = Array.isArray(keys) && keys.length > 0 && keys.every(k=>k.kty==='OKP' && k.crv==='Ed25519' && k.alg==='EdDSA' && typeof k.x==='string' && !('d' in k)) && keys.some(k=>k.kid==='srstagea_EWW-tM7u8uSnvCwV');
-            const versionOk = b.build === '9d76ad2' || b.build === 'fcd6d24';
+            const versionOk = b.build === '1d1e1ca';
             const pass = h.status===200 && b.db===true && b.dbSource==='staging' && b.admin===true && versionOk && j.status===200 && keyOk;
             console.log('A0 '+(pass?'PASS':'FAIL')+' health='+h.status+' db='+String(b.db===true)+' staging='+String(b.dbSource==='staging')+' admin='+String(b.admin===true)+' build='+(/^[a-f0-9]{7}$/.test(b.build)?b.build:'unknown')+' jwks='+j.status+' key='+keyOk);
             if (!pass) throw Error();
@@ -41,7 +41,7 @@ jobs:
           umask 077
           work=$(mktemp -d)
           trap 'rm -rf "$work"' EXIT
-          curl -qfsS --max-time 20 --proto '=https' -o "$work/check.js" 'https://raw.githubusercontent.com/luffysky/cube2/9d76ad27d6aeea886fa6951ceec10fa170f0c2b1/tools/joint-admin-check.js'
+          curl -qfsS --max-time 20 --proto '=https' -o "$work/check.js" 'https://raw.githubusercontent.com/luffysky/cube2/1d1e1ca4aee541f08e6f48d3e98245aaef8ae84e/tools/joint-admin-check.js'
           printf '%s  %s\n' '8d340b7651d9e557b673a56ae441072b1f65b87bbe854d723a395589c3ca2260' "$work/check.js" | sha256sum --check --status
           printf '%s\n' "$SIGNER" > "$work/key.pem"
           unset SIGNER
@@ -49,7 +49,7 @@ jobs:
           ADMIN_SIGNER_PEM="$work/key.pem" ADMIN_KID=srstagea_EWW-tM7u8uSnvCwV \
             ADMIN_ISS=https://identity-staging.snowrealm.pet \
             ADMIN_JWKS_URL=https://identity-staging.snowrealm.pet/.well-known/admin-jwks.json \
-            EXPECT_BUILD=9d76ad2 VERCEL_BYPASS="$BYPASS" SEED=1 \
+            EXPECT_BUILD=1d1e1ca VERCEL_BYPASS="$BYPASS" SEED=1 \
             node "$work/check.js" > "$work/results" 2> "$work/errors" || status=$?
           jq -c '.results[] | {caseId,result,status} | select(.caseId | test("^A([0-9]|1[0-4])$")) | select(.result | IN("PASS","FAIL","BLOCKED","MANUAL")) | select(.status == null or (.status | type == "number"))' "$work/results"
           if [ "$status" -ne 0 ] || [ ! -s "$work/results" ]; then echo 'Acceptance runner failed'; exit 1; fi
