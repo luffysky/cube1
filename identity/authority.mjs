@@ -33,7 +33,7 @@ function checkPurpose(audience, scope) {
 // Internal trusted-server signer ONLY. Not a public login or token-issuance route.
 // Upstream session validation, platform UUID ownership and revocation checks are
 // prerequisites handled by the future BFF. Never supply client-claimed playerId.
-export function createIdentityAuthority({ privateKeyPem, kid, previousPublicJwks = [], clock = Date.now }) {
+export function createIdentityAuthority({ privateKeyPem, kid, previousPublicJwks = [], issuer = ISSUER, clock = Date.now }) {
   if (typeof privateKeyPem !== 'string' || !KID.test(kid || '')) error('signing_not_configured');
   let privateKey;
   try { privateKey = createPrivateKey(privateKeyPem); }
@@ -52,7 +52,7 @@ export function createIdentityAuthority({ privateKeyPem, kid, previousPublicJwks
       if (!Number.isSafeInteger(lifetimeSeconds) || lifetimeSeconds < 1 || lifetimeSeconds > 600)
         error('invalid_lifetime');
       const iat = Math.floor(clock()/1000);
-      const payload = { iss:ISSUER, sub:playerId, aud:audience, scope,
+      const payload = { iss:issuer, sub:playerId, aud:audience, scope,
         nonce, iat, nbf:iat, exp:iat+lifetimeSeconds, jti:randomUUID() };
       const input = encode({alg:'EdDSA',typ:'JWT',kid}) + '.' + encode(payload);
       return input + '.' + sign(null,Buffer.from(input),privateKey).toString('base64url');
@@ -63,7 +63,7 @@ export function createIdentityAuthority({ privateKeyPem, kid, previousPublicJwks
 // Sensitive linking must consult live account + jti + kid revocation state.
 // Missing or failed status checks DENY; atomic single-use jti consumption
 // remains the caller's responsibility and is NOT provided by this module.
-export async function verifyBrickduelLinkToken(token,{jwks,checkStatus,clock=Date.now}={}) {
+export async function verifyBrickduelLinkToken(token,{jwks,checkStatus,issuer=ISSUER,clock=Date.now}={}) {
   if (typeof token !== 'string' || token.length > 16384) error('invalid_token');
   const parts = token.split('.');
   if (parts.length !== 3 || !/^[A-Za-z0-9_-]+$/.test(parts[2])) error('invalid_token');
@@ -78,7 +78,7 @@ export async function verifyBrickduelLinkToken(token,{jwks,checkStatus,clock=Dat
   if (!verify(null,Buffer.from(input),key,Buffer.from(parts[2],'base64url')))
     error('invalid_signature');
   checkPurpose(payload.aud,payload.scope);
-  if (payload.iss !== ISSUER || !UUID.test(payload.sub || '') || !UUID.test(payload.jti || ''))
+  if (payload.iss !== issuer || !UUID.test(payload.sub || '') || !UUID.test(payload.jti || ''))
     error('invalid_claims');
   if (typeof payload.nonce !== 'string' || !OAUTH_NONCE.test(payload.nonce)) error('invalid_nonce');
   const now = Math.floor(clock()/1000);

@@ -1,7 +1,7 @@
 import { createPrivateKey, createPublicKey, randomUUID, sign } from 'node:crypto';
 import { ISSUER } from './authority.mjs';
 
-export function createAdminAuthority({ privateKeyPem, kid, canIssue, clock = Date.now }) {
+export function createAdminAuthority({ privateKeyPem, kid, canIssue, issuer = ISSUER, clock = Date.now }) {
   if (typeof kid !== 'string' || !/^[A-Za-z0-9_-]{8,80}$/.test(kid) || typeof canIssue !== 'function')
     throw new Error('admin_signing_unavailable');
   let key;
@@ -21,7 +21,7 @@ export function createAdminAuthority({ privateKeyPem, kid, canIssue, clock = Dat
       if (!Number.isSafeInteger(iat) || iat < 0) throw new Error('admin_signing_unavailable');
       const jti = randomUUID();
       const claims = {
-        iss: ISSUER, aud: 'snowrealm:brickduel:admin',
+        iss: issuer, aud: 'snowrealm:brickduel:admin',
         scope: 'brickduel:admin:read', sub: 'svc:snowrealm-games-admin',
         iat, nbf: iat, exp: iat + 300, jti,
       };
