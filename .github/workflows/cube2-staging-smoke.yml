@@ -1,0 +1,43 @@
+name: Cube2 staging smoke
+on:
+  push:
+    branches: [staging/cube2-smoke]
+    paths: [.github/workflows/cube2-staging-smoke.yml]
+permissions: {}
+jobs:
+  health:
+    if: github.repository == 'luffysky/cube1' && github.ref == 'refs/heads/staging/cube2-smoke'
+    environment: staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check deployment protection and health
+        env:
+          BYPASS: ${{ secrets.CUBE2_STAGING_VERCEL_BYPASS }}
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          const url = 'https://brickduel-staging.snowrealm.pet/api/health';
+          const secret = process.env.BYPASS;
+          if (!secret) { console.error('Staging secret missing'); process.exit(1); }
+          try {
+            const request = headers => fetch(url, {
+              headers, redirect: 'manual', signal: AbortSignal.timeout(12000),
+            });
+            const baseline = await request({});
+            console.log('Without automation credential: HTTP ' + baseline.status);
+            await baseline.body?.cancel();
+            if (![301,302,303,307,308,401,403].includes(baseline.status)) {
+              console.error('Expected a protected baseline'); process.exit(1);
+            }
+            const health = await request({'x-vercel-protection-bypass': secret});
+            console.log('With automation credential: HTTP ' + health.status);
+            if (health.status !== 200 || !health.headers.get('content-type')?.includes('application/json')) process.exit(1);
+            const payload = await health.json();
+            if (payload?.ok !== true) { console.error('Health JSON did not confirm ok'); process.exit(1); }
+            console.log('Health JSON confirmed ok');
+          } catch {
+            console.error('Staging request or response validation failed');
+            process.exitCode = 1;
+          }
+          JS
