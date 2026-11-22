@@ -22,6 +22,15 @@ test('phone portrait prioritizes board size instead of squeezing controls into s
  assert.equal(standard,377);
 });
 
+test('portrait touch layout reserves browser-toolbar clearance and both control rows',()=>{
+ const normal=boardHeight({availableWidth:266,viewportHeight:740,top:80,below:170,touch:true});
+ const fitted=boardHeight({availableWidth:266,viewportHeight:740,top:80,below:170,touch:true,fitControls:true});
+ assert.equal(normal,532);
+ assert.equal(fitted,394);
+ assert.ok(fitted<normal,'compact phone must reserve the space for the controls');
+ assert.equal(boardHeight({availableWidth:266,viewportHeight:520,top:100,below:250,touch:true,fitControls:true}),240);
+});
+
 test('landscape keeps board within available field width and visible space',()=>{
  const h=boardHeight({availableWidth:245,viewportHeight:390,top:57,below:500,orientation:'landscape',touch:true});
  assert.equal(h,333);
@@ -42,4 +51,7 @@ test('layout styles keep board aspect ratio and prioritize player arena in portr
  assert.match(styles,/orientation:landscape/);
  assert.match(styles,/\.arena-card\{order:0;/);
  assert.match(index,/board-focus\.css/);
+ assert.match(styles,/scroll-margin-bottom:calc\(100px \+ env\(safe-area-inset-bottom/);
+ const app=await fs.readFile(new URL('../../dist/games/spinrealm/app.mjs',import.meta.url),'utf8');
+ assert.match(app,/fitControls:touch&&narrow&&!landscape/);
 });

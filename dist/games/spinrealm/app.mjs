@@ -662,13 +662,15 @@ function fitBoard(){
   // Browser chrome can resize the visible area without changing the layout viewport.
   // Keep the complete touch deck in view; do not reserve a 400px board on short tablets.
   const visibleHeight=window.visualViewport?.scale===1?window.visualViewport.height:window.innerHeight;
-  const viewport=visibleHeight-top-below;
   const landscape=matchMedia('(orientation:landscape) and (max-height:600px)').matches;
   const height=boardHeight({
     availableWidth:maxWidth,viewportHeight:visibleHeight,
-    top:landscape?Math.max(0,top-window.scrollY):Math.max(0,top-window.scrollY),
+    // Document position is stable while scrolling; avoid a growing/shrinking
+    // board as the browser address bar collapses or the user scrolls to the keys.
+    top:touch&&narrow&&!landscape?Math.max(0,Math.min(180,top)):Math.max(0,top-window.scrollY),
     below,orientation:landscape?'landscape':'portrait',
-    touch,standard:settings.boardSize==='standard',guide:Boolean(holdGuide)
+    touch,standard:settings.boardSize==='standard',guide:Boolean(holdGuide),
+    fitControls:touch&&narrow&&!landscape
   });
   const value=height+'px';
   if(arena.style.getPropertyValue('--board-h')!==value)arena.style.setProperty('--board-h',value);
