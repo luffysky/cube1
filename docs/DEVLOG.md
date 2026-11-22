@@ -4,6 +4,11 @@
 
 **正式制度**：[Owner 決策與強制開發紀錄規範](./SNOWREALM_GAMES_DEVELOPMENT_GOVERNANCE_AND_CHANGELOG_zh-TW.md)。
 
+## 2026-11-22｜新手導覽步驟 2 年齡欄位標籤精簡
+- 依 Owner 指示移除「年齡區間（不收生日）」中的括號說明；繁中、簡中、英、日、韓五種語言同步精簡為單純的年齡區間／Age group 標籤。
+- 僅修改 `dist/legal.mjs` 文案，`srgAge` 下拉選單、地區政策警示、年齡選項、個資告知與同意資料結構均維持不變。
+- `tests/region-policy.test.mjs` 新增五語文案防回歸測試；此變更不涉及 Identity、cube2、玩家資料庫或 API。
+
 ## 2026-11-21｜cube2 聯合驗收清單 27 案例與 staging 安全交辦
 - **cube2 最新證據**：main `07767a17f3e99afa543471c8988bd7a13b178ad4` 新增 [docs/JOINT_ACCEPTANCE.md](https://github.com/luffysky/cube2/blob/main/docs/JOINT_ACCEPTANCE.md)；Admin A1–A14、登入 B1–B13 共 27 項。b20f521 的 [CI #44840380067](https://github.com/luffysky/cube2/actions/runs/44840380067) 已完成，Chrome 與 server/sync 兩個 jobs 均 success。
 - **cube1 最新證據**：[PR #17](https://github.com/luffysky/cube1/pull/17) head `ef783e4b6799fbfb9f69c0f172e960821e393486` 保持 Draft；[PR CI #44841257885](https://github.com/luffysky/cube1/actions/runs/44841257885) success，補強有效 Ed25519 簽章缺 nonce 的拒絕、一次性授權碼／hash-only 儲存、獨立 Admin Signer 的故障拒簽。

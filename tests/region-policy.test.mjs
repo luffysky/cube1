@@ -43,3 +43,13 @@ test('first-use consent is language-first with device language and no IP-based g
   assert.doesNotMatch(source,/geoip|ipapi|ipinfo|geolocation|Cloudflare-IPCountry/i);
   assert.match(source,/localizedRegionSummary/);
 });
+
+test('age group label remains concise in every consent language',async()=>{
+  const source=await readFile(new URL('../dist/legal.mjs',import.meta.url),'utf8');
+  for(const label of ["'年齡區間'","'年龄区间'","'Age group'","'年齢区分'","'연령대'"]){
+    assert.ok(source.includes(label),'missing '+label);
+  }
+  for(const oldText of ['不收生日','no date of birth collected','誕生日は収集しません','생일을 수집하지 않음']){
+    assert.equal(source.includes(oldText),false,'outdated parenthetical '+oldText);
+  }
+});
