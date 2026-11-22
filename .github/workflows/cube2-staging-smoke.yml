@@ -17,43 +17,22 @@ jobs:
         shell: bash
         run: |
           node --input-type=module <<'JS'
-          const url = 'https://brickduel-staging.snowrealm.pet/api/health';
-          const secret = process.env.BYPASS;
-          if (!secret) { console.error('Staging secret missing'); process.exit(1); }
           try {
-            const request = headers => fetch(url, {
-              headers, redirect: 'manual', signal: AbortSignal.timeout(12000),
-            });
-            const baseline = await request({});
-            console.log('Without automation credential: HTTP ' + baseline.status);
-            await baseline.body?.cancel();
-            if (![301,302,303,307,308,401,403].includes(baseline.status)) {
-              console.error('Expected a protected baseline'); process.exit(1);
-            }
-            const health = await request({'x-vercel-protection-bypass': secret});
-            console.log('With automation credential: HTTP ' + health.status);
-            if (health.status !== 200 || !health.headers.get('content-type')?.includes('application/json')) process.exit(1);
-            const payload = await health.json();
-            if (payload?.ok !== true) { console.error('Health JSON did not confirm ok'); process.exit(1); }
-            console.log('Health JSON confirmed ok');
-            const admin = await fetch('https://brickduel-staging.snowrealm.pet/internal/admin/v1/overview', {
-              headers: {'x-vercel-protection-bypass': secret},
-              redirect: 'manual', signal: AbortSignal.timeout(12000),
-            });
-            const code = admin.headers.get('content-type')?.includes('application/json')
-              ? (await admin.json())?.error : null;
-            if (admin.status === 503 && ['disabled','unavailable'].includes(code)) {
-              console.log('Admin JWT check blocked: HTTP 503 (' + code + ')');
-              process.exitCode = 1;
-            } else if (admin.status === 401 && code === 'unauthorized') {
-              console.log('Admin route rejected request without JWT: HTTP 401');
-              console.log('Positive Admin JWT check pending a trusted staging signer');
-            } else {
-              console.error('Unexpected Admin response: HTTP ' + admin.status);
-              process.exitCode = 1;
-            }
-          } catch {
-            console.error('Staging request or response validation failed');
-            process.exitCode = 1;
-          }
+            const origin = 'https://brickduel-staging.snowrealm.pet';
+            if (!process.env.BYPASS) throw Error();
+            const read = (url, options = {}) => fetch(url, {...options, redirect:'error', signal:AbortSignal.timeout(15000)});
+            const headers = {'x-vercel-protection-bypass':process.env.BYPASS};
+            const h = await read(origin+'/api/health?deep=1',{headers});
+            const b = await h.json();
+            const j = await read('https://identity-staging.snowrealm.pet/.well-known/admin-jwks.json');
+            const {keys} = await j.json();
+            const keyOk = Array.isArray(keys) && keys.length > 0 && keys.every(k=>k.kty==='OKP' && k.crv==='Ed25519' && k.alg==='EdDSA' && typeof k.x==='string' && !('d' in k)) && keys.some(k=>k.kid==='srstagea_EWW-tM7u8uSnvCwV');
+            const versionOk = b.build === '9d76ad2' || b.build === 'fcd6d24';
+            const pass = h.status===200 && b.db===true && b.dbSource==='staging' && b.admin===true && versionOk && j.status===200 && keyOk;
+            console.log('A0 '+(pass?'PASS':'FAIL')+' health='+h.status+' db='+String(b.db===true)+' staging='+String(b.dbSource==='staging')+' admin='+String(b.admin===true)+' build='+(/^[a-f0-9]{7}$/.test(b.build)?b.build:'unknown')+' jwks='+j.status+' key='+keyOk);
+            if (!pass) throw Error();
+            const a = await read(origin+'/internal/admin/v1/overview',{headers});
+            console.log('No JWT control: HTTP '+a.status);
+            if(a.status!==401) throw Error();
+          } catch { console.error('Staging validation did not pass'); process.exitCode=1; }
           JS
