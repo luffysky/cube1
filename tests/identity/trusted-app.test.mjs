@@ -80,3 +80,23 @@ test('internal Admin signer requires a distinct service credential and denies br
  assert.equal((await staging.fetch(req(path,{}, {[header]:adminSecret}))).status,503);
  assert.throws(()=>createTrustedIdentityApp({...options,adminServiceSecret:secret}),/identity_service_secret_overlap/);
 });
+
+test('staging token HTTP exchange authenticates the BFF and forwards only its complete grant',async()=>{
+ const grant={clientId:'brickduel-bff-staging',redirectUri:'https://brickduel-staging.snowrealm.pet/api/auth/callback',
+  code:'fixture-code',codeVerifier:'fixture-verifier',state:'fixture-state',nonce:'fixture-nonce'};
+ const seen=[];
+ const app=createTrustedIdentityApp({authority,dbReady:async()=>true,verifyToken:async()=>false,clientSecret:secret,
+  exchangeCode:async value=>{seen.push(value);return {token_type:'Bearer',expires_in:300};}});
+ const headers={'x-snowrealm-client-secret':secret};
+ const exchange=(body=grant,extra=headers)=>app.fetch(req('/oauth/token',body,extra));
+ assert.equal((await exchange(grant,{})).status,401);
+ assert.equal((await exchange(grant,{...headers,origin:'https://games.snowrealm.pet'})).status,401);
+ assert.equal((await exchange({...grant,nonce:undefined})).status,400);
+ assert.equal((await exchange({...grant,consent:true})).status,400);
+ assert.equal((await exchange({...grant,code:'a'.repeat(4200)})).status,413);
+ assert.deepEqual(seen,[]);
+ const response=await exchange();
+ assert.equal(response.status,200);
+ assert.equal(response.headers.get('cache-control'),'no-store');
+ assert.deepEqual(seen,[grant]);
+});

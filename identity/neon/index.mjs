@@ -3,6 +3,8 @@ import {attachDatabasePool} from '@neon/functions';
 import {createIdentityAuthority,verifyBrickduelLinkToken} from '../authority.mjs';
 import {createAdminAuthority} from '../admin-authority.mjs';
 import {stagingIdentityConfig} from '../staging-config.mjs';
+import {createOAuthCore} from '../oauth-core.mjs';
+import {PlatformIdentityStore} from '../../server/api/platform-identity.mjs';
 import {OAuthStore} from '../oauth-store.mjs';
 import {createTrustedIdentityApp} from './trusted-app.mjs';
 import {identityDatabaseTarget} from './database-target.mjs';
@@ -39,8 +41,13 @@ async function initialize(){
       kid:process.env.IDENTITY_STAGING_ADMIN_KID,issuer:staging.issuer,canIssue:async adminKid=>
         await dbReady() && await store.canIssue(adminKid)})
     : null;
+  const oauth=staging?createOAuthCore({
+    store,signer:authority,identityMapping:new PlatformIdentityStore(pool),
+    issuer:staging.issuer,clients:staging.clients
+  }):null;
   return createTrustedIdentityApp({authority,verifyToken,dbReady,issuer:staging?.issuer,
     adminPublicKeys:[...(adminAuthority?.publicJwks().keys??[]),...adminPublicKeys],
+    exchangeCode:oauth?.exchange,
     issueAdminToken:adminAuthority?.issueAdminToken,
     adminServiceSecret:staging?process.env.IDENTITY_STAGING_ADMIN_SERVICE_SECRET:undefined,
     clientSecret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET});
