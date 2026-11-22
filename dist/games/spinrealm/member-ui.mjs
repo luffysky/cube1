@@ -35,6 +35,12 @@ export function initMemberUI({mount=document.querySelector('.topbar')||document.
   function renderAccount(){
     if(signedIn()){
       const p=profile();
+      // A valid login is not proof that the profile API loaded. Never invent
+      // a Free/1000/Silver account or allow profile edits from empty data.
+      if(!p){
+        const user=memberState().user;
+        return `<div class="srg-profile-hero"><span class="srg-profile-avatar">${esc((user.name||'P').slice(0,1).toUpperCase())}</span><div><span class="srg-kicker">SNOWREALM ID</span><h3 translate="no">${esc(user.name||t('account.title'))}</h3><p>${esc(user.email||'')}</p></div></div><div class="srg-notice">${label('account.profileUnavailable')}${button('common.retry','refresh')}</div>${button('account.logout','logout')}`;
+      }
       return `<div class="srg-profile-hero"><span class="srg-profile-avatar">${esc((p?.profile?.nickname||memberState().user.name||'P').slice(0,1).toUpperCase())}</span><div><span class="srg-kicker">SNOWREALM ID</span><h3 translate="no">${esc(p?.profile?.nickname||memberState().user.name||t('account.title'))}</h3><p>${esc(memberState().user.email)}</p></div></div>${!p?`<div class="srg-notice">${label('account.profileUnavailable')}${button('common.retry','refresh')}</div>`:''}<form data-form="profile">${field('account.nickname','nickname','text',`minlength="2" maxlength="24" autocomplete="nickname" value="${esc(p?.profile?.nickname||'')}"`)}<button class="srg-button srg-primary" type="submit">${label('common.save')}</button></form><div class="srg-detail-list"><div><span>${label('friends.myCode')}</span><code>${esc(p?.profile?.friendCode||'—')}</code>${button('common.copy','copy-code')}</div><div><span>${label('subscription.title')}</span><strong>${label(p?.entitlement?.plus?'subscription.active':'subscription.free')}</strong></div><div><span>${label('ranked.rating')}</span><strong>${p?.rank?.rating??1000} · ${label(`rank.${p?.rank?.tier||'silver'}`)}</strong></div></div><p class="srg-muted">${label('account.storageNote')}</p>${button('account.logout','logout')}`;
     }
     const signup=authMode==='register',verify=authMode==='verify',reset=authMode==='reset';
@@ -71,6 +77,7 @@ export function initMemberUI({mount=document.querySelector('.topbar')||document.
   }
   function renderRanked(){
     const p=profile(),rank=p?.rank;
+    if(signedIn()&&!p)return `<div class="srg-notice">${label('account.profileUnavailable')}${button('common.retry','refresh')}</div>`;
     return `<div class="srg-rank-hero"><span>♜</span><div><p class="srg-kicker">SEASON 0 · ONLINE BETA</p><h3>${label('rank.'+(rank?.tier||'silver'))} <b>${rank?.rating??1000}</b></h3><p>${rank?.provisional!==false?label('ranked.placements'):label('ranked.rated')}</p></div></div><p>${label('ranked.rules')}</p><p class="srg-notice">${label('ranked.betaNote')}</p>${signedIn()?button('ranked.join','play-ranked'):requireAccount()}<div class="srg-info-grid"><article><h3>${label('ranked.record')}</h3><p>${rank?.wins||0} W · ${rank?.losses||0} L · ${rank?.draws||0} D</p></article><article><h3>${label('ranked.fairPlay')}</h3><p>${label('ranked.noItems')}</p></article></div><h3>${label('ranked.leaderboard')}</h3>${leaderboard?.entries?.length?`<ol class="srg-leaderboard">${leaderboard.entries.map(row=>`<li><span translate="no">${esc(row.nickname)}</span><strong>${row.rating}</strong></li>`).join('')}</ol>`:`<p class="srg-muted">${label('ranked.noLeaderboard')}</p>`}<h3>${label('ranked.history')}</h3>${history?.matches?.length?`<div class="srg-history">${history.matches.slice(0,10).map(row=>`<div><span>${esc(row.opponent?.nickname||row.opponentNickname||t('ranked.opponent'))}<small>${esc(new Date(row.createdAt).toLocaleDateString(getLocale()))}</small></span><b>${label('ranked.'+row.outcome)} · ${row.ratingAfter}</b></div>`).join('')}</div>`:`<p class="srg-muted">${label('common.empty')}</p>`}`;
   }
   function renderPlus(){

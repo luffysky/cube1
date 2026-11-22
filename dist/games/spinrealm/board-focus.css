@@ -176,3 +176,16 @@ body[data-srg-page="spinrealm"] .opponent-board-panel canvas{aspect-ratio:1/2;}
  body[data-srg-page="spinrealm"] .opponent-board-panel canvas{width:46px!important;height:92px!important;max-height:92px!important;}
 }
 /* Reduced motion remains governed by the player's appearance preference. */
+
+/* Phone browsers may overlay the lower row with their floating URL/navigation bar.
+   Leave enough scrollable clearance even on devices whose visualViewport excludes
+   that chrome inconsistently. No fixed overlay over game buttons. */
+@media (orientation:portrait) and (max-width:600px){
+ body[data-srg-page="spinrealm"]{
+   padding-bottom:calc(120px + env(safe-area-inset-bottom, 0px));
+   scroll-padding-bottom:calc(120px + env(safe-area-inset-bottom, 0px));
+ }
+ body[data-srg-page="spinrealm"] .arena-card>.touch-controls{
+   scroll-margin-bottom:calc(100px + env(safe-area-inset-bottom, 0px));
+ }
+}

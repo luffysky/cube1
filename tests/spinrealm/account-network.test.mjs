@@ -145,3 +145,17 @@ test('opaque session token is rejected when Better Auth JWT endpoint is unavaila
   await assert.rejects(fixture.module.api('/v1/profile'),{code:'session_token_unavailable'});
   assert.equal(calls.some(url=>url.startsWith('https://api.example/')),false);
 });
+
+
+test('profile fetch failures never present invented Free/1000/Silver account data',async()=>{
+ const source=await readFile(new URL('../../dist/games/spinrealm/member-ui.mjs',import.meta.url),'utf8');
+ const from=source.indexOf('function renderAccount(){');
+ const to=source.indexOf('function renderCoinReward()',from);
+ assert.ok(from>=0&&to>from);
+ const section=source.slice(from,to);
+ assert.match(section,/if\(!p\)\{/);
+ assert.match(section,/account\.profileUnavailable/);
+ assert.match(section,/common\.retry/);
+ assert.ok(section.indexOf('if(!p){') < section.indexOf('subscription.free'), 'must show retry before rendering any entitlement fallback');
+ assert.ok(section.indexOf('if(!p){') < section.indexOf('ranked.rating'), 'must show retry before rendering any rating fallback');
+});
