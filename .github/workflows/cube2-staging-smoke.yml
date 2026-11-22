@@ -13,6 +13,7 @@ jobs:
     steps:
       - name: Check deployment protection and health
         env:
+          SIGNER: ${{ secrets.CUBE2_STAGING_ADMIN_SIGNER_PEM }}
           BYPASS: ${{ secrets.CUBE2_STAGING_VERCEL_BYPASS }}
         shell: bash
         run: |
@@ -36,3 +37,20 @@ jobs:
             if(a.status!==401) throw Error();
           } catch { console.error('Staging validation did not pass'); process.exitCode=1; }
           JS
+          if [ -z "$SIGNER" ] || [ -z "$BYPASS" ]; then echo 'Staging secret missing'; exit 1; fi
+          umask 077
+          work=$(mktemp -d)
+          trap 'rm -rf "$work"' EXIT
+          curl -qfsS --max-time 20 --proto '=https' -o "$work/check.js" 'https://raw.githubusercontent.com/luffysky/cube2/9d76ad27d6aeea886fa6951ceec10fa170f0c2b1/tools/joint-admin-check.js'
+          printf '%s  %s\n' '8d340b7651d9e557b673a56ae441072b1f65b87bbe854d723a395589c3ca2260' "$work/check.js" | sha256sum --check --status
+          printf '%s\n' "$SIGNER" > "$work/key.pem"
+          unset SIGNER
+          status=0
+          ADMIN_SIGNER_PEM="$work/key.pem" ADMIN_KID=srstagea_EWW-tM7u8uSnvCwV \
+            ADMIN_ISS=https://identity-staging.snowrealm.pet \
+            ADMIN_JWKS_URL=https://identity-staging.snowrealm.pet/.well-known/admin-jwks.json \
+            EXPECT_BUILD=9d76ad2 VERCEL_BYPASS="$BYPASS" SEED=1 \
+            node "$work/check.js" > "$work/results" 2> "$work/errors" || status=$?
+          jq -c '.results[] | {caseId,result,status} | select(.caseId | test("^A([0-9]|1[0-4])$")) | select(.result | IN("PASS","FAIL","BLOCKED","MANUAL")) | select(.status == null or (.status | type == "number"))' "$work/results"
+          if [ "$status" -ne 0 ] || [ ! -s "$work/results" ]; then echo 'Acceptance runner failed'; exit 1; fi
+          jq -e '([.results[] | select(.result == "FAIL")] | length) == 0' "$work/results" >/dev/null
