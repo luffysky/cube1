@@ -13,7 +13,7 @@ const common = {
 const json=(status,data,headers={})=>new Response(JSON.stringify(data),{status,headers:{...common,...headers}});
 /** Read-only Identity surface until the server owns the consent transaction.
  * Browser input cannot authorize a link or enable token issuance. */
-export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret,adminPublicKeys=[],allowedOrigin=originAllowed}={}){
+export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret,issuer=ISSUER,issueAdminToken,adminServiceSecret,adminPublicKeys=[],allowedOrigin=originAllowed}={}){
   if(!authority||typeof verifyToken!=='function'||typeof dbReady!=='function')
     throw Error('identity_app_configuration_missing');
   const playerKeys=authority.publicJwks().keys;
@@ -25,6 +25,9 @@ export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSe
   const hash=value=>createHash('sha256').update(value).digest();
   const clientDigest=typeof clientSecret==='string'&&clientSecret.length>=32
     ? hash(clientSecret) : null;
+  const adminDigest=typeof adminServiceSecret==='string'&&adminServiceSecret.length>=32
+    ? hash(adminServiceSecret) : null;
+  if(adminDigest&&clientDigest&&timingSafeEqual(adminDigest,clientDigest))throw Error('identity_service_secret_overlap');
   const cors=req=>{
     const origin=req.headers.get('origin');
     return origin===allowedOrigin?{
@@ -46,8 +49,18 @@ export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSe
           if(!adminKeys.length)return json(503,{error:'admin_jwks_unavailable'});
           return json(200,{keys:adminKeys},{'Cache-Control':'public, max-age=60'});
         }
+        if(request.method==='POST'&&path==='/internal/admin-token'){
+          if(!adminDigest||!issueAdminToken)return json(404,{error:'not_found'});
+          const presented=request.headers.get('x-snowrealm-admin-service-secret');
+          if(origin||!presented||presented.length>512||!timingSafeEqual(hash(presented),adminDigest))
+            return json(401,{error:'unauthorized'});
+          try {
+            const {token}=await issueAdminToken();
+            return json(200,{access_token:token,token_type:'Bearer',expires_in:300});
+          }catch{return json(503,{error:'admin_signing_unavailable'});}
+        }
         if(request.method==='GET'&&path==='/health/live'){
-          return json(200,{service:'snowrealm-identity',issuer:ISSUER,
+          return json(200,{service:'snowrealm-identity',issuer,
             authorizationAvailable:false,
             crossGameLinkingAvailable:false});
         }

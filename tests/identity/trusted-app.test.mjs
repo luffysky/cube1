@@ -61,3 +61,22 @@ test('Admin JWKS publishes only independently configured public keys and fails c
   assert.throws(()=>configure([key]));
  }
 });
+
+test('internal Admin signer requires a distinct service credential and denies browser requests', async()=>{
+ let calls=0;
+ const adminSecret='a'.repeat(48);
+ const options={authority,verifyToken:async()=>false,dbReady:async()=>true,clientSecret:secret,
+  issueAdminToken:async()=>{calls++;if(calls>1)throw Error('revoked');return {token:'synthetic'};}};
+ const staging=createTrustedIdentityApp({...options,adminServiceSecret:adminSecret});
+ const path='/internal/admin-token',header='x-snowrealm-admin-service-secret';
+ assert.equal((await app.fetch(req(path,{}))).status,404);
+ assert.equal((await staging.fetch(req(path,{}))).status,401);
+ assert.equal((await staging.fetch(req(path,{}, {[header]:secret}))).status,401);
+ assert.equal((await staging.fetch(req(path,{}, {[header]:adminSecret,origin:'https://games.snowrealm.pet'}))).status,401);
+ assert.equal(calls,0);
+ const response=await staging.fetch(req(path,{}, {[header]:adminSecret}));
+ assert.equal(response.status,200);
+ assert.equal(response.headers.get('cache-control'),'no-store');
+ assert.equal((await staging.fetch(req(path,{}, {[header]:adminSecret}))).status,503);
+ assert.throws(()=>createTrustedIdentityApp({...options,adminServiceSecret:secret}),/identity_service_secret_overlap/);
+});
