@@ -36,6 +36,22 @@ jobs:
             const payload = await health.json();
             if (payload?.ok !== true) { console.error('Health JSON did not confirm ok'); process.exit(1); }
             console.log('Health JSON confirmed ok');
+            const admin = await fetch('https://brickduel-staging.snowrealm.pet/internal/admin/v1/overview', {
+              headers: {'x-vercel-protection-bypass': secret},
+              redirect: 'manual', signal: AbortSignal.timeout(12000),
+            });
+            const code = admin.headers.get('content-type')?.includes('application/json')
+              ? (await admin.json())?.error : null;
+            if (admin.status === 503 && ['disabled','unavailable'].includes(code)) {
+              console.log('Admin JWT check blocked: HTTP 503 (' + code + ')');
+              process.exitCode = 1;
+            } else if (admin.status === 401 && code === 'unauthorized') {
+              console.log('Admin route rejected request without JWT: HTTP 401');
+              console.log('Positive Admin JWT check pending a trusted staging signer');
+            } else {
+              console.error('Unexpected Admin response: HTTP ' + admin.status);
+              process.exitCode = 1;
+            }
           } catch {
             console.error('Staging request or response validation failed');
             process.exitCode = 1;
