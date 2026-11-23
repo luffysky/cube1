@@ -13,7 +13,7 @@ const INPUT=path.join(PROJECT_ROOT,'dist');
 const OUTPUT=path.join(PROJECT_ROOT,'release-web');
 const TEXT_TYPES=new Set(['.html','.css','.mjs','.js','.webmanifest']);
 const ROOT_LITERAL_FILES=new Set(['app.mjs','pwa.mjs','sw.js','games/spinrealm/platform-bridge.mjs']);
-const LOCAL_PREFIXES=['/assets/','/games/','/studio/'];
+const LOCAL_PREFIXES=['/assets/','/games/','/studio/','/player/'];
 const LOCAL_ROOT_FILES=new Set(['/index.html','/styles.css','/app.mjs','/pwa.mjs','/member-platform.mjs','/sw.js','/manifest.webmanifest','/favicon.ico']);
 const ORIGIN='https://pages.example.test';
 
