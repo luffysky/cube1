@@ -1,4 +1,5 @@
 import pg from 'pg';
+import {createPrivateKey} from 'node:crypto';
 import {attachDatabasePool} from '@neon/functions';
 import {createIdentityAuthority,verifyBrickduelLinkToken} from '../authority.mjs';
 import {createAdminAuthority} from '../admin-authority.mjs';
@@ -16,11 +17,14 @@ import {createStagingLogin} from './staging-login.mjs';
 import {createBrowserAuthorization} from './browser-authorization.mjs';
 import {identityDatabaseReady} from './database-readiness.mjs';
 
-const keyPem=process.env.IDENTITY_ED25519_PRIVATE_PEM;
 const kid=process.env.IDENTITY_ACTIVE_KID;
 let app;
 
 async function initialize(){
+  const existingKey=process.env.IDENTITY_ED25519_PKCS8_BASE64;
+  const keyPem=process.env.IDENTITY_ED25519_PRIVATE_PEM || (existingKey
+    ? createPrivateKey({key:Buffer.from(existingKey,'base64'),format:'der',type:'pkcs8'})
+      .export({format:'pem',type:'pkcs8'}) : undefined);
   if(!keyPem||!kid||!process.env.IDENTITY_DATABASE_URL)
     throw Error('identity_environment_incomplete');
   const mode=process.env.IDENTITY_ENVIRONMENT || 'production';
