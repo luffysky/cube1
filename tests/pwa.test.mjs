@@ -131,7 +131,8 @@ test('auth pages, APIs, studio, query URLs, external URLs and POST never receive
   for (const [path, options] of [
     ['/signin-with-chatgpt', {}], ['/signout-with-chatgpt', {}], ['/callback?code=secret', {}],
     ['/api/session', {}], ['/studio/index.html', {}], ['/studio/model.mjs', { mode: 'cors' }],
-    ['/?code=secret', {}], ['/unrelated-page', {}], ['https://outside.example/app.mjs', { mode: 'cors' }],
+    ['/?code=secret', {}], ['/?sso=brickduel&state=test', {}],
+    ['/sso-bridge.mjs?v=39', { mode: 'cors' }], ['/sso-flow.mjs?v=39', { mode: 'cors' }], ['/unrelated-page', {}], ['https://outside.example/app.mjs', { mode: 'cors' }],
     ['/', { method: 'POST' }],
   ]) {
     assert.equal((await h.dispatch('fetch', { request: request(path, options) })).handled, false, path);

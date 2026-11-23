@@ -1,4 +1,4 @@
-import {loadPortalSsoIntent,clearPortalSsoIntent} from './sso-flow.mjs';
+import {loadPortalSsoIntent,clearPortalSsoIntent} from './sso-flow.mjs?v=39';
 import {memberState,initMember,getMemberAccessToken} from './games/spinrealm/member-client.mjs';
 
 let storage;
