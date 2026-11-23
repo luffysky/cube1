@@ -3,6 +3,12 @@ account.signInToContinue|登入後即可使用這個功能。|登录后即可使
 account.profileUnavailable|暫時無法載入會員資料，請重試。|暂时无法加载会员资料，请重试。|Your profile could not be loaded. Please retry.|プロフィールを読み込めません。再試行してください。|프로필을 불러오지 못했습니다. 다시 시도해 주세요.
 account.storageNote|帳號、金幣、好友與排位保存在伺服器。操作設定與自訂圖片保存在此裝置。|账号、金币、好友和排位保存在服务器。操作设置与自定义图片保存在此设备。|Accounts, coins, friends and rank are saved on the server. Handling and custom images stay on this device.|アカウント、コイン、フレンド、ランクはサーバーに保存。操作設定とカスタム画像はこの端末に保存されます。|계정, 코인, 친구, 랭크는 서버에 저장됩니다. 조작 설정과 맞춤 이미지는 이 기기에 저장됩니다.
 account.verify|驗證電子郵件|验证电子邮件|Verify email|メールを確認|이메일 인증
+account.changePassword|修改密碼|修改密码|Change password|パスワードを変更|비밀번호 변경
+account.currentPassword|目前密碼|当前密码|Current password|現在のパスワード|현재 비밀번호
+account.newPassword|新密碼|新密码|New password|新しいパスワード|새 비밀번호
+account.passwordChanged|密碼已更新。|密码已更新。|Password updated.|パスワードを更新しました。|비밀번호가 변경되었습니다.
+errors.PASSWORD_TOO_SHORT|密碼至少 8 碼。|密码至少 8 位。|Use at least 8 characters.|8 文字以上を入力してください。|8자 이상 입력하세요.
+errors.PASSWORD_TOO_LONG|密碼最多 128 碼。|密码最多 128 位。|Use at most 128 characters.|128 文字以内で入力してください。|128자 이내로 입력하세요.
 account.reset|重設密碼|重置密码|Reset password|パスワードを再設定|비밀번호 재설정
 account.welcome|歡迎回到雪域|欢迎回到雪域|Welcome to SnowRealm|SnowRealm へようこそ|SnowRealm에 오신 것을 환영합니다
 account.benefits|用同一個帳號保存金幣、收藏外觀、加入好友與真人排位。|使用同一个账号保存金币、收藏外观、添加好友和参加真人排位。|One account for your coins, cosmetics, friends and online ranked play.|ひとつのアカウントでコイン、外観、フレンド、オンラインランク戦を。|하나의 계정으로 코인, 꾸미기, 친구, 온라인 랭크전을 이용하세요.

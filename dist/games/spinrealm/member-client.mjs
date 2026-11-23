@@ -96,6 +96,18 @@ export async function initMember() {
   })();
   return readyPromise;
 }
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 128;
+
+function validateNewPassword(password) {
+  if (typeof password !== 'string' || password.length < PASSWORD_MIN_LENGTH) {
+    throw new ServiceError('PASSWORD_TOO_SHORT', 400);
+  }
+  if (password.length > PASSWORD_MAX_LENGTH) {
+    throw new ServiceError('PASSWORD_TOO_LONG', 400);
+  }
+}
+
 export async function signIn(email,password) {
   const generation=invalidateSession();
   clearLocalMembership();
@@ -107,6 +119,7 @@ export async function signIn(email,password) {
   return refreshProfile();
 }
 export async function signUp(email,password,name) {
+  validateNewPassword(password);
   result(await (await auth()).signUp.email({email,password,name}));
   return {verificationRequired:true};
 }
@@ -126,8 +139,15 @@ export async function requestPasswordReset(email) {
   return result(await (await auth()).emailOtp.sendVerificationOtp({email,type:'forget-password'}));
 }
 export async function resetPassword(email,otp,password) {
+  validateNewPassword(password);
   const response=result(await (await auth()).emailOtp.resetPassword({email,otp,password}));
   invalidateSession();clearLocalMembership();return response;
+}
+export async function changePassword(currentPassword,newPassword) {
+  validateNewPassword(newPassword);
+  return result(await (await auth()).changePassword({
+    currentPassword,newPassword,revokeOtherSessions:true
+  }));
 }
 export async function signOut() {
   const generation=invalidateSession();
