@@ -114,3 +114,16 @@ test('real SQL transactions preserve balances, receipts, friend authorization an
     assert.equal((await call('/v1/shop/purchase', { itemId: 'shield' })).status, 400);
   });
 });
+
+test('registration nickname seeds the profile once and preserves later edits', async t => {
+  const pool = await testPool(); t.after(() => pool.end());
+  const names = new Map([['new-player', '  雪境玩家  '], ['invalid-player', '<>' ]]);
+  const store = new Store(pool, { registrationName: (_client, id) => names.get(id) });
+  await store.ensureUser('new-player');
+  assert.equal((await store.profile('new-player')).profile.nickname, '雪境玩家');
+  await store.patchProfile('new-player', {nickname:'自訂名稱'});
+  await store.ensureUser('new-player');
+  assert.equal((await store.profile('new-player')).profile.nickname, '自訂名稱');
+  await store.ensureUser('invalid-player');
+  assert.match((await store.profile('invalid-player')).profile.nickname, /^Player /);
+});
