@@ -1,7 +1,11 @@
-import {parsePortalSsoIntent} from './sso-flow.mjs';
+import {loadPortalSsoIntent,clearPortalSsoIntent} from './sso-flow.mjs';
 import {memberState,initMember,getMemberAccessToken} from './games/spinrealm/member-client.mjs';
 
-const intent=parsePortalSsoIntent(location.href);
+let storage;
+try{storage=window.sessionStorage;}catch{/* The URL still works when storage is blocked. */}
+const intent=loadPortalSsoIntent(location.href,{
+  storage,replaceUrl:url=>history.replaceState(history.state,'',url)
+});
 if(intent){
   const section=document.createElement('section');
   section.className='container';
@@ -29,6 +33,11 @@ if(intent){
         document.querySelector('[data-member-open="account"]')?.click();
         return;
       }
+      if(Date.now()>=intent.expiresAt){
+        clearPortalSsoIntent(storage,intent.state);
+        status.textContent='授權請求已過期，請回到《轉磚》重新發起連結。';
+        return;
+      }
       const jwt=await getMemberAccessToken();
       status.textContent='正在核對平台登入身分…';
       const next=new URL('https://identity.snowrealm.pet/oauth/authorize');
@@ -42,6 +51,7 @@ if(intent){
         headers:{Authorization:'Bearer '+jwt}
       });
       if(response.status!==204)throw Error('identity_unavailable');
+      clearPortalSsoIntent(storage,intent.state);
       location.assign(next.href);
     }catch{
       status.textContent='SnowRealm Identity 尚未可用或授權未完成。沒有任何存檔被綁定，請稍後再試。';

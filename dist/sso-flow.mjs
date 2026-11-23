@@ -16,3 +16,51 @@ export function parsePortalSsoIntent(url){
   return {clientId:BRICKDUEL_CLIENT,redirectUri:BRICKDUEL_CALLBACK,
     state,nonce,codeChallenge};
 }
+
+const storageKey='snowrealm:brickduel-sso:v1';
+const intentLifetime=10*60*1000;
+const intentParams=['sso','client_id','redirect_uri','state','nonce','code_challenge','code_challenge_method','response_type'];
+
+function clearIntent(storage){
+  try{storage?.removeItem(storageKey);}catch{/* Storage may be unavailable in a private tab. */}
+}
+
+export function loadPortalSsoIntent(url,{storage,now=Date.now(),replaceUrl}={}){
+  const current=new URL(url);
+  if(current.origin!=='https://games.snowrealm.pet')return null;
+  try{
+    if(intentParams.some(key=>current.searchParams.has(key)) ||
+       ['code','access_token','refresh_token'].some(key=>current.searchParams.has(key))){
+      const intent=parsePortalSsoIntent(current.href);
+      if(!intent){clearIntent(storage);return null;}
+      const expiresAt=now+intentLifetime;
+      try{
+        storage?.setItem(storageKey,JSON.stringify({state:intent.state,nonce:intent.nonce,codeChallenge:intent.codeChallenge,expiresAt}));
+        if(storage){
+          for(const key of intentParams)current.searchParams.delete(key);
+          replaceUrl?.(current.pathname+current.search+current.hash);
+        }
+      }catch{/* Keep the original URL when the browser disallows storage. */}
+      return {...intent,expiresAt};
+    }
+    const raw=storage?.getItem(storageKey);
+    if(!raw || raw.length>1024)return null;
+    const saved=JSON.parse(raw);
+    if(!Number.isSafeInteger(saved?.expiresAt)||saved.expiresAt<=now||saved.expiresAt>now+intentLifetime||
+       typeof saved.state!=='string'||!token.test(saved.state)||
+       typeof saved.nonce!=='string'||!token.test(saved.nonce)||
+       typeof saved.codeChallenge!=='string'||!challenge.test(saved.codeChallenge)){
+      clearIntent(storage);
+      return null;
+    }
+    return {clientId:BRICKDUEL_CLIENT,redirectUri:BRICKDUEL_CALLBACK,state:saved.state,
+      nonce:saved.nonce,codeChallenge:saved.codeChallenge,expiresAt:saved.expiresAt};
+  }catch{clearIntent(storage);return null;}
+}
+
+export function clearPortalSsoIntent(storage,state){
+  try{
+    const saved=JSON.parse(storage?.getItem(storageKey)??'null');
+    if(saved?.state===state)clearIntent(storage);
+  }catch{/* A failed cleanup cannot block navigation. */}
+}
