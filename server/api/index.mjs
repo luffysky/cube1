@@ -14,7 +14,12 @@ attachDatabasePool(pool);
 pool.on('error', error => console.error('snowrealm_pool_error', { code: error.code || 'connection_error' }));
 
 export default createApp({
-  store: new Store(pool),
+  store: new Store(pool, {
+    async registrationName(client, userId) {
+      const { rows } = await client.query('SELECT name FROM neon_auth."user" WHERE id=$1', [userId]);
+      return rows[0]?.name;
+    },
+  }),
   adminStore: new AdminStore(pool),
   platformIdentity: new PlatformIdentityStore(pool),
   adminSubjects: process.env.SNOWREALM_ADMIN_SUBJECTS || '',

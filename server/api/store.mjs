@@ -68,7 +68,11 @@ async function activePlus(client, userId, now) {
 }
 
 export class Store {
-  constructor(pool, { clock = Date.now } = {}) { this.pool = pool; this.clock = clock; }
+  constructor(pool, { clock = Date.now, registrationName } = {}) {
+    this.pool = pool;
+    this.clock = clock;
+    this.registrationName = registrationName;
+  }
   tx(callback) { return transaction(this.pool, callback); }
   async readiness(expectedDatabase = 'cube1') {
     const row = (await this.pool.query("SELECT current_database()=$1 AS database_matches,to_regclass('public.sr_profiles') IS NOT NULL AS schema_ready", [expectedDatabase])).rows[0];
@@ -76,8 +80,15 @@ export class Store {
   }
   async ensureUser(userId) {
     return this.tx(async client => {
+      if ((await client.query('SELECT 1 FROM sr_profiles WHERE user_id=$1', [userId])).rowCount) return;
       const code = friendCode();
-      const inserted = await client.query('INSERT INTO sr_profiles(user_id,nickname,friend_code) VALUES($1,$2,$3) ON CONFLICT(user_id) DO NOTHING RETURNING user_id', [userId, `Player ${code.slice(0, 5)}`, code]);
+      const registeredName = await this.registrationName?.(client, userId);
+      let initialNickname = `Player ${code.slice(0, 5)}`;
+      if (registeredName != null) {
+        try { initialNickname = nickname(registeredName); }
+        catch (error) { if (error.code !== 'invalid_nickname') throw error; }
+      }
+      const inserted = await client.query('INSERT INTO sr_profiles(user_id,nickname,friend_code) VALUES($1,$2,$3) ON CONFLICT(user_id) DO NOTHING RETURNING user_id', [userId, initialNickname, code]);
       if (!inserted.rowCount) return;
       await client.query('INSERT INTO sr_wallets(user_id,balance) VALUES($1,0)', [userId]);
       await client.query('INSERT INTO sr_ratings(user_id) VALUES($1)', [userId]);
