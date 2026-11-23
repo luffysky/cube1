@@ -35,8 +35,9 @@ window.addEventListener('keydown',e=>{
  const lane=['d','f','j','k'].indexOf(e.key.toLowerCase());
  if(lane!==-1){e.preventDefault();hit(lane);}
 });
-$('start').addEventListener('click',async()=>{
- await unlockAudio();start(state);state.calibrationMs=Number($('calibrate').value);
+$('start').addEventListener('click',()=>{
+ void unlockAudio();
+ start(state);state.calibrationMs=Number($('calibrate').value);
  last=performance.now();lastBeat=-1;$('status').textContent='跟住節拍，保持連擊！';
 });
 $('mute').addEventListener('click',()=>{muted=!muted;$('mute').textContent=muted?'聲音：關':'聲音：開';});
