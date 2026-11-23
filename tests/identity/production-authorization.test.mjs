@@ -36,6 +36,8 @@ test('production portal verifies login and requires a separate Identity consent 
   const sessionCookie = session.headers.get('set-cookie').split(';')[0];
   const consent = await authorize(new Request(path + '?' + query,{headers:{cookie:sessionCookie}}));
   assert.equal(consent.status, 200);
+  const formAction = `form-action 'self' ${new URL(BRICKDUEL_CALLBACK).origin}`;
+  assert.ok(consent.headers.get('content-security-policy').split('; ').includes(formAction));
   assert.equal(issued, 0);
   assert.equal(consent.headers.get('set-cookie'), null);
   const html = await consent.text();
@@ -52,6 +54,7 @@ test('production portal verifies login and requires a separate Identity consent 
   assert.equal((await decide(csrf, proof, '')).status, 400);
   const approved = await decide(csrf);
   assert.equal(approved.status, 303);
+  assert.ok(approved.headers.get('content-security-policy').split('; ').includes(formAction));
   const callback = new URL(approved.headers.get('location'));
   assert.equal(callback.origin + callback.pathname, BRICKDUEL_CALLBACK);
   assert.equal(callback.searchParams.get('state'), query.get('state'));

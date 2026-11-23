@@ -3,9 +3,10 @@
 export class OAuthStore {
  constructor(pool){this.pool=pool;}
  async saveCode(rec){
-  const sql='INSERT INTO sr_identity_authorization_codes (code_hash,client_id,redirect_uri,code_challenge,player_id,state_hash,nonce_hash,expires_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)';
+  // Use the same database clock as created_at and the expiry constraint.
+  const sql="INSERT INTO sr_identity_authorization_codes (code_hash,client_id,redirect_uri,code_challenge,player_id,state_hash,nonce_hash,expires_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now()+interval '90 seconds')";
   await this.pool.query(sql,[rec.codeHash,rec.clientId,rec.redirectUri,rec.codeChallenge,
-   rec.playerId,rec.stateHash,rec.nonceHash,rec.expiresAt]);
+   rec.playerId,rec.stateHash,rec.nonceHash]);
  }
  async consumeCode({codeHash,clientId,redirectUri,codeChallenge,stateHash,nonceHash}){
   // This UPDATE is atomic: the first exchange wins; replay returns no rows.

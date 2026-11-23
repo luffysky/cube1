@@ -87,8 +87,9 @@ test('persistent store parameterizes writes, locks code via UPDATE and checks re
  }};
  const store=new OAuthStore(pool);
  await store.saveCode({codeHash:'a'.repeat(64),clientId:'brickduel-bff',redirectUri:params.redirectUri,
-  codeChallenge:params.codeChallenge,playerId:uuid,stateHash:'b'.repeat(64),nonceHash:'c'.repeat(64),expiresAt:new Date()});
- assert.equal(calls[0].params.length,8);
+  codeChallenge:params.codeChallenge,playerId:uuid,stateHash:'b'.repeat(64),nonceHash:'c'.repeat(64)});
+ assert.equal(calls[0].params.length,7);
+ assert.match(calls[0].sql,/now\(\)\+interval '90 seconds'/);
  assert.equal(await store.consumeCode({codeHash:'a'.repeat(64),clientId:'brickduel-bff',
   redirectUri:params.redirectUri,codeChallenge:params.codeChallenge}),uuid);
  consumed=true;

@@ -41,7 +41,11 @@ export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSe
       const origin=request.headers.get('origin');
       const headers=cors(request);
       try{
-        if(path==='/oauth/authorize'&&browserAuthorization)return await browserAuthorization(request);
+        if(path==='/oauth/authorize'&&browserAuthorization){
+          const response=await browserAuthorization(request);
+          if(request.method==='POST')console.info('identity_authorization_response',response.status);
+          return response;
+        }
         if(origin&&origin!==allowedOrigin)return json(403,{error:'origin_denied'},headers);
         if(request.method==='GET'&&path==='/.well-known/jwks.json'){
           return json(200,authority.publicJwks(),{'Cache-Control':'public, max-age=60'});
@@ -115,7 +119,14 @@ export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSe
           }catch {return json(401,{active:false});}
         }
         return json(404,{error:'not_found'});
-      } catch(e){
+      } catch(error){
+        if(path==='/oauth/authorize'){
+          const sqlState=typeof error?.code==='string'&&/^[0-9A-Z]{5}$/.test(error.code)
+            ? error.code : 'unclassified';
+          const expiryConstraint=error?.constraint==='identity_code_expiry';
+          console.warn('identity_authorization_error',request.method,sqlState,expiryConstraint);
+          if(error?.code==='account_disabled')return json(403,{error:'access_denied'},headers);
+        }
         return json(500,{error:'identity_unavailable'},headers);
       }
     }
