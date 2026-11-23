@@ -52,7 +52,7 @@ async function initialize(){
         secret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET,
         ...createStagingLogin({issuer:staging.issuer,
           base:'https://ep-green-pond-bici1klg.neonauth.c-5.ap-southeast-1.aws.neon.tech/cube1_identity_staging/auth',
-          accounts:["8a4f0adf-e990-4220-995c-d5b2a7bc5725","120d8f7e-f057-4b3b-9bd5-7cd8163d4da8"]})})
+          accounts:["947d7f1f-370e-43d6-b156-20ac43b0324d","f3cd7632-fa4d-4d8e-958d-7e32bfa5d9ac"]})})
     : undefined;
   return createTrustedIdentityApp({authority,verifyToken,dbReady,issuer:staging?.issuer,
     adminPublicKeys:[...(adminAuthority?.publicJwks().keys??[]),...adminPublicKeys],
