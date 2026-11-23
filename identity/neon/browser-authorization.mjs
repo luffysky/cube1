@@ -20,7 +20,7 @@ function html(status, title, content = '', extra = {}) {
   });
 }
 
-export function createBrowserAuthorization({issuer, clients, authorize, authenticate, signIn, loginUrl, secret}) {
+export function createBrowserAuthorization({issuer, clients, authorize, authenticate, signIn, loginUrl, secret, staging = true}) {
   const allowed = normalizeClients(clients);
   const login = loginUrl ? new URL(loginUrl) : null;
   if ((!signIn && !login) || (login && (login.protocol !== 'https:' || login.username || login.password || login.hash)) ||
@@ -60,7 +60,7 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
       const csrf = randomBytes(32).toString('base64url');
       const data = Buffer.from(JSON.stringify({grant, subject, csrf, expires: Date.now() + lifetime * 1000})).toString('base64url');
       return html(200, '連結 SnowRealm Games 帳號',
-        `<p>允許 BrickDuel 測試站連結你目前登入的 SnowRealm 帳號？</p>
+        `<p>允許 BrickDuel${staging ? " 測試站" : ""} 連結你目前登入的 SnowRealm 帳號？</p>
         <form method="post" action="${path}">
         <input type="hidden" name="csrf" value="${csrf}">
         <button name="decision" value="allow">同意</button>

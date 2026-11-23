@@ -13,7 +13,7 @@ if(intent){
   detail.textContent='登入 SnowRealm Games 後，請明確確認是否將你的平台帳號授權給《轉磚》。現有存檔不會自動合併或覆蓋。';
   const button=document.createElement('button');
   button.className='button primary';button.type='button';
-  button.textContent='確認授權並返回《轉磚》';
+  button.textContent='繼續前往授權';
   const status=document.createElement('p');
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   section.append(heading,detail,button,status);
@@ -30,20 +30,18 @@ if(intent){
         return;
       }
       const jwt=await getMemberAccessToken();
-      status.textContent='正在核對平台身分與一次性授權碼…';
-      const response=await fetch('https://identity.snowrealm.pet/oauth/authorize',{
-        method:'POST',mode:'cors',cache:'no-store',
-        headers:{Authorization:'Bearer '+jwt,'Content-Type':'application/json'},
-        body:JSON.stringify({...intent,consent:true})
+      status.textContent='正在核對平台登入身分…';
+      const next=new URL('https://identity.snowrealm.pet/oauth/authorize');
+      next.search=new URLSearchParams({
+        client_id:intent.clientId,redirect_uri:intent.redirectUri,state:intent.state,
+        nonce:intent.nonce,code_challenge:intent.codeChallenge,
+        code_challenge_method:'S256',response_type:'code'
       });
-      const grant=await response.json().catch(()=>null);
-      if(!response.ok||!grant||typeof grant.code!=='string'||
-        !/^[A-Za-z0-9_-]{43}$/.test(grant.code)||
-        grant.redirectUri!==intent.redirectUri||grant.state!==intent.state)
-        throw Error('identity_unavailable');
-      const next=new URL(intent.redirectUri);
-      next.searchParams.set('code',grant.code);
-      next.searchParams.set('state',intent.state);
+      const response=await fetch(next.origin+next.pathname,{
+        method:'POST',mode:'cors',credentials:'include',cache:'no-store',
+        headers:{Authorization:'Bearer '+jwt}
+      });
+      if(response.status!==204)throw Error('identity_unavailable');
       location.assign(next.href);
     }catch{
       status.textContent='SnowRealm Identity 尚未可用或授權未完成。沒有任何存檔被綁定，請稍後再試。';

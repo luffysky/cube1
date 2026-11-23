@@ -3,6 +3,9 @@ import {attachDatabasePool} from '@neon/functions';
 import {createIdentityAuthority,verifyBrickduelLinkToken} from '../authority.mjs';
 import {createAdminAuthority} from '../admin-authority.mjs';
 import {stagingIdentityConfig} from '../staging-config.mjs';
+import {ISSUER} from '../authority.mjs';
+import {jwtAuthenticator} from '../../server/api/auth.mjs';
+import {createProductionAuthorization} from './production-authorization.mjs';
 import {createOAuthCore} from '../oauth-core.mjs';
 import {BRICKDUEL_CLIENT,BRICKDUEL_CALLBACK} from '../../dist/sso-flow.mjs';
 import {PlatformIdentityStore} from '../../server/api/platform-identity.mjs';
@@ -44,22 +47,30 @@ async function initialize(){
       kid:process.env.IDENTITY_STAGING_ADMIN_KID,issuer:staging.issuer,canIssue:async adminKid=>
         await dbReady() && await store.canIssue(adminKid)})
     : null;
+  const clients=staging?.clients??[{clientId:BRICKDUEL_CLIENT,redirectUri:BRICKDUEL_CALLBACK}];
   const oauth=createOAuthCore({
     store,signer:authority,identityMapping:new PlatformIdentityStore(pool),
-    issuer:staging?.issuer,clients:staging?.clients??[
-      {clientId:BRICKDUEL_CLIENT,redirectUri:BRICKDUEL_CALLBACK}
-    ]
+    issuer:staging?.issuer,clients
   });
+  const productionAuthorization=!staging &&
+    process.env.IDENTITY_PRODUCTION_OAUTH_EXCHANGE_ENABLED==='true' &&
+    process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET?.length>=32 &&
+    process.env.NEON_AUTH_BASE_URL && process.env.NEON_AUTH_JWKS_URL && process.env.AUTH_AUDIENCE
+    ? createProductionAuthorization({issuer:ISSUER,clients,authorize:oauth.authorize,
+        authenticate:jwtAuthenticator({authBaseUrl:process.env.NEON_AUTH_BASE_URL,
+          jwksUrl:process.env.NEON_AUTH_JWKS_URL,audience:process.env.AUTH_AUDIENCE}),
+        secret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET})
+    : undefined;
   const browserAuthorization=staging&&process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET?.length>=32
     ? createBrowserAuthorization({issuer:staging.issuer,clients:staging.clients,authorize:oauth.authorize,
         secret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET,
         ...createStagingLogin({issuer:staging.issuer,
           base:'https://ep-green-pond-bici1klg.neonauth.c-5.ap-southeast-1.aws.neon.tech/cube1_identity_staging/auth',
           accounts:["947d7f1f-370e-43d6-b156-20ac43b0324d","f3cd7632-fa4d-4d8e-958d-7e32bfa5d9ac"]})})
-    : undefined;
+    : productionAuthorization;
   return createTrustedIdentityApp({authority,verifyToken,dbReady,issuer:staging?.issuer,
     adminPublicKeys:[...(adminAuthority?.publicJwks().keys??[]),...adminPublicKeys],
-    exchangeCode:staging||process.env.IDENTITY_PRODUCTION_OAUTH_EXCHANGE_ENABLED==='true'
+    exchangeCode:staging||productionAuthorization
       ? oauth.exchange : undefined,
     browserAuthorization,
     issueAdminToken:adminAuthority?.issueAdminToken,
