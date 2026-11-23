@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>玩家中心 | SnowRealm Games</title>
+  <link rel="stylesheet" href="/games/spinrealm/member.css">
+  <link rel="stylesheet" href="/player/player.css">
+</head>
+<body data-srg-page="player">
+  <header class="site-header">
+    <a class="brand" href="/"><img src="/assets/realm-mark.svg" alt="" width="32" height="32"> SnowRealm Games</a>
+  </header>
+  <main class="shell">
+    <div class="page-title"><h1>玩家中心</h1></div>
+    <p id="session-status" role="status">正在確認登入狀態…</p>
+    <div id="dashboard" hidden>
+      <nav id="player-nav" aria-label="玩家中心導覽">
+        <a href="#overview">總覽</a><a href="#games">我的遊戲</a><a href="#wallet">錢包與交易</a>
+        <a href="#billing">訂單與帳單</a><a href="#account">帳號與資料</a>
+      </nav>
+      <section id="view" aria-labelledby="view-title"></section>
+      <p id="view-status" role="status"></p>
+    </div>
+  </main>
+  <script type="module" src="/player/player.mjs"></script>
+</body>
+</html>
