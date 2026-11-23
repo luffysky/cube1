@@ -8,7 +8,7 @@ const workerSource = await fs.readFile(new URL('../dist/sw.js', import.meta.url)
 const clientSource = await fs.readFile(new URL('../dist/pwa.mjs', import.meta.url), 'utf8');
 const ORIGIN = 'https://games.example.test';
 const markers = new Map([
-  ['/index.html', 'platform'], ['/games/spinrealm/index.html', 'spinrealm'],
+  ['/index.html', 'platform'], ['/player/index.html', 'player'], ['/games/spinrealm/index.html', 'spinrealm'],
   ['/games/spinrealm/room.html', 'room'],
   ['/privacy.html', 'legal'], ['/cookies.html', 'legal'],
   ['/terms.html', 'legal'], ['/minor-protection.html', 'legal'],
@@ -118,7 +118,7 @@ test('verified install provides offline platform and game, with no automatic upd
   assert.equal(h.state.skips, 0);
   assert.equal((await h.message({ type: 'SRG_OFFLINE_STATUS' })).ready, true);
   h.state.fetcher = async () => { throw new TypeError('offline'); };
-  for (const [path, marker] of [['/', 'platform'], ['/games/spinrealm/', 'spinrealm'], ['/games/52hunt/', '52hunt']]) {
+  for (const [path, marker] of [['/', 'platform'], ['/player/', 'player'], ['/games/spinrealm/', 'spinrealm'], ['/games/52hunt/', '52hunt']]) {
     const result = await h.dispatch('fetch', { request: request(path) });
     assert.equal(result.handled, true);
     assert.match(await result.response.text(), new RegExp(`installed-${marker}`));
