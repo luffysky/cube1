@@ -4,7 +4,7 @@ import {parsePortalSsoIntent} from '../../dist/sso-flow.mjs';
 
 const portal = 'https://games.snowrealm.pet';
 const cookie = '__Host-snowrealm-portal-session';
-const maxAge = 180;
+const maxAge = 300;
 const cors = {
   'Access-Control-Allow-Origin': portal,
   'Access-Control-Allow-Credentials': 'true',
@@ -16,6 +16,7 @@ export function createProductionAuthorization({issuer, clients, authorize, authe
   const hmac = value => createHmac('sha256', secret).update('production-portal-session:').update(value).digest();
   const browser = createBrowserAuthorization({
     issuer, clients, authorize, loginUrl: portal, secret, staging: false,
+    onReject: reason => console.warn('identity_consent_rejected', reason),
     authenticate(request) {
       const proof = request.headers.get('cookie')?.split(/;\s*/).find(part =>
         part.startsWith(cookie + '='))?.slice(cookie.length + 1);

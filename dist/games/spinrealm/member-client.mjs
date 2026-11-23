@@ -111,7 +111,13 @@ function validateNewPassword(password) {
 export async function signIn(email,password) {
   const generation=invalidateSession();
   clearLocalMembership();
-  result(await (await auth()).signIn.email({email,password}));
+  const response=await (await auth()).signIn.email({email,password});
+  const error=response?.error;
+  if(error && (String(error.code).toUpperCase()==='INVALID_EMAIL_OR_PASSWORD' ||
+    (!error.code && error.status===401))) {
+    throw new ServiceError('INVALID_EMAIL_OR_PASSWORD',401);
+  }
+  result(response);
   const session=result(await (await auth()).getSession());
   if(generation!==sessionGeneration)throw new ServiceError('session_expired',401);
   emit({user:session?.user||null,profile:null,error:null});

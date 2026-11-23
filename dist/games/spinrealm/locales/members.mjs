@@ -131,7 +131,7 @@ errors.internal_error|伺服器發生錯誤，請稍後重試。|服务器发生
 errors.origin_not_allowed|此網站來源尚未獲准連接會員服務。|此网站来源尚未获准连接会员服务。|This site is not allowed to connect to the account service.|このサイトからアカウントサービスへの接続は許可されていません。|이 사이트는 계정 서비스에 연결할 권한이 없습니다.
 errors.invalid_payload|要求資料格式不正確，請重新整理後再試。|请求数据格式不正确，请刷新后重试。|Invalid request data. Refresh and retry.|要求データの形式が無効です。更新して再試行してください。|요청 데이터 형식이 올바르지 않습니다. 새로 고침 후 다시 시도하세요.
 errors.EMAIL_NOT_VERIFIED|請先驗證電子郵件。|请先验证电子邮件。|Please verify your email first.|先にメールアドレスを確認してください。|먼저 이메일을 인증하세요.
-errors.INVALID_EMAIL_OR_PASSWORD|電子郵件或密碼不正確。|电子邮件或密码不正确。|Incorrect email or password.|メールアドレスまたはパスワードが違います。|이메일 또는 비밀번호가 올바르지 않습니다.
+errors.INVALID_EMAIL_OR_PASSWORD|帳號或密碼錯誤。|电子邮件或密码不正确。|Incorrect email or password.|メールアドレスまたはパスワードが違います。|이메일 또는 비밀번호가 올바르지 않습니다.
 errors.INVALID_PASSWORD|密碼不正確。|密码不正确。|Incorrect password.|パスワードが違います。|비밀번호가 올바르지 않습니다.
 errors.USER_ALREADY_EXISTS|此電子郵件已經註冊。|此电子邮件已经注册。|This email is already registered.|このメールアドレスは登録済みです。|이미 등록된 이메일입니다.
 errors.INVALID_OTP|驗證碼不正確或已過期。|验证码不正确或已过期。|Verification code is incorrect or expired.|確認コードが違うか期限切れです。|인증 코드가 올바르지 않거나 만료되었습니다.

@@ -20,7 +20,7 @@ function html(status, title, content = '', extra = {}) {
   });
 }
 
-export function createBrowserAuthorization({issuer, clients, authorize, authenticate, signIn, loginUrl, secret, staging = true}) {
+export function createBrowserAuthorization({issuer, clients, authorize, authenticate, signIn, loginUrl, secret, staging = true, onReject = () => {}}) {
   const allowed = normalizeClients(clients);
   const login = loginUrl ? new URL(loginUrl) : null;
   if ((!signIn && !login) || (login && (login.protocol !== 'https:' || login.username || login.password || login.hash)) ||
@@ -28,7 +28,10 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
     throw new Error('browser_authorization_config_invalid');
   const mac = value => createHmac('sha256', secret).update('snowrealm-consent-v1:').update(value).digest();
   const setCookie = (value, maxAge) => `${cookie}=${value}; Path=/; Max-Age=${maxAge}; Secure; HttpOnly; SameSite=Lax`;
-  const invalid = () => html(400, '授權請求無效');
+  const invalid = reason => {
+    if (reason) onReject(reason);
+    return html(400, '授權請求無效');
+  };
   const loginPage = (url, failed = false) => {
     const action = (path + url.search).replace(/&/g, '&amp;').replace(/"/g, '&quot;')
       .replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -68,10 +71,11 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
         {'Set-Cookie': setCookie(`${data}.${mac(data).toString('base64url')}`, lifetime)});
     }
     if (request.method !== 'POST') return new Response(null, {status: 405, headers: {...headers, Allow: 'GET, POST'}});
-    if (request.headers.get('origin') !== issuer ||
-        request.headers.get('content-type')?.split(';')[0] !== 'application/x-www-form-urlencoded') return invalid();
+    if (request.headers.get('origin') !== issuer) return invalid('post_origin');
+    if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !==
+        'application/x-www-form-urlencoded') return invalid('post_content_type');
     const reader = request.body?.getReader();
-    if (!reader) return invalid();
+    if (!reader) return invalid('post_body_missing');
     const parts = [];
     let size = 0;
     for (;;) {
@@ -91,14 +95,16 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
       }});
     }
     const cookieValue = request.headers.get('cookie')?.split(/;\s*/).find(value => value.startsWith(`${cookie}=`))?.slice(cookie.length + 1);
-    if (!cookieValue || cookieValue.length > 3600 || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{43}$/.test(cookieValue)) return invalid();
+    if (!cookieValue) return invalid('consent_cookie_missing');
+    if (cookieValue.length > 3600 || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{43}$/.test(cookieValue)) return invalid('consent_cookie_format');
     const [data, signature] = cookieValue.split('.');
-    if (!timingSafeEqual(mac(data), Buffer.from(signature, 'base64url'))) return invalid();
+    if (!timingSafeEqual(mac(data), Buffer.from(signature, 'base64url'))) return invalid('consent_cookie_signature');
     const transaction = JSON.parse(Buffer.from(data, 'base64url').toString('utf8'));
-    if (transaction.expires <= Date.now()) return invalid();
+    if (transaction.expires <= Date.now()) return invalid('consent_cookie_expired');
     const decision = form.get('decision');
     if (form.size !== 2 || form.get('csrf') !== transaction.csrf ||
-        !['allow', 'deny'].includes(decision) || await authenticate(request) !== transaction.subject) return invalid();
+        !['allow', 'deny'].includes(decision)) return invalid('consent_form');
+    if (await authenticate(request) !== transaction.subject) return invalid('consent_session');
     const {grant} = transaction;
     const redirect = new URL(grant.redirectUri);
     redirect.searchParams.set('iss', issuer);
