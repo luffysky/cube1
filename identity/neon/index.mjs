@@ -1,4 +1,6 @@
 import pg from 'pg';
+import {BrickduelSaveStore} from '../../server/api/brickduel-saves.mjs';
+import {brickduelSyncVerifier,createBrickduelSync} from '../../server/api/brickduel-sync.mjs';
 import {createPrivateKey} from 'node:crypto';
 import {attachDatabasePool} from '@neon/functions';
 import {createIdentityAuthority,verifyBrickduelLinkToken} from '../authority.mjs';
@@ -77,6 +79,9 @@ async function initialize(){
     exchangeCode:staging||productionAuthorization
       ? oauth.exchange : undefined,
     browserAuthorization,
+    brickduelSync:process.env.BRICKDUEL_SAVE_INGEST_ENABLED==='true'
+      ? createBrickduelSync({store:new BrickduelSaveStore(pool),verify:brickduelSyncVerifier({staging:Boolean(staging)})})
+      : undefined,
     issueAdminToken:adminAuthority?.issueAdminToken,
     adminServiceSecret:staging?process.env.IDENTITY_STAGING_ADMIN_SERVICE_SECRET:undefined,
     clientSecret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET});
