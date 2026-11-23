@@ -41,7 +41,11 @@ export function createTrustedIdentityApp({authority,verifyToken,dbReady,clientSe
       const origin=request.headers.get('origin');
       const headers=cors(request);
       try{
-        if(path==='/oauth/authorize'&&browserAuthorization)return await browserAuthorization(request);
+        if(path==='/oauth/authorize'&&browserAuthorization){
+          const response=await browserAuthorization(request);
+          if(request.method==='POST')console.info('identity_authorization_response',response.status);
+          return response;
+        }
         if(origin&&origin!==allowedOrigin)return json(403,{error:'origin_denied'},headers);
         if(request.method==='GET'&&path==='/.well-known/jwks.json'){
           return json(200,authority.publicJwks(),{'Cache-Control':'public, max-age=60'});

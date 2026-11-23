@@ -63,6 +63,9 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
       const csrf = randomBytes(32).toString('base64url');
       const data = Buffer.from(JSON.stringify({grant, subject, csrf, expires: Date.now() + lifetime * 1000})).toString('base64url');
       const proof = `${data}.${mac(data).toString('base64url')}`;
+      // Some browsers apply the submitting document's form-action to redirects.
+      const callbackPolicy = headers['Content-Security-Policy'].replace("form-action 'self'",
+        `form-action 'self' ${new URL(grant.redirectUri).origin}`);
       return html(200, '連結 SnowRealm Games 帳號',
         `<p>允許 BrickDuel${staging ? " 測試站" : ""} 連結你目前登入的 SnowRealm 帳號？</p>
         <form method="post" action="${path}">
@@ -70,7 +73,7 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
         ${staging ? '' : `<input type="hidden" name="consent" value="${proof}">`}
         <button name="decision" value="allow">同意</button>
         <button name="decision" value="deny">拒絕</button></form>`,
-        staging ? {'Set-Cookie': setCookie(proof, lifetime)} : {});
+        {'Content-Security-Policy': callbackPolicy, ...(staging ? {'Set-Cookie': setCookie(proof, lifetime)} : {})});
     }
     if (request.method !== 'POST') return new Response(null, {status: 405, headers: {...headers, Allow: 'GET, POST'}});
     if (request.headers.get('origin') !== issuer) return invalid('post_origin');
@@ -121,8 +124,9 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
     } else {
       redirect.searchParams.set('error', 'access_denied');
     }
+    const callbackPolicy = headers['Content-Security-Policy'].replace("form-action 'self'", `form-action 'self' ${redirect.origin}`);
     return new Response(null, {status: 303, headers: {
-      ...headers, Location: redirect.href, ...(staging ? {'Set-Cookie': setCookie('', 0)} : {}),
+      ...headers, 'Content-Security-Policy': callbackPolicy, Location: redirect.href, ...(staging ? {'Set-Cookie': setCookie('', 0)} : {}),
     }});
   };
 }
