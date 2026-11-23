@@ -43,3 +43,20 @@ export function createBrickduelSync({store, verify}) {
     }
   };
 }
+
+export function createStagingBrickduelSaveRead({store, authenticate}) {
+  return async request => {
+    const reply = (status, data) => Response.json(data,{status,headers:{'Cache-Control':'private, no-store'}});
+    if (request.method !== 'GET') return new Response(null,{status:405,headers:{Allow:'GET'}});
+    if (request.headers.has('origin') && request.headers.get('origin') !== new URL(request.url).origin) {
+      return reply(403,{error:'origin_denied'});
+    }
+    try {
+      const subject = await authenticate(request);
+      if (!subject) return reply(401,{error:'unauthorized'});
+      return reply(200,{save:await store.getForPlayer(subject)});
+    } catch {
+      return reply(503,{error:'brickduel_save_unavailable'});
+    }
+  };
+}

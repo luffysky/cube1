@@ -1,6 +1,6 @@
 import pg from 'pg';
 import {BrickduelSaveStore} from '../../server/api/brickduel-saves.mjs';
-import {brickduelSyncVerifier,createBrickduelSync} from '../../server/api/brickduel-sync.mjs';
+import {brickduelSyncVerifier,createBrickduelSync,createStagingBrickduelSaveRead} from '../../server/api/brickduel-sync.mjs';
 import {createPrivateKey} from 'node:crypto';
 import {attachDatabasePool} from '@neon/functions';
 import {createIdentityAuthority,verifyBrickduelLinkToken} from '../authority.mjs';
@@ -67,20 +67,26 @@ async function initialize(){
           jwksUrl:process.env.NEON_AUTH_JWKS_URL,audience:process.env.AUTH_AUDIENCE}),
         secret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET})
     : undefined;
-  const browserAuthorization=staging&&process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET?.length>=32
+  const stagingLogin=staging ? createStagingLogin({issuer:staging.issuer,
+    base:'https://ep-green-pond-bici1klg.neonauth.c-5.ap-southeast-1.aws.neon.tech/cube1_identity_staging/auth',
+    accounts:["947d7f1f-370e-43d6-b156-20ac43b0324d","f3cd7632-fa4d-4d8e-958d-7e32bfa5d9ac"]}) : null;
+  const browserAuthorization=stagingLogin&&process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET?.length>=32
     ? createBrowserAuthorization({issuer:staging.issuer,clients:staging.clients,authorize:oauth.authorize,
-        secret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET,
-        ...createStagingLogin({issuer:staging.issuer,
-          base:'https://ep-green-pond-bici1klg.neonauth.c-5.ap-southeast-1.aws.neon.tech/cube1_identity_staging/auth',
-          accounts:["947d7f1f-370e-43d6-b156-20ac43b0324d","f3cd7632-fa4d-4d8e-958d-7e32bfa5d9ac"]})})
+        secret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET,...stagingLogin})
     : productionAuthorization;
+  const stagingSyncBuild=Boolean(staging) &&
+    typeof __ENABLE_STAGING_BRICKDUEL_SYNC__ !== 'undefined' && __ENABLE_STAGING_BRICKDUEL_SYNC__;
+  const brickduelSaves=new BrickduelSaveStore(pool);
   return createTrustedIdentityApp({authority,verifyToken,dbReady,issuer:staging?.issuer,
     adminPublicKeys:[...(adminAuthority?.publicJwks().keys??[]),...adminPublicKeys],
     exchangeCode:staging||productionAuthorization
       ? oauth.exchange : undefined,
     browserAuthorization,
-    brickduelSync:process.env.BRICKDUEL_SAVE_INGEST_ENABLED==='true'
-      ? createBrickduelSync({store:new BrickduelSaveStore(pool),verify:brickduelSyncVerifier({staging:Boolean(staging)})})
+    brickduelSync:(stagingSyncBuild || process.env.BRICKDUEL_SAVE_INGEST_ENABLED==='true')
+      ? createBrickduelSync({store:brickduelSaves,verify:brickduelSyncVerifier({staging:Boolean(staging)})})
+      : undefined,
+    brickduelSaveRead:stagingLogin&&(stagingSyncBuild || process.env.BRICKDUEL_SAVE_READ_ENABLED==='true')
+      ? createStagingBrickduelSaveRead({store:brickduelSaves,authenticate:stagingLogin.authenticate})
       : undefined,
     issueAdminToken:adminAuthority?.issueAdminToken,
     adminServiceSecret:staging?process.env.IDENTITY_STAGING_ADMIN_SERVICE_SECRET:undefined,

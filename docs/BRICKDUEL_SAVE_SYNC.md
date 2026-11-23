@@ -15,3 +15,5 @@ BrickDuel owns the save. The SnowRealm Games player center reads a private copy 
 ## Verification
 
 Apply migration 005 after the Identity roles and migrations 003–004 are installed in isolated staging. Enable `BRICKDUEL_SAVE_INGEST_ENABLED` in Identity and `BRICKDUEL_SAVE_READ_ENABLED` in the member API for that environment. Verify the sender's initially bound save, updates, retries, hide, restore, purge, replacement, and anonymous exclusion. Validate the dashboard with the matching and a different player. Production configuration remains gated on joint verification and Owner approval.
+
+On the existing Neon staging project, which runs Identity without a separate member API, build Identity with `node identity/neon/build.mjs --enable-staging-brickduel-sync` and preserve its existing environment. This enables both routes only when Identity is running in staging mode. For the owner read, open `GET https://identity-staging.snowrealm.pet/v1/games/brickduel/save` in the same browser used to complete staging OAuth while its short-lived Identity session cookie is still valid.
