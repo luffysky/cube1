@@ -4,6 +4,7 @@ import {createIdentityAuthority,verifyBrickduelLinkToken} from '../authority.mjs
 import {createAdminAuthority} from '../admin-authority.mjs';
 import {stagingIdentityConfig} from '../staging-config.mjs';
 import {createOAuthCore} from '../oauth-core.mjs';
+import {BRICKDUEL_CLIENT,BRICKDUEL_CALLBACK} from '../../dist/sso-flow.mjs';
 import {PlatformIdentityStore} from '../../server/api/platform-identity.mjs';
 import {OAuthStore} from '../oauth-store.mjs';
 import {createTrustedIdentityApp} from './trusted-app.mjs';
@@ -43,10 +44,12 @@ async function initialize(){
       kid:process.env.IDENTITY_STAGING_ADMIN_KID,issuer:staging.issuer,canIssue:async adminKid=>
         await dbReady() && await store.canIssue(adminKid)})
     : null;
-  const oauth=staging?createOAuthCore({
+  const oauth=createOAuthCore({
     store,signer:authority,identityMapping:new PlatformIdentityStore(pool),
-    issuer:staging.issuer,clients:staging.clients
-  }):null;
+    issuer:staging?.issuer,clients:staging?.clients??[
+      {clientId:BRICKDUEL_CLIENT,redirectUri:BRICKDUEL_CALLBACK}
+    ]
+  });
   const browserAuthorization=staging&&process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET?.length>=32
     ? createBrowserAuthorization({issuer:staging.issuer,clients:staging.clients,authorize:oauth.authorize,
         secret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET,
@@ -56,7 +59,9 @@ async function initialize(){
     : undefined;
   return createTrustedIdentityApp({authority,verifyToken,dbReady,issuer:staging?.issuer,
     adminPublicKeys:[...(adminAuthority?.publicJwks().keys??[]),...adminPublicKeys],
-    exchangeCode:oauth?.exchange,browserAuthorization,
+    exchangeCode:staging||process.env.IDENTITY_PRODUCTION_OAUTH_EXCHANGE_ENABLED==='true'
+      ? oauth.exchange : undefined,
+    browserAuthorization,
     issueAdminToken:adminAuthority?.issueAdminToken,
     adminServiceSecret:staging?process.env.IDENTITY_STAGING_ADMIN_SERVICE_SECRET:undefined,
     clientSecret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET});
