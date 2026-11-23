@@ -22,7 +22,7 @@ export function createStagingLogin({base, issuer, accounts, fetchImpl = fetch}) 
 
     async signIn(email, password) {
       if (typeof email !== 'string' || typeof password !== 'string' ||
-          email.length > 254 || !password.length || password.length > 128) return null;
+          email.length > 254 || !password.length) return null;
       const response = await authFetch('/sign-in/email', {
         method: 'POST', headers: {Origin: issuer, 'Content-Type': 'application/json'},
         body: JSON.stringify({email, password}),
