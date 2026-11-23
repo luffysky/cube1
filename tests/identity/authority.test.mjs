@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generateKeyPairSync } from 'node:crypto';
+import { generateKeyPairSync, sign } from 'node:crypto';
 import {
   createIdentityAuthority, verifyBrickduelLinkToken,
   ISSUER, PLAYER_AUDIENCE, LINK_SCOPE
@@ -19,7 +19,7 @@ function signer(pair,kid,extra={}) {
 }
 const authority = signer(key1,'identity-test-key-01');
 const issue = (server=authority,fields={}) => server.issuePlayerToken({
-  playerId,audience:PLAYER_AUDIENCE,scope:LINK_SCOPE,...fields
+  playerId,audience:PLAYER_AUDIENCE,scope:LINK_SCOPE,nonce:'n'.repeat(32),...fields
 });
 const verify = (token,opts={}) => verifyBrickduelLinkToken(token,{
   jwks:authority.publicJwks(),checkStatus:async()=>true,
@@ -109,4 +109,15 @@ test('status callback receives signed issued-at for revocation-after checks',asy
  const result=await verify(token,{checkStatus:async detail=>{seen=detail;return true;}});
  assert.equal(result.playerId,playerId);
  assert.equal(seen.issuedAt,Math.floor(now/1000));
+});
+
+test('valid Ed25519 signatures cannot authorize missing, empty or malformed nonce claims',async()=>{
+ const [header,body]=issue().split('.');
+ const encode=value=>Buffer.from(JSON.stringify(value)).toString('base64url');
+ const payload=JSON.parse(Buffer.from(body,'base64url'));
+ for(const nonce of [undefined,'','x'.repeat(21),'!'.repeat(32),42]){
+  const input=header+'.'+encode({...payload,nonce});
+  const token=input+'.'+sign(null,Buffer.from(input),key1.privateKey).toString('base64url');
+  await assert.rejects(verify(token),/invalid_nonce/);
+ }
 });

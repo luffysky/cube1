@@ -1,8 +1,13 @@
 import pg from 'pg';
 import {attachDatabasePool} from '@neon/functions';
 import {createIdentityAuthority,verifyBrickduelLinkToken} from '../authority.mjs';
+import {createAdminAuthority} from '../admin-authority.mjs';
+import {stagingIdentityConfig} from '../staging-config.mjs';
+import {createOAuthCore} from '../oauth-core.mjs';
+import {PlatformIdentityStore} from '../../server/api/platform-identity.mjs';
 import {OAuthStore} from '../oauth-store.mjs';
 import {createTrustedIdentityApp} from './trusted-app.mjs';
+import {identityDatabaseTarget} from './database-target.mjs';
 import {identityDatabaseReady} from './database-readiness.mjs';
 
 const keyPem=process.env.IDENTITY_ED25519_PRIVATE_PEM;
@@ -12,30 +17,40 @@ let app;
 async function initialize(){
   if(!keyPem||!kid||!process.env.IDENTITY_DATABASE_URL)
     throw Error('identity_environment_incomplete');
-  const databaseUrl=new URL(process.env.IDENTITY_DATABASE_URL);
-  const allowedHosts=new Set([
-    'ep-crimson-truth-b3j5tyvk.c-4.ap-southeast-1.aws.neon.tech',
-    'ep-crimson-truth-b3j5tyvk-pooler.c-4.ap-southeast-1.aws.neon.tech'
-  ]);
-  if(databaseUrl.protocol!=='postgresql:'||!allowedHosts.has(databaseUrl.hostname)||
-     databaseUrl.username!=='sr_identity_service'||databaseUrl.pathname!=='/cube1'||
-     !databaseUrl.password||(databaseUrl.port&&databaseUrl.port!=='5432'))
-    throw Error('identity_database_target_invalid');
-  // Build pg's options explicitly so URL query options cannot override TLS.
-  const pool=new pg.Pool({host:databaseUrl.hostname,port:5432,database:'cube1',
-    user:'sr_identity_service',password:decodeURIComponent(databaseUrl.password),
-    ssl:{rejectUnauthorized:true},enableChannelBinding:true,
-    max:5,connectionTimeoutMillis:5000,idleTimeoutMillis:10000});
+  const mode=process.env.IDENTITY_ENVIRONMENT || 'production';
+  if(!['production','staging'].includes(mode))throw Error('identity_environment_invalid');
+  const staging=mode==='staging'?stagingIdentityConfig(process.env.IDENTITY_STAGING_ISSUER):null;
+  if(staging&&staging.issuer!=='https://identity-staging.snowrealm.pet')throw Error('identity_staging_issuer_invalid');
+  const pool=new pg.Pool(identityDatabaseTarget(process.env.IDENTITY_DATABASE_URL,{
+    staging:Boolean(staging),stagingHost:process.env.IDENTITY_STAGING_DATABASE_HOST
+  }));
   attachDatabasePool(pool);
   pool.on('error',()=>{ /* Never log credentials. pg removes dead idle clients. */ });
-  const authority=createIdentityAuthority({privateKeyPem:keyPem,kid});
+  const authority=createIdentityAuthority({privateKeyPem:keyPem,kid,issuer:staging?.issuer});
   const store=new OAuthStore(pool);
   const verifyToken=token=>verifyBrickduelLinkToken(token,{
+    issuer:staging?.issuer,
     jwks:authority.publicJwks(),
     checkStatus:async info=>store.isTokenActive(info)
   });
   const dbReady=()=>identityDatabaseReady(pool,store,kid,'sr_identity_service');
-  return createTrustedIdentityApp({authority,verifyToken,dbReady,clientSecret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET});
+  const adminPublicKeys=JSON.parse(process.env.IDENTITY_ADMIN_PUBLIC_JWKS || '{"keys":[]}').keys;
+  if(!Array.isArray(adminPublicKeys))throw Error('identity_admin_jwks_invalid');
+  const adminAuthority=staging&&process.env.IDENTITY_STAGING_ADMIN_PRIVATE_PEM
+    ? createAdminAuthority({privateKeyPem:process.env.IDENTITY_STAGING_ADMIN_PRIVATE_PEM,
+      kid:process.env.IDENTITY_STAGING_ADMIN_KID,issuer:staging.issuer,canIssue:async adminKid=>
+        await dbReady() && await store.canIssue(adminKid)})
+    : null;
+  const oauth=staging?createOAuthCore({
+    store,signer:authority,identityMapping:new PlatformIdentityStore(pool),
+    issuer:staging.issuer,clients:staging.clients
+  }):null;
+  return createTrustedIdentityApp({authority,verifyToken,dbReady,issuer:staging?.issuer,
+    adminPublicKeys:[...(adminAuthority?.publicJwks().keys??[]),...adminPublicKeys],
+    exchangeCode:oauth?.exchange,
+    issueAdminToken:adminAuthority?.issueAdminToken,
+    adminServiceSecret:staging?process.env.IDENTITY_STAGING_ADMIN_SERVICE_SECRET:undefined,
+    clientSecret:process.env.IDENTITY_BRICKDUEL_CLIENT_SECRET});
 }
 
 export default {

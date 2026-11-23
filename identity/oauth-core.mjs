@@ -27,7 +27,7 @@ export function normalizeClients(clients=[]){
 /** Trusted backend-only authorization core. Caller MUST first verify Neon session,
  * explicit account-link consent, CSRF defenses, and rate limits. No HTTP routes
  * are provided here. This is not a finished OIDC provider or BFF. */
-export function createOAuthCore({store,identityMapping,signer,clients=[],clock=Date.now}){
+export function createOAuthCore({store,identityMapping,signer,clients=[],issuer=ISSUER,clock=Date.now}){
  if(!store||!identityMapping||typeof signer?.issuePlayerToken!=='function')deny('oauth_dependencies_unavailable',503);
  const allowed=normalizeClients(clients);
  const checkClient=(id,uri)=>{
@@ -47,7 +47,7 @@ export function createOAuthCore({store,identityMapping,signer,clients=[],clock=D
    const code=randomBytes(32).toString('base64url');
    await store.saveCode({codeHash:hash(code),clientId,redirectUri,codeChallenge,
     playerId,stateHash:hash(state),nonceHash:hash(nonce),expiresAt:new Date(clock()+90000)});
-   return {code,state,issuer:ISSUER,redirectUri};
+   return {code,state,issuer,redirectUri};
   },
   async exchange({clientId,redirectUri,code,codeVerifier,state,nonce}){
    checkClient(clientId,redirectUri);
@@ -62,7 +62,7 @@ export function createOAuthCore({store,identityMapping,signer,clients=[],clock=D
    if(!kid||typeof store.canIssue!=='function'||(await store.canIssue(kid))!==true)
      deny('signing_key_revoked_or_unavailable',503);
    const accessToken=signer.issuePlayerToken({playerId,audience:PLAYER_AUDIENCE,
-    scope:LINK_SCOPE,lifetimeSeconds:300});
+    scope:LINK_SCOPE,nonce,lifetimeSeconds:300});
    return {access_token:accessToken,token_type:'Bearer',expires_in:300,scope:LINK_SCOPE};
   }
  };

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {generateKeyPairSync} from 'node:crypto';
+import {createHash,generateKeyPairSync} from 'node:crypto';
 import {createIdentityAuthority} from '../../identity/authority.mjs';
 import {createOAuthCore,normalizeClients,pkceS256} from '../../identity/oauth-core.mjs';
 import {OAuthStore} from '../../identity/oauth-store.mjs';
@@ -27,7 +27,7 @@ function makeHarness(){
   kid:'identity-oauth-test-01'});
  const oauth=createOAuthCore({store,signer,identityMapping:{ensure:async()=>uuid},
   clients:[{clientId:params.clientId,redirectUri:params.redirectUri}]});
- return {oauth,setActive:value=>active=value,setKeyActive:value=>keyActive=value};
+ return {oauth,records,setActive:value=>active=value,setKeyActive:value=>keyActive=value};
 }
 test('exact HTTPS callback registration rejects wildcard, query and duplicates',()=>{
  for(const redirectUri of ['https://evil.test/cb','https://brickduel.snowrealm.pet/cb?next=evil',
@@ -45,20 +45,26 @@ test('authorization requires verified subject, explicit consent and S256',async(
  await assert.rejects(oauth.authorize({...params,redirectUri:'https://brickduel.snowrealm.pet/evil'}),/invalid_client_or_redirect/);
 });
 test('short code is bound to PKCE and redeemable only once',async()=>{
- const {oauth}=makeHarness();
+ const {oauth,records}=makeHarness();
  const auth=await oauth.authorize(params);
  assert.equal(auth.code.length,43);assert.equal(auth.state,params.state);
  await assert.rejects(oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier+'BAD'}),/invalid_grant/);
+ await assert.rejects(oauth.exchange({...params,nonce:undefined,code:auth.code,codeVerifier:verifier}),/invalid_grant/);
  for (const field of ['state','nonce']) {
   await assert.rejects(oauth.exchange({
    ...params,code:auth.code,codeVerifier:verifier,[field]:'x'.repeat(43)
   }),/invalid_grant/);
  }
+ const [record]=records.values();
+ assert.equal(record.used,false);
+ assert.equal(record.nonceHash,createHash('sha256').update(params.nonce).digest('hex'));
+ assert.equal(JSON.stringify(record).includes(params.nonce),false);
  const grant=await oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier});
  assert.equal(grant.token_type,'Bearer');assert.equal(grant.expires_in,300);
  const claims=JSON.parse(Buffer.from(grant.access_token.split('.')[1],'base64url').toString());
+ assert.equal(claims.nonce,params.nonce);
  assert.equal(claims.sub,uuid);assert.equal(claims.aud,'snowrealm:brickduel:api');
  await assert.rejects(oauth.exchange({state:params.state,nonce:params.nonce,clientId:params.clientId,redirectUri:params.redirectUri,
   code:auth.code,codeVerifier:verifier}),/invalid_grant/);
