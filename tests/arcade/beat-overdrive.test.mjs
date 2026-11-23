@@ -27,3 +27,23 @@ test('timeout ends session and restart clears score and input history',()=>{
  assert.equal(s.over,true);assert.equal(s.active,false);
  start(s);assert.equal(s.over,false);assert.equal(s.hits.length,0);
 });
+
+test('start does not wait for a mobile audio context to resume', async () => {
+ const {readFileSync}=await import('node:fs');
+ const vm=await import('node:vm');
+ const elements=new Map();
+ const element=()=>({style:{},value:'0',addEventListener(name,handler){this[name]=handler;},append(){}});
+ const document={
+  querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){},
+  getElementById(id){if(!elements.has(id))elements.set(id,element());return elements.get(id);},
+ };
+ let started=false;
+ const source=readFileSync(new URL('../../dist/games/beat-overdrive/game.mjs',import.meta.url),'utf8');
+ vm.runInNewContext(source.replace(/^import .*\n/,''),{
+  document,window:{AudioContext:class {resume(){return new Promise(()=>{});}},addEventListener(){}},
+  requestAnimationFrame(){},performance:{now:()=>0},NOTES:[],makeState:()=>({}),start(){started=true;},
+ });
+ elements.get('start').click();
+ assert.equal(started,true);
+ assert.match(elements.get('status').textContent,/跟住節拍/);
+});

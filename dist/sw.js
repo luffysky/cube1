@@ -1,6 +1,6 @@
 /* Original SnowRealm Games offline shell. No libraries or runtime cache rules. */
 // Bump VERSION whenever a precached file changes. Install is all-or-nothing.
-const VERSION = '2026-11-24-v39';
+const VERSION = '2026-11-24-v40';
 const CACHE_PREFIX = 'snowrealm-games-shell-';
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 
@@ -95,7 +95,12 @@ function routeFor(request) {
   if (request.method !== 'GET') return null;
   const url = new URL(request.url);
   // Queries may contain session/callback data. They never enter the offline shell.
-  if (url.origin !== self.location.origin || url.search) return null;
+  if (url.origin !== self.location.origin) return null;
+  // Versioned arcade launches bypass older workers and retain offline support here.
+  const arcadeLaunch = request.mode === 'navigate' &&
+    /^\/games\/(?:beat-overdrive|gravity-reversal|orbit-escape|territory-conquest|refract-maze|zero-dodge)\/$/.test(url.pathname);
+  const rhythmModule = url.pathname === '/games/beat-overdrive/game.mjs';
+  if (url.search && !(url.search === '?v=40' && (arcadeLaunch || rhythmModule))) return null;
   if (request.headers.has('range')) {
     // Audio players may request byte ranges even after the full file is cached.
     // HTML, unknown media paths, and every other asset keep the original bypass.
