@@ -62,13 +62,15 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
       }
       const csrf = randomBytes(32).toString('base64url');
       const data = Buffer.from(JSON.stringify({grant, subject, csrf, expires: Date.now() + lifetime * 1000})).toString('base64url');
+      const proof = `${data}.${mac(data).toString('base64url')}`;
       return html(200, '連結 SnowRealm Games 帳號',
         `<p>允許 BrickDuel${staging ? " 測試站" : ""} 連結你目前登入的 SnowRealm 帳號？</p>
         <form method="post" action="${path}">
         <input type="hidden" name="csrf" value="${csrf}">
+        ${staging ? '' : `<input type="hidden" name="consent" value="${proof}">`}
         <button name="decision" value="allow">同意</button>
         <button name="decision" value="deny">拒絕</button></form>`,
-        {'Set-Cookie': setCookie(`${data}.${mac(data).toString('base64url')}`, lifetime)});
+        staging ? {'Set-Cookie': setCookie(proof, lifetime)} : {});
     }
     if (request.method !== 'POST') return new Response(null, {status: 405, headers: {...headers, Allow: 'GET, POST'}});
     if (request.headers.get('origin') !== issuer) return invalid('post_origin');
@@ -94,15 +96,19 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
         ...headers, Location: path + url.search, 'Set-Cookie': session,
       }});
     }
-    const cookieValue = request.headers.get('cookie')?.split(/;\s*/).find(value => value.startsWith(`${cookie}=`))?.slice(cookie.length + 1);
-    if (!cookieValue) return invalid('consent_cookie_missing');
-    if (cookieValue.length > 3600 || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{43}$/.test(cookieValue)) return invalid('consent_cookie_format');
-    const [data, signature] = cookieValue.split('.');
-    if (!timingSafeEqual(mac(data), Buffer.from(signature, 'base64url'))) return invalid('consent_cookie_signature');
+    const proof = staging
+      ? request.headers.get('cookie')?.split(/;\s*/).find(value => value.startsWith(`${cookie}=`))?.slice(cookie.length + 1)
+      : form.get('consent');
+    if (!proof) return invalid(staging ? 'consent_cookie_missing' : 'consent_proof_missing');
+    if (proof.length > 3600 || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{43}$/.test(proof))
+      return invalid('consent_proof_format');
+    const [data, signature] = proof.split('.');
+    if (!timingSafeEqual(mac(data), Buffer.from(signature, 'base64url')))
+      return invalid('consent_proof_signature');
     const transaction = JSON.parse(Buffer.from(data, 'base64url').toString('utf8'));
     if (transaction.expires <= Date.now()) return invalid('consent_cookie_expired');
     const decision = form.get('decision');
-    if (form.size !== 2 || form.get('csrf') !== transaction.csrf ||
+    if (form.size !== (staging ? 2 : 3) || form.get('csrf') !== transaction.csrf ||
         !['allow', 'deny'].includes(decision)) return invalid('consent_form');
     if (await authenticate(request) !== transaction.subject) return invalid('consent_session');
     const {grant} = transaction;
@@ -116,7 +122,7 @@ export function createBrowserAuthorization({issuer, clients, authorize, authenti
       redirect.searchParams.set('error', 'access_denied');
     }
     return new Response(null, {status: 303, headers: {
-      ...headers, Location: redirect.href, 'Set-Cookie': setCookie('', 0),
+      ...headers, Location: redirect.href, ...(staging ? {'Set-Cookie': setCookie('', 0)} : {}),
     }});
   };
 }

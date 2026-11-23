@@ -37,15 +37,19 @@ test('production portal verifies login and requires a separate Identity consent 
   const consent = await authorize(new Request(path + '?' + query,{headers:{cookie:sessionCookie}}));
   assert.equal(consent.status, 200);
   assert.equal(issued, 0);
-  const cookies = sessionCookie + '; ' + consent.headers.get('set-cookie').split(';')[0];
-  const csrf = (await consent.text()).match(/name="csrf" value="([^"]+)"/)[1];
-  async function decide(value) {
+  assert.equal(consent.headers.get('set-cookie'), null);
+  const html = await consent.text();
+  const proof = html.match(/name="consent" value="([^"]+)"/)[1];
+  const csrf = html.match(/name="csrf" value="([^"]+)"/)[1];
+  async function decide(value, signed=proof, cookie=sessionCookie) {
     return authorize(new Request(path,{
-      method:'POST',headers:{cookie:cookies,origin:issuer},
-      body:new URLSearchParams({decision:'allow',csrf:value}),
+      method:'POST',headers:{cookie,origin:issuer},
+      body:new URLSearchParams({decision:'allow',csrf:value,consent:signed}),
     }));
   }
   assert.equal((await decide('wrong')).status, 400);
+  assert.equal((await decide(csrf, 'invalid')).status, 400);
+  assert.equal((await decide(csrf, proof, '')).status, 400);
   const approved = await decide(csrf);
   assert.equal(approved.status, 303);
   const callback = new URL(approved.headers.get('location'));
