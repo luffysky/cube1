@@ -11,5 +11,6 @@ await build({
   outfile:fileURLToPath(new URL('./build/index.mjs',import.meta.url)),
   banner:{js:"import{createRequire as ___cr}from'node:module';import{fileURLToPath as ___f}from'node:url';import{dirname as ___d}from'node:path';const require=___cr(import.meta.url);const __filename=___f(import.meta.url);const __dirname=___d(__filename);"},
   nodePaths:[fileURLToPath(new URL('../../server/api/node_modules',import.meta.url))],
+  define:{__ENABLE_STAGING_BRICKDUEL_SYNC__:JSON.stringify(process.argv.includes('--enable-staging-brickduel-sync'))},
   external:['pg-native'],logLevel:'info'
 });

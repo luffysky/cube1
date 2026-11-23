@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { BrickduelSaveStore } from './brickduel-saves.mjs';
 import { attachDatabasePool } from '@neon/functions';
 import { createApp } from './app.mjs';
 import { jwtAuthenticator } from './auth.mjs';
@@ -20,6 +21,7 @@ export default createApp({
       return rows[0]?.name;
     },
   }),
+  brickduelSaves: process.env.BRICKDUEL_SAVE_READ_ENABLED === 'true' ? new BrickduelSaveStore(pool) : null,
   adminStore: new AdminStore(pool),
   platformIdentity: new PlatformIdentityStore(pool),
   adminSubjects: process.env.SNOWREALM_ADMIN_SUBJECTS || '',

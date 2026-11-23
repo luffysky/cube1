@@ -4,7 +4,7 @@ import { Ranked, validateInputs } from './ranked.mjs';
 import { assertAdmin, adminAllowlist, adminRead } from './admin.mjs';
 import { adsEnabled, checkAdapterSignature, validateAdapterEvent, rewardedAdsConfig } from './rewarded-ads.mjs';
 
-export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, platformIdentity = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
+export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, platformIdentity = null, brickduelSaves = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
   const origins = new Set(allowedOrigins.filter(Boolean).map(origin => new URL(origin).origin));
   const ranked = new Ranked(store);
   const admins = adminAllowlist(adminSubjects);
@@ -57,6 +57,11 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
         }
         const userId = await authenticate(request);
         if (typeof userId !== 'string' || !userId.length || userId.length > 128 || ['__proto__', 'constructor', 'prototype'].includes(userId)) fail('unauthorized', 401);
+        if (path === '/v1/games/brickduel/save' && method === 'GET') {
+          if (!brickduelSaves) fail('brickduel_save_unavailable', 503);
+          await store.limit(userId, 'brickduel_save_read', 30);
+          return respond({save:await brickduelSaves.getForPlayer(userId)});
+        }
         if(path==='/v1/identity/me' && method==='GET'){
           if(!platformIdentity)fail('identity_unavailable',503);
           // Unlike a Neon auth ID, this UUID is portable across SnowRealm games.

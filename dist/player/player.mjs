@@ -131,10 +131,23 @@ async function render() {
         table('最近 30 場排位對局',['時間','對手','結果','得分'],
           history.matches.map(match=>[time(match.createdAt),match.opponent.nickname,
             ({win:'勝',loss:'敗',draw:'和'})[match.outcome] ?? match.outcome,number.format(match.score)]),'目前沒有排位紀錄。');
+      } else if (brickduel) {
+        status.textContent = '載入轉磚存檔…';
+        const {save, available} = await api('/v1/games/brickduel/save',{signal:pending.signal}).then(
+          data => ({...data, available:true}),
+          error => { if (error.status !== 503) throw error; return {available:false}; }
+        );
+        if (version !== renderVersion) return;
+        if (save) {
+          const {state} = save;
+          cards(card('存檔代號',save.publicTag),card('轉磚金幣',number.format(state.coins)),
+            card('排位分數',number.format(state.rp)),card('磚之冒險最高關卡',state.rpg.best ?? 0));
+          view.append(node('p','最後同步 ' + time(save.syncedAt)));
+        } else {
+          view.append(node('p',available ? '目前沒有已同步的轉磚存檔。' : '目前無法讀取轉磚存檔，請前往轉磚查看。'));
+        }
       } else {
-        view.append(node('h3',description),node('p',brickduel
-          ? '請在轉磚對戰的個人資料查看連結狀態、冒險進度與雲端存檔。這些資料尚未接入玩家中心。'
-          : '這款遊戲的個人紀錄尚未接入玩家中心。'));
+        view.append(node('h3',description),node('p','這款遊戲的個人紀錄尚未接入玩家中心。'));
       }
       view.append(link(brickduel ? '前往轉磚對戰' : '前往遊戲',brickduel ? 'https://brickduel.snowrealm.pet/' : '/games/' + id + '/'));
     } else if (page === 'games') {
