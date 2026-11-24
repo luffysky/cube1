@@ -22,6 +22,7 @@ export default createApp({
   }),
   adminStore: new AdminStore(pool),
   platformIdentity: new PlatformIdentityStore(pool),
+  adminApiEnabled: process.env.SNOWREALM_ADMIN_API_ENABLED === 'true',
   adminSubjects: process.env.SNOWREALM_ADMIN_SUBJECTS || '',
   rewardedAdSecret: process.env.REWARDED_AD_ADAPTER_SECRET || '',
   rewardedAdUnit: process.env.REWARDED_AD_UNIT || '',
