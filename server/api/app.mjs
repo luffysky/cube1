@@ -4,7 +4,7 @@ import { Ranked, validateInputs } from './ranked.mjs';
 import { assertAdmin, adminAllowlist, adminRead } from './admin.mjs';
 import { adsEnabled, checkAdapterSignature, validateAdapterEvent, rewardedAdsConfig } from './rewarded-ads.mjs';
 
-export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminStore = null, platformIdentity = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
+export function createApp({ store, authenticate, allowedOrigins = [], adminSubjects = '', adminApiEnabled = false, adminStore = null, platformIdentity = null, entitlementWebhookSecret = '', rewardedAdSecret = '', rewardedAdUnit = '', rewardedAdsReady = false, expectedDatabase = 'cube1', logger = console }) {
   const origins = new Set(allowedOrigins.filter(Boolean).map(origin => new URL(origin).origin));
   const ranked = new Ranked(store);
   const admins = adminAllowlist(adminSubjects);
@@ -73,6 +73,7 @@ export function createApp({ store, authenticate, allowedOrigins = [], adminSubje
           return respond({platformPlayerId,linked:true,source:'snowrealm-identity-mapping',readyForBrickduel:false});
         }
         if(path.startsWith('/v1/admin/')){
+          if (!adminApiEnabled) fail('not_found', 404);
           assertAdmin(userId,admins);
           if(!adminStore)fail('admin_unavailable',503);
           await store.limit(userId,'admin_read',60);

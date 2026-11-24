@@ -25,6 +25,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Reject high or critical runtime dependency advisories
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm --prefix server/api audit --omit=dev --audit-level=high
       - name: Test gameplay and offline rules
         run: npm test
       - name: Verify Identity signer, JWKS and fail-closed policies

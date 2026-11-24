@@ -12,7 +12,7 @@ test('unauthorized logged-in players receive 403 without invoking any management
  let ensured=0,adminReads=0;
  const store={clock:Date.now,ensureUser:()=>{ensured++;},limit:async()=>{},};
  const app=createApp({store,authenticate:async()=> 'unlisted-player-id',
-  adminSubjects:'approved-player-id',
+  adminApiEnabled:true,adminSubjects:'approved-player-id',
   adminStore:{overview:async()=>{adminReads++;return {players:3};}},
   allowedOrigins:['https://games.snowrealm.pet']});
  const request=new Request('https://api.example/v1/admin/overview',{headers:{origin:'https://games.snowrealm.pet'}});
@@ -26,7 +26,7 @@ test('approved admin can view data only by GET and without creating a player pro
  let ensured=0,limited=0;
  const store={clock:Date.now,ensureUser:()=>{ensured++;},limit:async()=>{limited++;}};
  const app=createApp({store,authenticate:async()=> 'approved-player-id',
-  adminSubjects:'approved-player-id',adminStore:{overview:async()=>({players:1,readOnly:true})},
+  adminApiEnabled:true,adminSubjects:'approved-player-id',adminStore:{overview:async()=>({players:1,readOnly:true})},
   allowedOrigins:['https://games.snowrealm.pet']});
  const url='https://api.example/v1/admin/overview';
  const get=await app.fetch(new Request(url));assert.equal(get.status,200);assert.equal((await get.json()).readOnly,true);
@@ -36,7 +36,7 @@ test('approved admin can view data only by GET and without creating a player pro
 
 test('unknown admin routes reject, and missing allowlist never leaks backend availability',async()=>{
  const store={clock:Date.now,limit:async()=>{}};
- const make=(subjects,adminStore)=>createApp({store,authenticate:async()=> 'approved-player-id',adminSubjects:subjects,adminStore});
+ const make=(subjects,adminStore)=>createApp({store,authenticate:async()=> 'approved-player-id',adminApiEnabled:true,adminSubjects:subjects,adminStore});
  const forbidden=await make('',null).fetch(new Request('https://api.example/v1/admin/overview'));
  assert.equal(forbidden.status,403);
  const unavailable=await make('approved-player-id',null).fetch(new Request('https://api.example/v1/admin/overview'));
@@ -70,7 +70,7 @@ test('admin trends are gated by the same explicit allowlist and remain read-only
  const store={clock:Date.now,limit:async()=>{}};
  const trends=async()=>{called++;return {scope:'cube1',readOnly:true,days:7,items:[]};};
  const make=id=>createApp({store,authenticate:async()=>id,
-   adminSubjects:'approved-player-id',adminStore:{trends}});
+   adminApiEnabled:true,adminSubjects:'approved-player-id',adminStore:{trends}});
  const denied=await make('ordinary-player-id').fetch(new Request('https://api.test/v1/admin/trends'));
  assert.equal(denied.status,403);assert.equal(called,0);
  const allowed=await make('approved-player-id').fetch(new Request('https://api.test/v1/admin/trends'));
@@ -103,4 +103,16 @@ test('seven-day admin trends are UTC-aligned, sparse days become zeros and queri
   assert.ok(statements.every(q=>!/(neon_auth|password|session_token|delete|update|truncate)/i.test(q)));
   assert.ok(statements.every(q=>q.includes("AT TIME ZONE 'UTC'")));
  }finally{globalThis.Date=original;}
+});
+
+test('management stays closed with an allowlisted user unless explicitly enabled',async()=>{
+ const unexpected=()=>assert.fail('disabled admin route must not read or write data');
+ const app=createApp({
+  store:{clock:Date.now,limit:unexpected,ensureUser:unexpected},
+  authenticate:async()=> 'approved-player-id',
+  adminSubjects:'approved-player-id',
+  adminStore:{overview:unexpected},
+ });
+ const response=await app.fetch(new Request('https://api.example/v1/admin/overview'));
+ assert.equal(response.status,404);
 });
